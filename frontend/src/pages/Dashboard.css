@@ -1,0 +1,241 @@
+/* ── Dashboard (light theme) ─────────────────────────────────────────────── */
+.dashboard {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.75rem 1.5rem 3rem;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.db-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.db-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--l-text);
+  margin-bottom: 0.3rem;
+  letter-spacing: -0.03em;
+}
+
+.db-meta {
+  font-size: 0.875rem;
+  color: var(--l-text-sec);
+}
+
+.db-concepts-link {
+  color: var(--l-primary);
+  font-weight: 500;
+}
+
+.db-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.db-btn-continue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--l-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  box-shadow: 0 2px 12px rgba(124, 92, 252, 0.3);
+}
+
+.db-btn-continue:hover {
+  background: var(--l-primary-h);
+  transform: translateY(-1px);
+}
+
+/* ── Stats row ───────────────────────────────────────────────────────────── */
+.db-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.db-stat-card {
+  background: var(--l-card);
+  border: 1.5px solid var(--l-border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.db-stat-card:hover {
+  border-color: var(--l-primary);
+  box-shadow: 0 2px 12px rgba(124, 92, 252, 0.1);
+}
+
+.db-stat-card__label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--l-text-sec);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.db-stat-card__icon {
+  font-size: 0.85rem;
+  color: var(--l-primary);
+}
+
+.db-stat-card__value {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--l-text);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+/* ── Middle row ──────────────────────────────────────────────────────────── */
+.db-middle {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Generic card ────────────────────────────────────────────────────────── */
+.db-card {
+  background: var(--l-card);
+  border: 1.5px solid var(--l-border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+}
+
+.db-card--full { width: 100%; }
+
+.db-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--l-text-sec);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1rem;
+}
+
+.db-card__empty {
+  font-size: 0.875rem;
+  color: var(--l-locked-txt);
+  padding: 0.5rem 0;
+}
+
+.db-card--radar .db-card__radar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+/* ── Concepts section ────────────────────────────────────────────────────── */
+.db-concepts-section { width: 100%; }
+
+.db-concepts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.db-phase-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--l-locked-txt);
+  letter-spacing: 0.1em;
+}
+
+.db-concepts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+/* ── Concept row ─────────────────────────────────────────────────────────── */
+.db-concept-row {
+  background: var(--l-locked-bg);
+  border: 1.5px solid var(--l-border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  transition: border-color 0.15s;
+}
+
+.db-concept-row:hover {
+  border-color: var(--l-primary);
+}
+
+.db-concept-row__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.db-concept-row__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--l-text);
+}
+
+.db-concept-row__sub {
+  font-size: 0.75rem;
+  color: var(--l-text-sec);
+  margin-bottom: 0.5rem;
+}
+
+/* ── Badge ───────────────────────────────────────────────────────────────── */
+.db-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  background: var(--l-accent);
+  color: var(--l-primary);
+  border: 1px solid rgba(124, 92, 252, 0.2);
+  letter-spacing: 0.02em;
+}
+
+/* ── Progress bar ─────────────────────────────────────────────────────────── */
+.db-progress-bar {
+  height: 4px;
+  background: var(--l-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.db-progress-bar__fill {
+  height: 100%;
+  background: var(--l-primary);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .db-stats          { grid-template-columns: 1fr; }
+  .db-middle         { grid-template-columns: 1fr; }
+  .db-concepts-grid  { grid-template-columns: 1fr; }
+  .db-header         { flex-direction: column; }
+}

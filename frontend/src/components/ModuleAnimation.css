@@ -1,0 +1,231 @@
+/* ── Module Animation wrapper ─────────────────────────────────────────────── */
+.module-animation {
+  background: var(--l-locked-bg);
+  border: 1.5px solid var(--l-border);
+  border-radius: 14px;
+  padding: 1.5rem 1.25rem 1.25rem;
+  overflow: hidden;
+}
+
+/* ── Shared dots ─────────────────────────────────────────────────────────── */
+.ma-dots { display: flex; justify-content: center; gap: 6px; margin-top: 0.75rem; }
+.ma-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--l-border); border: none; cursor: pointer; padding: 0; transition: background 0.2s, transform 0.2s; }
+.ma-dot--active { background: var(--l-primary); transform: scale(1.4); }
+
+/* ── Architecture Node ───────────────────────────────────────────────────── */
+.arch-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--l-card);
+  border: 1.5px solid var(--l-border);
+  border-radius: 12px;
+  padding: 0.875rem 0.75rem 0.75rem;
+  min-width: 80px;
+  max-width: 110px;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+  text-align: center;
+}
+.arch-node:hover { border-color: var(--l-primary); transform: translateY(-2px); }
+.arch-node--active {
+  border-color: var(--l-primary);
+  box-shadow: 0 0 0 3px rgba(124,92,252,0.15), 0 4px 12px rgba(124,92,252,0.12);
+  transform: translateY(-3px);
+  background: #FDFCFF;
+}
+.arch-node--danger {
+  border-color: #DC2626;
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.15);
+  background: #FFF5F5;
+}
+.arch-node__icon { line-height: 1; }
+.arch-node__label { font-size: 0.75rem; font-weight: 700; color: var(--l-text); white-space: nowrap; }
+.arch-node__sublabel { font-size: 0.62rem; color: var(--l-text-sec); line-height: 1.3; text-align: center; max-width: 90px; }
+.arch-node__pulse {
+  position: absolute; top: -4px; right: -4px;
+  width: 10px; height: 10px; background: var(--l-primary); border-radius: 50%;
+  animation: archPulse 1.2s ease-in-out infinite;
+}
+@keyframes archPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.6)} }
+
+/* ── Arrows ──────────────────────────────────────────────────────────────── */
+.arch-arrow {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  flex-shrink: 0;
+}
+.arch-arrow__svg { transition: all 0.3s; }
+.arch-arrow__svg--active line, .arch-arrow__svg--active path { stroke: var(--l-primary); }
+.arch-arrow__svg--active polygon { fill: var(--l-primary); }
+.arch-arrow__label { font-size: 0.6rem; color: var(--l-text-sec); white-space: nowrap; }
+.arch-arrow__label--active { color: var(--l-primary); font-weight: 600; }
+
+.arch-varrow {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+
+/* ── Layout helpers ──────────────────────────────────────────────────────── */
+.arch-diagram { display: flex; flex-direction: column; gap: 0.875rem; }
+
+.arch-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.arch-row::-webkit-scrollbar { display: none; }
+.arch-row--center { justify-content: center; flex-wrap: wrap; gap: 0.35rem; }
+.arch-row--col { flex-direction: column; align-items: center; gap: 0; }
+
+.arch-col { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.arch-col--center { align-items: center; }
+
+/* ── Step info bar ───────────────────────────────────────────────────────── */
+.arch-step-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: var(--l-card);
+  border: 1.5px solid var(--l-border);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-top: 0.25rem;
+}
+.arch-step-pill {
+  background: var(--l-primary);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.arch-step-desc {
+  font-size: 0.8125rem;
+  color: var(--l-text-sec);
+  line-height: 1.5;
+}
+
+/* ── Return row ──────────────────────────────────────────────────────────── */
+.arch-return-row {
+  display: flex; align-items: center; gap: 0.5rem; justify-content: center;
+  font-size: 0.72rem; color: var(--l-text-sec);
+}
+.arch-return-label { font-size: 0.72rem; color: var(--l-text-sec); font-style: italic; }
+
+/* ── Cache Architecture layers ───────────────────────────────────────────── */
+.arch-layer {
+  display: flex; align-items: center; gap: 0.875rem;
+  background: var(--l-card); border: 1.5px solid var(--l-border);
+  border-radius: 10px; padding: 0.75rem 1rem;
+  cursor: pointer; transition: all 0.2s;
+  width: 100%; max-width: 360px;
+}
+.arch-layer:hover { border-color: var(--l-primary); transform: translateX(2px); }
+.arch-layer--active { border-color: var(--l-primary); background: #FDFCFF; box-shadow: 0 2px 8px rgba(124,92,252,0.1); }
+.arch-layer__icon { flex-shrink: 0; }
+.arch-layer__info { flex: 1; }
+.arch-layer__label { display: block; font-size: 0.875rem; font-weight: 700; color: var(--l-text); }
+.arch-layer__sub { display: block; font-size: 0.72rem; color: var(--l-text-sec); }
+.arch-layer__latency {
+  font-size: 0.7rem; font-weight: 700;
+  background: var(--l-accent); color: var(--l-primary);
+  padding: 0.2rem 0.6rem; border-radius: 999px; white-space: nowrap;
+}
+
+/* ── Two-path layout ─────────────────────────────────────────────────────── */
+.arch-two-path {
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.75rem; align-items: start;
+}
+.arch-path { background: var(--l-locked-bg); border: 1.5px solid var(--l-border); border-radius: 12px; padding: 1rem; transition: border-color 0.2s; }
+.arch-path--active { border-color: var(--l-primary); background: #FDFCFF; }
+.arch-path__label { font-size: 0.7rem; font-weight: 700; text-align: center; margin-bottom: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 6px; }
+.arch-path__label--read { background: var(--l-accent); color: var(--l-primary); }
+.arch-path__label--write { background: #dcfce7; color: #166534; }
+.arch-path-divider { width: 1px; background: var(--l-border); align-self: stretch; margin: 2rem 0; }
+
+/* ── Eviction slots ──────────────────────────────────────────────────────── */
+.arch-eviction { display: flex; flex-direction: column; gap: 0.875rem; align-items: center; }
+.arch-eviction__label { font-size: 0.72rem; font-weight: 700; color: var(--l-text-sec); text-transform: uppercase; letter-spacing: 0.07em; }
+.arch-eviction__slots { display: flex; gap: 0.5rem; }
+.arch-eviction__slot {
+  width: 52px; height: 52px; border-radius: 10px;
+  background: var(--l-card); border: 1.5px solid var(--l-border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 0.875rem; font-weight: 700; color: var(--l-text);
+  position: relative; transition: all 0.3s;
+}
+.arch-eviction__slot--full { background: var(--l-accent); border-color: var(--l-primary); }
+.arch-eviction__slot--victim { background: #FFF5F5; border-color: #DC2626; color: #DC2626; animation: shake 0.4s ease; }
+.arch-eviction__slot--empty { background: var(--l-locked-bg); border-color: var(--l-border); border-style: dashed; color: var(--l-locked-txt); }
+.arch-eviction__slot--new { background: #f0fdf4; border-color: #22c55e; color: #166534; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-3px)} 75%{transform:translateX(3px)} }
+.arch-eviction__evict-badge {
+  position: absolute; top: -8px; right: -8px;
+  background: #DC2626; color: #fff; font-size: 0.55rem; font-weight: 700;
+  padding: 1px 4px; border-radius: 4px;
+}
+.arch-eviction__new-pulse {
+  position: absolute; inset: -3px; border-radius: 12px;
+  border: 2px solid #22c55e; animation: newGlow 1s ease-in-out infinite;
+}
+@keyframes newGlow { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.arch-eviction__ttl-row { display: flex; align-items: center; gap: 0.5rem; }
+
+/* ── Event row ───────────────────────────────────────────────────────────── */
+.arch-event-row { display: flex; align-items: center; gap: 0.25rem; justify-content: center; flex-wrap: wrap; }
+
+/* ── Redis layout ────────────────────────────────────────────────────────── */
+.arch-redis-layout { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+.arch-redis__apps { display: flex; flex-direction: column; gap: 0.5rem; }
+.arch-redis__arrows { display: flex; flex-direction: column; gap: 0.5rem; align-items: center; }
+.arch-redis__core { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.arch-redis__sub { display: flex; flex-direction: row; gap: 0.5rem; }
+.arch-redis__module {
+  background: var(--l-locked-bg); border: 1.5px solid var(--l-border); border-radius: 8px;
+  padding: 0.4rem 0.6rem; font-size: 0.72rem; font-weight: 600; color: var(--l-text-sec);
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.arch-redis__module:hover { border-color: var(--l-primary); color: var(--l-primary); }
+.arch-redis__module--active { border-color: var(--l-primary); background: var(--l-accent); color: var(--l-primary); }
+
+/* ── Cluster layout ──────────────────────────────────────────────────────── */
+.arch-cluster { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+.arch-cluster__client { }
+.arch-cluster__nodes { display: flex; flex-direction: column; gap: 0.5rem; }
+
+/* ── Banners ─────────────────────────────────────────────────────────────── */
+.arch-danger-banner {
+  background: rgba(220,38,38,0.08); border: 1.5px solid rgba(220,38,38,0.25);
+  border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.8125rem; font-weight: 600;
+  color: #DC2626; text-align: center;
+  animation: fadeInUp 0.3s ease;
+}
+.arch-failover-banner {
+  background: rgba(34,197,94,0.08); border: 1.5px solid rgba(34,197,94,0.25);
+  border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.8125rem; font-weight: 600;
+  color: #166534; text-align: center;
+  animation: fadeInUp 0.3s ease;
+}
+.arch-failover-banner--ok { }
+@keyframes fadeInUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── Stampede ────────────────────────────────────────────────────────────── */
+.arch-stampede { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+.arch-stampede__users { display: flex; flex-direction: column; gap: 0.25rem; align-items: center; }
+.arch-stampede__user { display: flex; flex-direction: column; align-items: center; font-size: 0.6rem; color: var(--l-text-sec); transition: transform 0.2s; }
+.arch-stampede__user--flood { animation: flood 0.5s ease-in-out infinite alternate; }
+@keyframes flood { from{transform:translateX(0)} to{transform:translateX(4px)} }
+.arch-stampede__center { display: flex; flex-direction: column; align-items: center; gap: 0; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .arch-two-path { grid-template-columns: 1fr; }
+  .arch-path-divider { width: 100%; height: 1px; margin: 0; }
+  .arch-redis-layout { flex-direction: column; }
+  .arch-cluster { flex-direction: column; }
+}

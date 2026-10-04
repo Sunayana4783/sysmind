@@ -1,0 +1,22 @@
+/* ── Light theme design tokens (Learning Interface) ─────────────────────────
+   These override the dark theme variables for all learning pages.
+   Applied by wrapping pages in a class="learn-root" div.
+──────────────────────────────────────────────────────────────────────────── */
+.learn-root {
+  --l-bg:         #FAF9FC;
+  --l-card:       #FFFFFF;
+  --l-primary:    #7C5CFC;
+  --l-primary-h:  #6847E8;
+  --l-accent:     #EEE9FF;
+  --l-text:       #24212B;
+  --l-text-sec:   #716B7A;
+  --l-border:     #E5E0EF;
+  --l-locked-bg:  #F4F2F9;
+  --l-locked-txt: #A89FC0;
+  --l-green:      #22C55E;
+  --l-shadow:     0 1px 4px rgba(124,92,252,0.08), 0 4px 16px rgba(124,92,252,0.06);
+
+  background: var(--l-bg);
+  color: var(--l-text);
+  min-height: calc(100vh - 60px);
+}

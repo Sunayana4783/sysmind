@@ -1,0 +1,58 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* ── Dark theme (dashboard, auth pages) ─────────────────────────────── */
+  --bg-primary:    #0a0a0f;
+  --bg-secondary:  #111118;
+  --bg-card:       #16161f;
+  --bg-card-hover: #1c1c28;
+  --border:        #2a2a3a;
+  --text-primary:  #f0eeff;
+  --text-secondary:#9d97b8;
+  --text-muted:    #6b6585;
+
+  /* Purple as sole accent — no blue anywhere */
+  --accent-purple: #7C5CFC;
+  --accent-purple-light: #a78bfa;
+  --accent-purple-dim:   rgba(124,92,252,0.15);
+  --accent-green:  #34d399;
+  --accent-yellow: #fbbf24;
+  --accent-orange: #f87171;
+
+  /* Keep these aliases so existing code that refs them still works */
+  --accent-blue:   #7C5CFC;
+  --input-bg:      #0a0a0f;
+  --input-border:  #2a2a3a;
+  --input-focus:   #7C5CFC;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--accent-purple-light);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+input {
+  font-family: inherit;
+}
