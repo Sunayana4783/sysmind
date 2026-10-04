@@ -31,6 +31,23 @@ const AppRoutes = () => {
     pathname === '/login' ||
     pathname === '/signup';
 
+  const isLightPage =
+    pathname.startsWith('/learning') ||
+    pathname === '/profile' ||
+    pathname === '/dashboard' ||
+    pathname === '/login' ||
+    pathname === '/signup';
+
+  // Set html/body background to white for light pages, dark for others
+  React.useEffect(() => {
+    document.documentElement.style.backgroundColor = isLightPage ? '#FAF9FC' : '#0a0a0f';
+    document.body.style.backgroundColor = isLightPage ? '#FAF9FC' : '#0a0a0f';
+    return () => {
+      document.documentElement.style.backgroundColor = '';
+      document.body.style.backgroundColor = '';
+    };
+  }, [isLightPage]);
+
   return (
     <>
       {!hideDarkNav && <Navbar />}

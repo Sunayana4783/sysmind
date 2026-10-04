@@ -257,8 +257,17 @@
 
 /* ── Light theme override for Login page (uses learn-root) ──────────────── */
 .learn-root.auth-page {
-  background: var(--l-bg);
+  background: #FAF9FC;
   min-height: 100vh;
+  /* Cover the dark body background completely */
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
 }
 
 .learn-root .auth-card {
