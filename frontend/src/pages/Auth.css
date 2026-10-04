@@ -1,21 +1,22 @@
 /* ── Auth pages: Sign Up & Login ──────────────────────────────────────────── */
 
 .auth-page {
-  min-height: calc(100vh - 60px); /* subtract navbar height */
+  min-height: calc(100vh - 60px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
-  background: var(--bg-primary);
+  background: #FAF9FC;  /* always light — dark theme not used on auth pages */
 }
 
 .auth-card {
   width: 100%;
   max-width: 420px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
+  background: #ffffff;
+  border: 1.5px solid #E5E0EF;
   border-radius: 12px;
   padding: 2.5rem 2rem;
+  box-shadow: 0 4px 24px rgba(124,92,252,0.08);
 }
 
 /* ── Header ─────────────────────────────────────────────────────────────── */
@@ -32,13 +33,13 @@
 .auth-card__title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #24212B;
   margin-bottom: 0.35rem;
 }
 
 .auth-card__subtitle {
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: #716B7A;
 }
 
 /* ── Alerts ─────────────────────────────────────────────────────────────── */
@@ -80,15 +81,15 @@
 .auth-form__label {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: #716B7A;
   letter-spacing: 0.01em;
 }
 
 .auth-form__input {
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
+  background: #FAF9FC;
+  border: 1px solid #E5E0EF;
   border-radius: 6px;
-  color: var(--text-primary);
+  color: #24212B;
   font-size: 0.9375rem;
   padding: 0.625rem 0.875rem;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -97,7 +98,7 @@
 }
 
 .auth-form__input::placeholder {
-  color: var(--text-muted);
+  color: #A89FC0;
 }
 
 .auth-form__input:focus {
@@ -146,11 +147,11 @@
   margin-top: 1.5rem;
   text-align: center;
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: #716B7A;
 }
 
 .auth-card__footer a {
-  color: var(--accent-blue);
+  color: #7C5CFC;
   font-weight: 500;
 }
 
