@@ -33,15 +33,10 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, sans-serif;
-  background-color: var(--bg-primary);
+  background-color: #FAF9FC;
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.5;
-}
-
-/* Light theme pages override body background */
-body:has(.learn-root) {
-  background-color: #FAF9FC;
 }
 
 a {
