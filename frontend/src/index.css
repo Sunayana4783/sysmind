@@ -39,6 +39,11 @@ body {
   line-height: 1.5;
 }
 
+/* Light theme pages override body background */
+body:has(.learn-root) {
+  background-color: #FAF9FC;
+}
+
 a {
   color: var(--accent-purple-light);
   text-decoration: none;
