@@ -49,9 +49,11 @@ router.post(
       const otp = user.generateOTP();
       await user.save();
 
-      // Send email in background — do NOT await it so signup responds immediately
-      sendOTPEmail({ to: email, username, otp }).catch(e =>
-        console.error('Email error:', e.message)
+      // Fire and forget — don't block response
+      sendOTPEmail({ to: email, username, otp }).then(() => {
+        console.log('OTP email sent successfully to:', email);
+      }).catch(e =>
+        console.error('Email send FAILED:', e.message, e.code, e.response)
       );
 
       res.status(201).json({
