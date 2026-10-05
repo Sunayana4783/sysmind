@@ -2,12 +2,10 @@ const nodemailer = require('nodemailer');
 
 const createTransporter = () => {
   return nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 587,
-    secure: false,
+    service: 'gmail',  // use gmail service directly — handles ports automatically
     auth: {
-      user: 'bcaad1001@smtp-brevo.com',
-      pass: process.env.BREVO_SMTP_KEY,
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
     },
   });
 };
@@ -17,7 +15,7 @@ const sendOTPEmail = async ({ to, username, otp }) => {
   const transporter = createTransporter();
 
   await transporter.sendMail({
-    from: '"SysMind" <bcaad1001@smtp-brevo.com>',
+    from: `"SysMind" <${process.env.EMAIL_USER}>`,
     to,
     subject: `${otp} is your SysMind verification code`,
     text: `Hi ${username},\n\nYour SysMind verification code is: ${otp}\n\nThis code expires in 10 minutes.\n\nDo not share it with anyone.`,
