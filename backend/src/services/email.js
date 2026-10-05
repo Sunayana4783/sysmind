@@ -1,15 +1,26 @@
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
-const getResend = () => new Resend(process.env.RESEND_API_KEY);
+const createTransporter = () => {
+  return nodemailer.createTransport({
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: 'bcaad1001@smtp-brevo.com',
+      pass: process.env.BREVO_SMTP_KEY,
+    },
+  });
+};
 
 // ── Send OTP email ────────────────────────────────────────────────────────────
 const sendOTPEmail = async ({ to, username, otp }) => {
-  const resend = getResend();
+  const transporter = createTransporter();
 
-  await resend.emails.send({
-    from: 'SysMind <onboarding@resend.dev>',
+  await transporter.sendMail({
+    from: '"SysMind" <bcaad1001@smtp-brevo.com>',
     to,
     subject: `${otp} is your SysMind verification code`,
+    text: `Hi ${username},\n\nYour SysMind verification code is: ${otp}\n\nThis code expires in 10 minutes.\n\nDo not share it with anyone.`,
     html: `
 <!DOCTYPE html>
 <html lang="en">
@@ -57,7 +68,6 @@ const sendOTPEmail = async ({ to, username, otp }) => {
   </table>
 </body>
 </html>`,
-    text: `Hi ${username},\n\nYour SysMind verification code is: ${otp}\n\nThis code expires in 10 minutes.\n\nDo not share it with anyone.`,
   });
 };
 
