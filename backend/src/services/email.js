@@ -1,71 +1,40 @@
 const nodemailer = require('nodemailer');
 
+// Brevo SMTP — works on Render free tier, delivers to any email address
 const createTransporter = () => {
   return nodemailer.createTransport({
-    service: 'gmail',  // use gmail service directly — handles ports automatically
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false,
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      user: 'bcaad1001@smtp-brevo.com',
+      pass: process.env.BREVO_SMTP_KEY,
     },
   });
 };
 
-// ── Send OTP email ────────────────────────────────────────────────────────────
 const sendOTPEmail = async ({ to, username, otp }) => {
   const transporter = createTransporter();
 
   await transporter.sendMail({
-    from: `"SysMind" <${process.env.EMAIL_USER}>`,
+    from: '"SysMind" <bcaad1001@smtp-brevo.com>',
     to,
     subject: `${otp} is your SysMind verification code`,
-    text: `Hi ${username},\n\nYour SysMind verification code is: ${otp}\n\nThis code expires in 10 minutes.\n\nDo not share it with anyone.`,
+    text: `Hi ${username},\n\nYour SysMind code: ${otp}\n\nExpires in 10 minutes.`,
     html: `
-<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"/></head>
-<body style="margin:0;padding:0;background:#FAF9FC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF9FC;padding:40px 16px;">
-    <tr><td align="center">
-      <table width="520" cellpadding="0" cellspacing="0"
-        style="background:#ffffff;border-radius:16px;border:1.5px solid #E5E0EF;overflow:hidden;">
-        <tr>
-          <td style="background:#7C5CFC;padding:28px 40px;text-align:center;">
-            <p style="margin:0;font-size:22px;font-weight:800;color:#ffffff;">⚡ SysMind</p>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:36px 40px 28px;">
-            <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#24212B;">Verify your email</h1>
-            <p style="margin:0 0 24px;font-size:14px;color:#716B7A;line-height:1.6;">
-              Hi <strong style="color:#24212B;">${username}</strong>, enter this code to activate your account.
-            </p>
-            <table cellpadding="0" cellspacing="0" style="margin:0 auto 28px;">
-              <tr>
-                <td style="background:#EEE9FF;border:2px solid #7C5CFC;border-radius:12px;padding:20px 40px;text-align:center;">
-                  <span style="font-size:36px;font-weight:800;color:#7C5CFC;letter-spacing:0.15em;font-family:monospace;">${otp}</span>
-                </td>
-              </tr>
-            </table>
-            <p style="margin:0 0 8px;font-size:13px;color:#A89FC0;text-align:center;">
-              This code expires in <strong>10 minutes</strong>.
-            </p>
-            <p style="margin:0;font-size:13px;color:#A89FC0;text-align:center;">
-              Maximum <strong>3 attempts</strong>. Do not share this code.
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td style="background:#FAF9FC;padding:16px 40px;border-top:1px solid #E5E0EF;">
-            <p style="margin:0;font-size:12px;color:#A89FC0;text-align:center;">
-              © ${new Date().getFullYear()} SysMind. If you didn't request this, ignore this email.
-            </p>
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`,
+<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:40px 20px;background:#FAF9FC;">
+  <div style="background:#7C5CFC;border-radius:12px 12px 0 0;padding:24px;text-align:center;">
+    <h1 style="color:#fff;margin:0;font-size:20px;">⚡ SysMind</h1>
+  </div>
+  <div style="background:#fff;border:1.5px solid #E5E0EF;border-top:none;border-radius:0 0 12px 12px;padding:32px 24px;text-align:center;">
+    <h2 style="color:#24212B;margin:0 0 8px;">Verify your email</h2>
+    <p style="color:#716B7A;margin:0 0 24px;">Hi <strong>${username}</strong>, your verification code is:</p>
+    <div style="background:#EEE9FF;border:2px solid #7C5CFC;border-radius:12px;display:inline-block;padding:16px 40px;margin-bottom:24px;">
+      <span style="font-size:32px;font-weight:800;color:#7C5CFC;letter-spacing:0.15em;font-family:monospace;">${otp}</span>
+    </div>
+    <p style="color:#A89FC0;font-size:13px;margin:0;">Expires in 10 minutes. Do not share this code.</p>
+  </div>
+</div>`,
   });
 };
 
