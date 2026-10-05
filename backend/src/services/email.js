@@ -14,6 +14,7 @@ const createTransporter = () => {
 };
 
 const sendOTPEmail = async ({ to, username, otp }) => {
+  console.log(`Sending OTP email to: ${to} via Brevo`);
   const transporter = createTransporter();
 
   await transporter.sendMail({
