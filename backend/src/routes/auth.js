@@ -49,9 +49,10 @@ router.post(
       const otp = user.generateOTP();
       await user.save();
 
-      try { await sendOTPEmail({ to: email, username, otp }); } catch (e) {
-        console.error('Email error:', e.message);
-      }
+      // Send email in background — do NOT await it so signup responds immediately
+      sendOTPEmail({ to: email, username, otp }).catch(e =>
+        console.error('Email error:', e.message)
+      );
 
       res.status(201).json({
         message: 'Account created! Enter the 6-digit OTP sent to your email.',
@@ -133,7 +134,11 @@ router.post(
 
       const otp = user.generateOTP();
       await user.save();
-      await sendOTPEmail({ to: email, username: user.username, otp });
+
+      // Fire and forget — don't block response
+      sendOTPEmail({ to: email, username: user.username, otp }).catch(e =>
+        console.error('Resend email error:', e.message)
+      );
 
       res.json({ message: 'New OTP sent. Please check your inbox.' });
     } catch (err) {
