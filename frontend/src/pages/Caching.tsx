@@ -226,6 +226,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
         setFlagCount(c => c + 1);
         setShowFlagWarning(true);
         setTimeout(() => setShowFlagWarning(false), 5000);
+        // Don't call onQuizEnd here — user is still in the quiz, just flagged
       }
     };
     document.addEventListener('fullscreenchange', handler);
@@ -591,17 +592,20 @@ const Caching = () => {
     <div className="learn-root">
       <LearningNav />
       <main className="caching-page">
-        {/* Breadcrumb */}
-        <nav className="caching-breadcrumb">
-          <button className="caching-breadcrumb__btn" onClick={() => navigate('/learning')}>Learning Interface</button>
-          <span>/</span>
-          <button className="caching-breadcrumb__btn" onClick={() => navigate('/learning/hld')}>HLD</button>
-          <span>/</span>
-          <span className="caching-breadcrumb__current">Caching</span>
-        </nav>
+        {/* Hide breadcrumb and sidebar during active quiz */}
+        {!quizActive && (
+          <nav className="caching-breadcrumb">
+            <button className="caching-breadcrumb__btn" onClick={() => navigate('/learning')}>Learning Interface</button>
+            <span>/</span>
+            <button className="caching-breadcrumb__btn" onClick={() => navigate('/learning/hld')}>HLD</button>
+            <span>/</span>
+            <span className="caching-breadcrumb__current">Caching</span>
+          </nav>
+        )}
 
-        <div className="caching-layout">
-          {/* Sidebar */}
+        <div className={`caching-layout${quizActive ? ' caching-layout--quiz-active' : ''}`}>
+          {/* Sidebar — hidden during quiz */}
+          {!quizActive && (
           <aside className="caching-sidebar">
             <button className="caching-dropdown__header" onClick={() => setDropdownOpen(v => !v)} aria-expanded={dropdownOpen}>
               <span className="caching-dropdown__title">Caching Topics</span>
@@ -630,6 +634,7 @@ const Caching = () => {
               </ul>
             )}
           </aside>
+          )}
 
           {/* Content panel */}
           <div className="caching-content">

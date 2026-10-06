@@ -7,6 +7,7 @@
 .caching-breadcrumb__current { font-weight: 700; color: var(--l-text); }
 
 .caching-layout { display: grid; grid-template-columns: 240px 1fr; gap: 1.5rem; align-items: start; }
+.caching-layout--quiz-active { grid-template-columns: 1fr; }
 
 /* ── Sidebar ─────────────────────────────────────────────────────────────── */
 .caching-sidebar { background: var(--l-card); border: 1.5px solid var(--l-border); border-radius: 14px; overflow: hidden; position: sticky; top: 76px; }
