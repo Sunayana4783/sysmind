@@ -1,5 +1,5 @@
 // Static caching content — 13 modules total
-// Orders 1-10: individual content sub-topics (old RAG topics, now static)
+// Orders 1-10: content topics (simple language, no code)
 // Order 11: Failure Cases
 // Order 12: Interview Discussion Questions
 // Order 13: Quiz
@@ -10,18 +10,18 @@ const CACHING_MODULES = [
   {
     order: 1, type: 'content', title: 'Cache Basics',
     content: {
-      overview: 'A cache is a high-speed storage layer between your application and its data source. Instead of hitting a slow database or API on every request, the app checks the cache first.\n\nCaches exploit the principle of temporal locality — data accessed once is very likely to be accessed again soon.',
+      overview: 'Imagine you need the same book from a library every day. Instead of walking to the library every time, you keep a copy at home. A cache works the same way — it keeps a copy of data close to your application so you can get it quickly without going back to the original source every time.\n\nWithout a cache, every time a user opens a page, the app has to go to the database, fetch the data, and send it back. This takes time. With a cache, the app checks the cache first. If the data is there, it returns instantly.',
       sections: [
-        { heading: 'What is a Cache?', icon: '⚡', body: 'A cache stores copies of frequently requested data in fast-access memory. On a cache hit the data is returned immediately (sub-millisecond). On a cache miss the original source is queried and the result is stored for next time.', code: null },
-        { heading: 'Cache Hit vs Miss', icon: '🎯', body: 'Hit rate = hits / (hits + misses). A healthy production system targets >90% hit rate. A miss is expensive — it means a full round-trip to the database. Monitor hit rate as a key performance indicator.', code: null },
-        { heading: 'Why Caching Matters', icon: '📈', body: 'A typical PostgreSQL query takes 5–50ms. A Redis cache read takes 0.1–0.5ms. At 10,000 requests/second, caching can reduce database load by 90% and response times by 100x.', code: null },
+        { heading: 'What is a Cache?', icon: '', body: 'A cache is a storage layer that holds copies of data. When your app needs some data, it checks the cache first. If the data is found, that is called a cache hit and it is returned immediately. If not found, that is a cache miss and the app fetches it from the database.', code: null },
+        { heading: 'Cache Hit and Cache Miss', icon: '', body: 'A cache hit means the data was found in the cache — very fast, returns in under 1 millisecond. A cache miss means the data was not in the cache — the app has to go to the database which takes much longer. A good system should have more hits than misses.', code: null },
+        { heading: 'Why Does It Matter?', icon: '', body: 'A database query can take anywhere from 5 to 50 milliseconds. A cache read takes less than 1 millisecond. When your app handles thousands of requests every second, this difference is huge. Caching can reduce the load on your database by up to 90%.', code: null },
       ],
       keyPoints: [
-        'Cache hit rate above 90% is a healthy target',
-        'Cache misses are expensive — warm up caches on startup for critical data',
-        'Always measure before and after caching — not all data benefits equally',
-        'Caching trades memory for speed',
-        'Caches are not a replacement for database optimisation',
+        'A cache stores copies of data so it can be returned quickly without hitting the database',
+        'Cache hit means data was found in cache. Cache miss means it was not',
+        'A good system aims for more than 90% cache hits',
+        'Caching makes apps faster by reducing how often the database is queried',
+        'Not all data needs to be cached — focus on data that is read frequently',
       ],
       animationSteps: [
         { label: 'Request', description: 'User requests data from application', highlight: false },
@@ -30,7 +30,7 @@ const CACHING_MODULES = [
         { label: 'Cache miss', description: 'Not found — query the database', highlight: false },
         { label: 'Store & return', description: 'Save result in cache, return to user', highlight: false },
       ],
-      example: 'Twitter serves home timelines from Redis. A DB query to build a timeline takes 200ms. Redis returns it in <1ms. At 400M daily users this saves billions of DB queries every day.',
+      example: 'Twitter keeps your home timeline ready in a cache. When you open the app, your feed loads instantly. Without caching, Twitter would need to scan millions of tweets from all the people you follow every time you open the app — that would take seconds instead of milliseconds.',
     },
   },
 
@@ -38,19 +38,19 @@ const CACHING_MODULES = [
   {
     order: 2, type: 'content', title: 'Cache Architecture',
     content: {
-      overview: 'Caches exist at multiple layers of a system. Understanding where to place a cache and what type to use is a fundamental system design skill.\n\nEach layer has different trade-offs in speed, capacity, and consistency.',
+      overview: 'Caches are not all the same. They exist at different levels of a system, each with different speeds and sizes. Think of it like how you store things at home — some things are on your desk (fastest access), some are in a nearby cupboard, and some are in a storage room far away.\n\nKnowing where to place a cache and which type to use is an important skill when designing large systems.',
       sections: [
-        { heading: 'L1/L2/L3 CPU Cache', icon: '🖥️', body: 'Hardware caches built into the CPU. L1 is the fastest (1-4 cycles) and smallest (32KB). L3 is shared across cores and larger (8-32MB). Managed entirely by the CPU — not directly controlled by application code.', code: null },
-        { heading: 'In-Process Cache', icon: '🏠', body: 'A HashMap or similar structure inside the application process itself. Zero network overhead — nanosecond reads. Downside: not shared across servers, so each instance has its own copy. Good for static/rarely-changing data.', code: 'const cache = new Map();\ncache.set("config", configData); // in-memory' },
-        { heading: 'Distributed Cache', icon: '🌐', body: 'A shared cache server (Redis, Memcached) accessible by all application instances. Consistent view across horizontally-scaled servers. Sub-millisecond reads over local network. This is the most common production caching layer.', code: null },
-        { heading: 'CDN Cache', icon: '🛰️', body: 'Content Delivery Networks cache static assets (images, JS, CSS) at edge nodes close to users. Reduces round-trip latency from hundreds of ms to single-digit ms for static content.', code: null },
+        { heading: 'CPU Cache (L1, L2, L3)', icon: '', body: 'These are tiny, extremely fast memory chips built directly into the processor. They are managed by the hardware automatically — you do not write code to control them. They are the fastest storage possible but also the smallest, holding only a few megabytes.', code: null },
+        { heading: 'In-Process Cache', icon: '', body: 'This is a cache that lives inside your application itself — stored in the app\'s own memory. It is very fast because there is no network involved. However, if you have multiple servers running, each server has its own separate copy. Good for data that rarely changes, like configuration settings.', code: null },
+        { heading: 'Distributed Cache (Redis)', icon: '', body: 'This is a shared cache server that all your application servers can connect to. Redis is the most popular example. All servers see the same data, which makes it consistent. It is slightly slower than in-process cache because it goes over the network, but still very fast.', code: null },
+        { heading: 'CDN Cache', icon: '', body: 'A Content Delivery Network caches files like images, videos, and website files at servers located around the world, close to where users are. Instead of a user in India fetching an image from a server in the US, they get it from a nearby CDN server — much faster.', code: null },
       ],
       keyPoints: [
-        'Use in-process cache for rarely-changing shared data (config, feature flags)',
-        'Use distributed cache (Redis) for user sessions, hot data, computed results',
-        'Use CDN for all static assets and public API responses',
-        'Layered caching (L1 in-process → L2 Redis → L3 DB) maximises hit rates',
-        'Each cache layer adds complexity — only add what is needed',
+        'Caches exist at multiple levels — CPU, application memory, shared server, and CDN',
+        'Each level trades off between speed, size, and how many servers can share it',
+        'Redis is the most commonly used shared cache in production systems',
+        'CDN caches are specifically for static files like images and videos',
+        'Using multiple levels together (layered caching) gives the best performance',
       ],
       animationSteps: [
         { label: 'Request', description: 'User request arrives at app server', highlight: false },
@@ -59,26 +59,26 @@ const CACHING_MODULES = [
         { label: 'L3: Database', description: 'Last resort — fetch from DB (milliseconds)', highlight: false },
         { label: 'Populate', description: 'Store result in Redis and local cache', highlight: false },
       ],
-      example: 'Facebook uses a three-tier cache: local Memcached per web server → regional Memcached cluster → MySQL databases. The local tier handles 90% of reads, the regional tier handles 9%, and MySQL handles only 1%.',
+      example: 'Facebook uses three levels of caching. Each web server has its own local cache (Level 1). There is a shared regional cache cluster (Level 2). The actual database is only hit as a last resort (Level 3). The local cache handles 90% of all requests — the database handles less than 1%.',
     },
   },
 
-  // ── 3. Cache-Aside ─────────────────────────────────────────────────────────
+  // ── 3. Cache-Aside Pattern ─────────────────────────────────────────────────
   {
     order: 3, type: 'content', title: 'Cache-Aside Pattern',
     content: {
-      overview: 'Cache-Aside (also called Lazy Loading) is the most widely used caching pattern. The application code manages cache interactions manually — the cache is "aside" from the main data flow.\n\nThis pattern gives you full control over what gets cached and when.',
+      overview: 'Cache-Aside is the most commonly used caching pattern. The idea is simple: the application itself decides when to read from and write to the cache. The cache sits "aside" — it is not automatically in the middle of every request.\n\nThis gives developers full control and is also resilient — if the cache goes down, the app can still work by reading directly from the database.',
       sections: [
-        { heading: 'Read Path', icon: '📖', body: 'On every read: (1) check cache for the key. (2) If hit — return cached value. (3) If miss — read from database, store in cache with a TTL, return value. The first request always goes to the DB; subsequent requests are served from cache.', code: 'async function getUser(id) {\n  let user = await cache.get(`user:${id}`);\n  if (!user) {\n    user = await db.findById(id);\n    await cache.set(`user:${id}`, user, 300);\n  }\n  return user;\n}' },
-        { heading: 'Write Path', icon: '✍️', body: 'On every write: (1) write to the database first. (2) Invalidate (delete) the cache entry. The next read will repopulate the cache with fresh data. Never update the cache directly on write — this risks race conditions.', code: 'async function updateUser(id, data) {\n  await db.update(id, data);       // write DB first\n  await cache.del(`user:${id}`);   // invalidate cache\n}' },
-        { heading: 'Pros and Cons', icon: '⚖️', body: 'Pros: Only requested data is cached (no wasted memory). Cache failures are isolated — app still works (just slower). Full developer control. Cons: First request always misses. Potential for stale data between DB write and cache invalidation.', code: null },
+        { heading: 'How Reading Works', icon: '', body: 'When the app needs data, it first checks the cache. If the data is there, great — return it immediately. If not, the app goes to the database, gets the data, saves a copy in the cache for next time, and returns it to the user. The first request is always a bit slower, but all future requests are fast.', code: null },
+        { heading: 'How Writing Works', icon: '', body: 'When data is updated, the app first writes the new data to the database. Then it deletes the old entry from the cache. The next time someone reads that data, it will be fetched fresh from the database and stored in the cache again. This ensures the cache never holds wrong data for long.', code: null },
+        { heading: 'Why Delete Instead of Update the Cache?', icon: '', body: 'When writing, deleting from cache is safer than updating it. If you update both the database and cache at the same time, there is a small window where two requests could overwrite each other and create inconsistent data. Deleting and letting it be refetched avoids this problem.', code: null },
       ],
       keyPoints: [
-        'Always write to DB first, then invalidate cache — never the reverse',
-        'Set a TTL as a safety net even when using explicit invalidation',
-        'Cache-Aside is resilient — if Redis goes down the app still reads from DB',
-        'Use consistent key naming: resource:id (e.g. user:123, product:456)',
-        'Pre-warm the cache on application startup for critical hot data',
+        'Application checks cache first on every read — if not found, fetch from DB and store in cache',
+        'On every write, update the database first then delete the old cache entry',
+        'If cache is down, the app still works by reading directly from the database',
+        'The very first request for any piece of data will always be a cache miss',
+        'This is the most widely used caching pattern in web applications',
       ],
       animationSteps: [
         { label: 'Read request', description: 'App needs user data for id=123', highlight: false },
@@ -87,7 +87,7 @@ const CACHING_MODULES = [
         { label: 'Cache set', description: 'Store user:123 in Redis with TTL=300s', highlight: true },
         { label: 'Return data', description: 'Subsequent reads served from cache', highlight: false },
       ],
-      example: 'GitHub uses cache-aside extensively. When you visit a repository page, GitHub checks Memcached for the repo metadata. On miss it queries MySQL and caches the result for 60 seconds. Write events (new commit, new star) invalidate the relevant cache keys.',
+      example: 'GitHub uses cache-aside for repository pages. When you visit a repo, GitHub checks its cache. If not found, it queries the database, stores the result in cache for 60 seconds, and serves it. When someone pushes a new commit, the cache entry for that repo is deleted so the next visitor gets fresh data.',
     },
   },
 
@@ -95,19 +95,19 @@ const CACHING_MODULES = [
   {
     order: 4, type: 'content', title: 'Read/Write Strategies',
     content: {
-      overview: 'Beyond Cache-Aside, there are several other caching strategies that handle reads and writes differently. Each has different trade-offs in consistency, performance, and complexity.\n\nChoosing the right strategy depends on your tolerance for stale data and write performance requirements.',
+      overview: 'Besides Cache-Aside, there are other ways to decide when and how data moves between the cache and the database. Each strategy has a different balance between speed and data accuracy.\n\nChoosing the right strategy depends on what your application values more — fast writes, or always having the most accurate data.',
       sections: [
-        { heading: 'Write-Through', icon: '➡️', body: 'Every write updates BOTH cache and database synchronously before responding to the user. Cache is always consistent with the DB. No stale reads. Downside: writes are slower (two writes per operation). Best for data that is read frequently after being written.', code: 'async function setUser(id, data) {\n  await cache.set(`user:${id}`, data);\n  await db.update(id, data); // both updated\n}' },
-        { heading: 'Write-Back (Write-Behind)', icon: '⏩', body: 'Writes go to cache immediately and return success to the user. DB is updated asynchronously in the background. Much faster writes. Risk: if cache crashes before flush, data is lost. Best for high-write workloads where some loss is acceptable (e.g. analytics, counters).', code: null },
-        { heading: 'Read-Through', icon: '🔁', body: 'Cache sits in front of the database and automatically fetches missing data. Application always reads from cache — cache handles DB lookups transparently. Simpler code but less flexible than cache-aside. Cache library (e.g. Spring Cache) handles this automatically.', code: null },
-        { heading: 'Refresh-Ahead', icon: '🔄', body: 'Cache proactively refreshes entries before they expire. Predicts which entries will be needed and pre-fetches them. Reduces cache miss rate at the cost of potentially fetching data that is never used.', code: null },
+        { heading: 'Write-Through', icon: '', body: 'Every time data is written, it is written to both the cache and the database at the same time before the user gets a response. This means the cache is always up to date. The downside is that writes take a bit longer because they have to update two places. Use this when data accuracy is critical, like financial records.', code: null },
+        { heading: 'Write-Back (Write-Behind)', icon: '', body: 'Data is written to the cache first and the user gets an instant response. The database is updated a little later in the background. This makes writes very fast. The risk is that if the cache crashes before the database is updated, you could lose that recent data. Good for things like view counters or analytics.', code: null },
+        { heading: 'Read-Through', icon: '', body: 'The cache sits directly in front of the database. When the app asks for data, it always asks the cache. If the cache does not have it, the cache itself goes and fetches it from the database — the application does not need to handle this. The app code is simpler because it only ever talks to the cache.', code: null },
+        { heading: 'Refresh-Ahead', icon: '', body: 'The cache predicts which data will be needed soon and fetches it before it expires. This way, popular data is always fresh and ready. The downside is it might fetch data that no one actually requests, wasting resources.', code: null },
       ],
       keyPoints: [
-        'Write-through: strong consistency, slower writes — use for financial/critical data',
-        'Write-back: fast writes, risk of data loss — use for counters/analytics',
-        'Read-through: simplest code, auto-population — use with caching frameworks',
-        'Cache-aside is the most flexible and most commonly used in microservices',
-        'Mixing strategies per data type is fine — use the right tool for each case',
+        'Write-through always keeps cache and database in sync but is slower to write',
+        'Write-back is faster to write but risks losing data if the cache crashes',
+        'Read-through simplifies application code by letting the cache handle database fetching',
+        'Cache-aside gives the most control and is most commonly used',
+        'Choose your strategy based on whether speed or accuracy matters more for that data',
       ],
       animationSteps: [
         { label: 'Write-through', description: 'Write hits cache AND DB simultaneously', highlight: true },
@@ -116,7 +116,7 @@ const CACHING_MODULES = [
         { label: 'Async flush', description: 'DB updated in background later', highlight: false },
         { label: 'Trade-off', description: 'Speed vs consistency — choose per use case', highlight: false },
       ],
-      example: 'Amazon DynamoDB Accelerator (DAX) uses read-through caching. Application code reads from DAX exactly like reading from DynamoDB — DAX transparently fetches from DynamoDB on misses and caches the result. Zero code changes needed.',
+      example: 'Amazon\'s DynamoDB service has a caching layer called DAX that uses read-through caching. Your app talks to DAX just like it talks to DynamoDB. When data is not in the cache, DAX fetches it from DynamoDB automatically. You get the speed of a cache without changing your application code.',
     },
   },
 
@@ -124,19 +124,19 @@ const CACHING_MODULES = [
   {
     order: 5, type: 'content', title: 'Eviction (LRU/LFU/TTL)',
     content: {
-      overview: 'Caches have finite memory. When full, they must evict (remove) old entries. The eviction policy determines which entries are removed.\n\nTTL (Time To Live) is separate — it sets a maximum lifetime on each entry regardless of memory pressure.',
+      overview: 'A cache has limited memory. It cannot store everything forever. When the cache is full and new data needs to be added, something old has to be removed. This is called eviction.\n\nThere are also expiry rules — you can tell a cache to automatically delete data after a certain amount of time, even if the cache is not full. This is called TTL (Time To Live).',
       sections: [
-        { heading: 'LRU — Least Recently Used', icon: '🕐', body: 'Evicts the entry that was accessed least recently. Assumes recently accessed data will be accessed again soon. Best for most web workloads. Implemented with a doubly-linked list + hash map. Redis supports allkeys-lru and volatile-lru policies.', code: null },
-        { heading: 'LFU — Least Frequently Used', icon: '📊', body: 'Evicts the entry with the fewest total accesses. Better than LRU when some data is always hot (e.g. top 100 products on an e-commerce site). Requires extra memory to maintain frequency counters.', code: null },
-        { heading: 'TTL — Time To Live', icon: '⏱️', body: 'Every entry gets a TTL. After expiry the entry is deleted regardless of access patterns or memory pressure. Essential for preventing stale data. Set TTL based on how often the source data changes.', code: 'cache.set("product:1", data, { ttl: 3600 }); // 1 hour TTL\ncache.set("session:abc", sess, { ttl: 86400 }); // 24 hour TTL' },
-        { heading: 'Choosing the Right Policy', icon: '⚙️', body: 'Use LRU for general purpose. Use LFU when access patterns are skewed (Zipf distribution — a few items get most traffic). Use short TTL for volatile data. Use long TTL + explicit invalidation for stable data.', code: null },
+        { heading: 'LRU — Least Recently Used', icon: '', body: 'When the cache is full, LRU removes the item that has not been used for the longest time. The idea is that if you have not needed something recently, you probably will not need it again soon. This works well for most websites where recently viewed content is likely to be viewed again.', code: null },
+        { heading: 'LFU — Least Frequently Used', icon: '', body: 'LFU removes the item that has been accessed the fewest number of times. This is better when some items are always popular — like the top 10 products on a shopping site. Even if a product was not accessed in the last minute, if it is accessed thousands of times a day, LFU will keep it.', code: null },
+        { heading: 'TTL — Time To Live', icon: '', body: 'TTL is a timer on every cached item. You set how long the data should stay in the cache — for example 5 minutes or 1 hour. After that time, the item is automatically deleted. This prevents showing users old, outdated data. Always set a TTL — never cache data forever.', code: null },
+        { heading: 'Choosing the Right One', icon: '', body: 'Use LRU for general purpose caching — it works well for most cases. Use LFU when a small number of items get most of the traffic, like popular products or trending topics. Use short TTLs for data that changes often (like prices) and longer TTLs for data that rarely changes (like product descriptions).', code: null },
       ],
       keyPoints: [
-        'LRU is the default — works well for most web application workloads',
-        'LFU outperforms LRU when traffic is skewed toward a small set of hot keys',
-        'Always set TTL — infinite TTL causes memory leaks and stale data',
-        'Redis maxmemory-policy controls eviction: allkeys-lru, volatile-lru, allkeys-lfu',
-        'Monitor eviction rate — high eviction means cache is undersized',
+        'When the cache is full, eviction policies decide which data to remove',
+        'LRU removes the least recently used item — good for most general use cases',
+        'LFU removes the least frequently accessed item — good when traffic is uneven',
+        'TTL automatically deletes data after a set time to prevent stale data',
+        'Always set a TTL — caching data forever causes memory problems and stale reads',
       ],
       animationSteps: [
         { label: 'Cache full', description: 'maxmemory limit reached', highlight: true },
@@ -145,27 +145,27 @@ const CACHING_MODULES = [
         { label: 'Insert new', description: 'New entry takes freed slot', highlight: false },
         { label: 'TTL expiry', description: 'Separately, expired entries auto-removed', highlight: false },
       ],
-      example: 'Netflix caches movie metadata with a 1-hour TTL using LRU eviction. Metadata (title, description, ratings) changes infrequently so 1-hour staleness is acceptable. User watch history uses LRU since recently watched content is most likely to be recommended.',
+      example: 'Netflix caches movie information like titles, descriptions, and ratings with a 1-hour TTL. This data rarely changes so serving it from cache for up to an hour is fine. Your watch history uses LRU eviction — recently watched shows are most likely to be relevant for recommendations.',
     },
   },
 
-  // ── 6. Invalidation ────────────────────────────────────────────────────────
+  // ── 6. Cache Invalidation ──────────────────────────────────────────────────
   {
     order: 6, type: 'content', title: 'Cache Invalidation',
     content: {
-      overview: '"There are only two hard things in Computer Science: cache invalidation and naming things." — Phil Karlton\n\nInvalidation is the process of removing or updating stale cache entries when the source data changes. Getting it wrong causes users to see outdated data.',
+      overview: 'Cache invalidation means removing or updating old data in the cache when the original data in the database changes. This is one of the hardest problems in software because if you do it wrong, users see outdated information.\n\nThere is a famous saying: "There are only two hard things in computer science: cache invalidation and naming things."',
       sections: [
-        { heading: 'TTL-Based Invalidation', icon: '⏲️', body: 'The simplest approach — let entries expire naturally. Easy to implement. Downside: users may see stale data for up to TTL seconds after an update. Acceptable when some staleness is tolerable (e.g. product catalog, news feeds).', code: null },
-        { heading: 'Event-Driven Invalidation', icon: '📡', body: 'When data changes in the DB, immediately delete the cache entry. The next read will repopulate with fresh data. Zero staleness. More complex — requires every write path to also call cache invalidation.', code: 'async function updateProduct(id, price) {\n  await db.update(id, { price });\n  await cache.del(`product:${id}`);\n  await cache.del(`product:list`);\n}' },
-        { heading: 'Versioned Keys', icon: '🔢', body: 'Append a version number to cache keys. On update, increment the version. Old keys become orphans and expire via TTL. Allows atomic cache updates without deletion race conditions.', code: 'const key = `user:${id}:v${version}`;\n// on update: increment version in DB\n// old key expires naturally' },
-        { heading: 'Pub/Sub Invalidation', icon: '📢', body: 'Use a message queue (Redis Pub/Sub, Kafka) to broadcast invalidation events. When one service updates data, all services subscribed to that data type invalidate their local caches. Essential in microservices architectures.', code: null },
+        { heading: 'TTL-Based (Let It Expire)', icon: '', body: 'The simplest approach: do nothing. Just wait for the TTL timer to expire and the cache will clear itself. The downside is that users might see old data for a few minutes or hours. This is fine for data that does not change often, like a news article or a product description.', code: null },
+        { heading: 'Delete on Write', icon: '', body: 'When data changes in the database, immediately delete the related cache entry. The next user who reads that data will get the fresh version from the database. This is fast and accurate. The trade-off is you have to remember to delete the cache every time you update the database.', code: null },
+        { heading: 'Using Events to Invalidate', icon: '', body: 'In systems with multiple services, one service can send a message when data changes. Other services that have the same data in their own caches listen for these messages and delete their stale copies. This keeps all parts of the system in sync without them needing to talk to each other directly.', code: null },
+        { heading: 'Versioned Cache Keys', icon: '', body: 'Instead of deleting old entries, you can change the name of the cache key every time data changes. Old entries with the old name just expire naturally over time. This avoids race conditions where one request might overwrite another.', code: null },
       ],
       keyPoints: [
-        'Use TTL as a safety net even when using event-driven invalidation',
-        'Always invalidate all related keys — e.g. both user:123 and user:list',
-        'Invalidation on write is safer than update-in-place to avoid race conditions',
-        'In microservices: establish clear ownership of cache invalidation per service',
-        'Log cache invalidation events for debugging stale data issues',
+        'Invalidation means removing stale data from cache when the database is updated',
+        'TTL-based invalidation is simple but allows stale data for the duration of the TTL',
+        'Deleting cache on write gives fresher data but requires careful implementation',
+        'Event-based invalidation works well when multiple services share the same data',
+        'Always use TTL as a backup even when using manual invalidation',
       ],
       animationSteps: [
         { label: 'DB updated', description: 'Product price changed in database', highlight: false },
@@ -174,27 +174,27 @@ const CACHING_MODULES = [
         { label: 'Next read', description: 'Cache miss — fetches fresh price from DB', highlight: false },
         { label: 'Re-cached', description: 'New price stored in cache for future reads', highlight: false },
       ],
-      example: 'Shopify uses event-driven invalidation for product pages. When a merchant updates a product price, a background job runs that deletes all related cache keys (product detail, collection page, search results). Customer-facing pages reflect the new price within seconds.',
+      example: 'Shopify deletes all related cache entries when a shop owner updates a product price. The product detail page cache, the category page cache, and the search results cache are all cleared. The next customer to visit sees the correct new price immediately.',
     },
   },
 
-  // ── 7. Consistency ─────────────────────────────────────────────────────────
+  // ── 7. Cache Consistency ───────────────────────────────────────────────────
   {
     order: 7, type: 'content', title: 'Cache Consistency',
     content: {
-      overview: 'Cache consistency describes how closely the cached data matches the source of truth (the database). Perfect consistency is expensive — most systems accept some degree of eventual consistency.\n\nUnderstanding the CAP theorem helps frame consistency trade-offs in distributed caching.',
+      overview: 'Cache consistency describes how closely the data in the cache matches the real data in the database. Perfect consistency means users always see the absolute latest data. But achieving that perfectly is expensive and slows things down.\n\nMost real-world systems accept a small window where the cache might be slightly behind — this is called eventual consistency.',
       sections: [
-        { heading: 'Strong Consistency', icon: '💎', body: 'Every read sees the most recent write. Achieved by write-through caching + synchronous invalidation. High consistency cost — every write involves both DB and cache. Required for financial transactions, inventory counts, authentication tokens.', code: null },
-        { heading: 'Eventual Consistency', icon: '🔄', body: 'Cache may be stale for a short period (TTL duration) but will eventually converge to the correct value. Acceptable for social media feeds, product descriptions, recommendation engines. Much better performance than strong consistency.', code: null },
-        { heading: 'Read-Your-Writes', icon: '👤', body: 'A user always sees their own writes immediately even if other users may see stale data. Achieved by routing a user\'s read requests to the same cache node that received their write, or by using user-specific cache keys.', code: null },
-        { heading: 'Split-Brain Problem', icon: '🧠', body: 'When a network partition splits a Redis cluster, some nodes may have different versions of the same key. Redis Cluster handles this with eventual consistency — the most recent write wins after the partition heals.', code: null },
+        { heading: 'Strong Consistency', icon: '', body: 'Every read always returns the most recent write. The cache and database are always in sync. This requires more work and slows things down slightly. Use this for things where wrong data would be a serious problem — bank balances, inventory counts, login sessions.', code: null },
+        { heading: 'Eventual Consistency', icon: '', body: 'The cache might be slightly behind the database for a short time — usually just seconds or minutes — but it will eventually catch up. This is acceptable for most content on websites. For example, if someone adds a new post on social media, it is fine if it takes a few seconds to appear for all users.', code: null },
+        { heading: 'Read Your Own Writes', icon: '', body: 'A user should always see their own changes immediately, even if other users might see a slightly older version for a moment. For example, when you update your profile photo, you should see the new photo right away even if your friend sees the old one for a few more seconds.', code: null },
+        { heading: 'What Happens When Servers Disagree', icon: '', body: 'In a large system with many cache servers, sometimes different servers temporarily have different versions of the same data — especially after a network problem. Redis handles this by eventually making all copies agree on the most recent version once the connection is restored.', code: null },
       ],
       keyPoints: [
-        'Accept eventual consistency for most read-heavy workloads',
-        'Use strong consistency only where correctness is business-critical',
-        'Short TTL (30-60s) gives near-real-time consistency with good performance',
-        'Monitor cache-to-DB discrepancy in critical paths',
-        'Idempotent cache operations prevent consistency bugs under concurrent writes',
+        'Strong consistency means cache always shows the latest data — more expensive',
+        'Eventual consistency means cache may be slightly behind — cheaper and faster',
+        'Most websites use eventual consistency for most data with short TTLs',
+        'For critical data like payments and logins, always use strong consistency',
+        'A short TTL of 30 to 60 seconds gives a good balance between freshness and speed',
       ],
       animationSteps: [
         { label: 'Write to DB', description: 'User updates their profile', highlight: false },
@@ -203,7 +203,7 @@ const CACHING_MODULES = [
         { label: 'TTL expires', description: 'Cache entry removed after 60 seconds', highlight: false },
         { label: 'Consistent', description: 'Fresh data fetched — all users see latest', highlight: true },
       ],
-      example: 'Facebook\'s social graph tolerates eventual consistency. When you unfriend someone, their view may still show you as a friend for up to 60 seconds. The business impact is negligible. This trade-off allows Facebook to scale to billions of relationships.',
+      example: 'Facebook accepts that when you unfriend someone, they might still see you as a friend for up to 60 seconds. This is eventually consistent — the correct state will show up shortly. Accepting this small delay allows Facebook to handle billions of friend connections without slowing down.',
     },
   },
 
@@ -211,19 +211,19 @@ const CACHING_MODULES = [
   {
     order: 8, type: 'content', title: 'Redis',
     content: {
-      overview: 'Redis (Remote Dictionary Server) is the industry-standard in-memory data structure store. It is used as a cache, session store, message broker, rate limiter, and real-time leaderboard.\n\nRedis stores all data in RAM making reads/writes under 1 millisecond.',
+      overview: 'Redis is the most popular caching tool in the world. The name stands for Remote Dictionary Server. Unlike a regular database that saves data to disk, Redis keeps all its data in memory (RAM), which makes it extremely fast — responses come back in under 1 millisecond.\n\nRedis is used by companies like Twitter, Instagram, GitHub, Snapchat, and thousands of others.',
       sections: [
-        { heading: 'Core Data Types', icon: '📦', body: 'String: basic key-value. Hash: object with fields (e.g. user profile). List: ordered sequence (e.g. timeline). Set: unique unordered collection. Sorted Set: ranked leaderboard. These types allow Redis to replace multiple specialised databases.', code: 'SET user:123:name "Alice"\nHSET user:123 name Alice age 30\nLPUSH timeline:alice tweet1 tweet2\nZADD leaderboard 1000 alice' },
-        { heading: 'Persistence Options', icon: '💾', body: 'RDB (Redis Database): periodic snapshots to disk. AOF (Append Only File): logs every write command — can replay to reconstruct state. Both can be used together for durability. Redis can also run purely in-memory with no persistence.', code: null },
-        { heading: 'Redis Commands', icon: '⌨️', body: 'Common operations: SET/GET (string), HSET/HGET (hash), LPUSH/LRANGE (list), SADD/SMEMBERS (set), ZADD/ZRANGE (sorted set), EXPIRE (TTL), TTL (check remaining TTL), DEL (delete), KEYS (find keys by pattern).', code: 'SET session:abc token123 EX 3600  // with TTL\nTTL session:abc                    // check TTL\nEXPIRE user:123 300                // set TTL on existing key\nDEL user:123                       // delete key' },
-        { heading: 'Atomic Operations', icon: '⚗️', body: 'Redis is single-threaded so all commands are atomic. INCR/DECR are atomic counters — safe for rate limiting and inventory counts without race conditions. MULTI/EXEC wraps multiple commands in a transaction.', code: 'INCR rate:limit:user123  // atomic counter\nSETNX lock:resource 1    // atomic lock (set if not exists)' },
+        { heading: 'What Can Redis Store?', icon: '', body: 'Redis is not just a simple key-value store. It can store different types of data: plain text values, lists of items, sets of unique items, ranked leaderboards, and objects with multiple fields. This flexibility means Redis can replace several different tools — cache, queue, leaderboard, and session storage all in one.', code: null },
+        { heading: 'Does Redis Lose Data When It Restarts?', icon: '', body: 'By default, Redis keeps data in memory, which means it could be lost if Redis restarts. But Redis also has options to save data to disk regularly (snapshots) or keep a log of every change. Using these options, Redis can recover its data after a restart, making it suitable for more than just temporary caching.', code: null },
+        { heading: 'Redis is Very Reliable', icon: '', body: 'Redis processes commands one at a time in a single thread. This sounds slow, but because everything is in memory it is extremely fast, and it means there are never conflicts between commands. Every operation is atomic — it either fully succeeds or fully fails, never halfway.', code: null },
+        { heading: 'Setting Expiry Times', icon: '', body: 'Every item stored in Redis can have an expiry time. You tell Redis how many seconds the data should stay, and Redis automatically deletes it when the time is up. This is essential for caching because you want fresh data, not data that is days or weeks old.', code: null },
       ],
       keyPoints: [
-        'Redis is single-threaded — all commands are atomic with no locking needed',
-        'Use EXPIRE or EX flag on all keys to prevent memory leaks',
-        'Redis Sorted Sets are ideal for leaderboards and rate limiting',
-        'Monitor memory usage with redis-cli INFO memory',
-        'Use Redis connection pooling in production (never create a new connection per request)',
+        'Redis stores data in RAM making it under 1 millisecond to read or write',
+        'It supports multiple data types: strings, lists, sets, sorted sets, and hashes',
+        'Redis can optionally save data to disk so it survives restarts',
+        'Every Redis command is atomic — no partial updates or race conditions',
+        'Always set an expiry time on cached data to prevent it from growing forever',
       ],
       animationSteps: [
         { label: 'App request', description: 'Application sends GET user:123', highlight: false },
@@ -232,7 +232,7 @@ const CACHING_MODULES = [
         { label: 'SET with TTL', description: 'Store new data: SET key val EX 300', highlight: false },
         { label: 'Persist', description: 'AOF logs the write for durability', highlight: false },
       ],
-      example: 'Instagram uses Redis Sorted Sets for the "Explore" feed ranking. Every content item has a score (engagement rate + recency). ZADD adds items with their scores. ZREVRANGE returns the top-N items instantly. 500M users, sub-millisecond response.',
+      example: 'Instagram uses Redis to power its Explore page rankings. Every post has a score based on how many likes, comments, and shares it gets. Redis keeps all these scores sorted in order. When you open Explore, Instagram instantly retrieves the top-ranked posts for you from Redis in milliseconds.',
     },
   },
 
@@ -240,19 +240,19 @@ const CACHING_MODULES = [
   {
     order: 9, type: 'content', title: 'Distributed Cache',
     content: {
-      overview: 'A distributed cache spans multiple nodes to provide more memory capacity and higher availability than a single server can offer.\n\nThe key challenge is distributing data across nodes while minimising reshuffling when nodes are added or removed.',
+      overview: 'A single cache server has limits — it only has so much memory and can only handle so many requests per second. When your system grows beyond what one server can handle, you spread the cache across multiple servers. This is called a distributed cache.\n\nThe challenge is making sure the right server gets the right request every time, and that if one server fails, the system keeps working.',
       sections: [
-        { heading: 'Redis Cluster', icon: '🌐', body: 'Redis Cluster shards data across up to 1000 nodes. Uses 16384 hash slots. Each key is assigned to a slot using CRC16(key) % 16384. Each node owns a range of slots. Clients use smart clients that know the slot-to-node mapping.', code: null },
-        { heading: 'Consistent Hashing', icon: '🔵', body: 'Maps both keys and nodes to positions on a virtual ring. Each key is assigned to the nearest node clockwise. Adding/removing a node only remaps ~1/N keys. Essential for scaling without cache invalidation storms.', code: null },
-        { heading: 'Replication', icon: '📋', body: 'Each primary node has one or more replica nodes. Replicas receive async copies of all writes. On primary failure, Redis Sentinel or Cluster promotes a replica to primary automatically (failover in 10-30 seconds).', code: null },
-        { heading: 'Hot Key Problem', icon: '🔥', body: 'When one key receives disproportionate traffic (e.g. trending topic), the node holding it becomes a bottleneck. Solutions: local in-process L1 cache, read replicas for the hot key, key sharding (key:1, key:2, key:3 — pick randomly on read).', code: 'const shard = Math.floor(Math.random() * 3) + 1;\nconst key = `trending:${hashtag}:${shard}`;\nconst val = await redis.get(key);' },
+        { heading: 'Redis Cluster', icon: '', body: 'Redis Cluster automatically splits your data across multiple Redis servers. It divides all possible data into 16,384 slots and assigns groups of slots to different servers. When you store or retrieve data, Redis calculates which slot it belongs to and sends the request to the right server automatically.', code: null },
+        { heading: 'Consistent Hashing', icon: '', body: 'Consistent hashing is a clever way to decide which server stores which data. Imagine all servers placed around a circle. Each piece of data is also placed on the circle based on its name. Data is stored on the nearest server clockwise. When you add or remove a server, only the data near that server needs to move — everything else stays put.', code: null },
+        { heading: 'Replicas for Reliability', icon: '', body: 'Each main cache server has one or more backup servers called replicas. The replica constantly receives copies of all the data from the main server. If the main server crashes, Redis automatically promotes the replica to take over within about 30 seconds. This means your cache keeps working even during failures.', code: null },
+        { heading: 'The Hot Key Problem', icon: '', body: 'Sometimes one piece of data becomes extremely popular — like a trending hashtag or a breaking news story. If millions of requests all go to the same server for that one piece of data, that server can become overwhelmed. The solution is to store copies of that data on multiple servers and spread the requests among them.', code: null },
       ],
       keyPoints: [
-        'Redis Cluster provides automatic sharding across up to 1000 nodes',
-        'Consistent hashing minimises key movement when adding/removing nodes',
-        'Always configure at least one replica per primary for high availability',
-        'Hot keys require special handling — local cache or key sharding',
-        'Monitor slot distribution to ensure even load across cluster nodes',
+        'Distributed caching spreads data across multiple servers when one is not enough',
+        'Redis Cluster automatically routes requests to the correct server',
+        'Consistent hashing means adding servers only moves a small amount of data',
+        'Replicas provide automatic backup — if one server fails, another takes over',
+        'Popular data should be spread across multiple servers to avoid bottlenecks',
       ],
       animationSteps: [
         { label: 'Key arrives', description: 'Request for key "product:456"', highlight: false },
@@ -261,7 +261,7 @@ const CACHING_MODULES = [
         { label: 'Node responds', description: 'Node 2 returns cached data', highlight: false },
         { label: 'Node fails', description: 'Replica promoted, slot ownership transferred', highlight: false },
       ],
-      example: 'Uber\'s cache cluster processes over 1 million cache operations per second. They use consistent hashing to distribute ride data across hundreds of Redis nodes. Adding new nodes during peak periods only moves ~5% of keys thanks to consistent hashing.',
+      example: 'Uber handles over one million cache operations every second. Their ride data is spread across hundreds of Redis servers using consistent hashing. When Uber adds more cache servers during peak hours, only about 5% of the data needs to move to the new servers — everything else stays exactly where it was.',
     },
   },
 
@@ -269,18 +269,18 @@ const CACHING_MODULES = [
   {
     order: 10, type: 'content', title: 'Cache Stampede / Penetration / Avalanche',
     content: {
-      overview: 'Three classic cache failure modes that every system designer must know. Each describes a different way the cache can be bypassed or overwhelmed, sending unexpected load to the database.\n\nUnderstanding these patterns — and their solutions — is essential for senior engineering interviews.',
+      overview: 'These are three common problems that can bring down a system when the cache does not work as expected. All three result in a sudden flood of requests hitting the database directly, which can cause it to crash.\n\nUnderstanding these problems and their solutions is one of the most important topics in system design interviews.',
       sections: [
-        { heading: 'Cache Stampede', icon: '🐂', body: 'A popular key expires. Thousands of concurrent requests all get a cache miss simultaneously and all query the DB at the same time. Solution: mutex lock (one request rebuilds, others wait), or probabilistic early expiration (refresh before TTL expires with some probability).', code: 'async function getWithLock(key) {\n  let val = await cache.get(key);\n  if (!val) {\n    const lock = await cache.set(`lock:${key}`, 1, { NX: true, EX: 5 });\n    if (lock) {\n      val = await db.query(key);\n      await cache.set(key, val, 300);\n    } else {\n      await sleep(50); // wait for lock holder\n      val = await cache.get(key);\n    }\n  }\n  return val;\n}' },
-        { heading: 'Cache Penetration', icon: '🕳️', body: 'Requests for keys that DO NOT exist in DB OR cache. Every request bypasses the cache and hits the DB. Common attack vector. Solution: cache null results with a short TTL (30s), or use a Bloom filter to reject provably non-existent keys before cache lookup.', code: null },
-        { heading: 'Cache Avalanche', icon: '🏔️', body: 'A large number of keys all expire at the same time (all set with same TTL at startup). The DB is hit with a massive spike. Solution: add random jitter to TTL values so expiry is spread across a time window.', code: 'const TTL = 300 + Math.floor(Math.random() * 60); // 300-360s\nawait cache.set(key, val, TTL); // different TTL each time' },
+        { heading: 'Cache Stampede', icon: '', body: 'Imagine thousands of users all try to access the same popular piece of data at exactly the same moment when its cache entry has just expired. The cache is empty for that item, so all thousands of requests go straight to the database at the same time. The database gets overwhelmed. The fix is to only let one request rebuild the cache while all others wait for it.', code: null },
+        { heading: 'Cache Penetration', icon: '', body: 'This happens when someone keeps requesting data that does not exist anywhere — not in the cache and not in the database. Every single request has to go all the way to the database only to get an empty result. An attacker can use this to deliberately overload your database. The fix is to cache the empty result too, even if it is just for 30 seconds.', code: null },
+        { heading: 'Cache Avalanche', icon: '', body: 'If you load your cache all at once when your app starts, and all those items have the same expiry time, they will all expire at exactly the same moment. Suddenly every request is a cache miss and floods the database. The fix is simple: add a small random amount to each item\'s expiry time so they expire at different times instead of all at once.', code: null },
       ],
       keyPoints: [
-        'Stampede: use mutex lock or probabilistic early expiration',
-        'Penetration: cache null results or use Bloom filters',
-        'Avalanche: add random TTL jitter at cache population time',
-        'All three problems share a root cause: uncoordinated cache misses',
-        'Monitor DB query rate — sudden spikes indicate one of these three patterns',
+        'Cache stampede: many requests hit the same expired key at once — use a lock to let only one rebuild it',
+        'Cache penetration: requests for non-existent data bypass the cache — store the empty result briefly',
+        'Cache avalanche: all cache entries expire at the same time — add random variation to expiry times',
+        'All three problems cause sudden spikes of database requests',
+        'Monitor your database request rate — a sudden spike is a warning sign of one of these problems',
       ],
       animationSteps: [
         { label: 'Key expires', description: 'Popular key TTL reaches zero', highlight: true },
@@ -289,7 +289,7 @@ const CACHING_MODULES = [
         { label: 'Fix: lock', description: 'First request acquires mutex lock', highlight: false },
         { label: 'Others wait', description: 'Remaining requests wait, then hit cache', highlight: false },
       ],
-      example: 'During a major live event, a streaming platform experienced a stampede when the homepage banner image cache expired. 50,000 concurrent users all fetched it from the DB simultaneously. They now use jitter + mutex locking for all high-traffic keys.',
+      example: 'A popular streaming service experienced a cache stampede when their homepage banner image cache expired during a major live event. 50,000 users were online at that moment and all tried to load the image simultaneously, crashing the database. They now spread out the expiry times of their cache entries and use locking for high-traffic items.',
     },
   },
 
@@ -430,7 +430,7 @@ const CACHING_MODULES = [
           explanation: 'Redis with 1-hour TTL matches data volatility perfectly. TTL ensures freshness. Adding replicas reduces per-replica load but does not eliminate the redundant queries.',
         },
         {
-          question: 'At 3 AM: DB CPU 100%, response time 2ms → 8s. A popular cache key expired 5 minutes ago. What happened?',
+          question: 'At 3 AM: DB CPU 100%, response time 2ms to 8s. A popular cache key expired 5 minutes ago. What happened?',
           options: ['Cache penetration attack','Cache avalanche','Cache stampede','Redis node failure'],
           correctIndex: 2, scenario: true,
           explanation: 'Cache stampede — one key expired causing thousands of concurrent misses that all queried the DB simultaneously. The timing correlation (key expiry → immediate DB spike) is the key indicator.',
@@ -457,7 +457,7 @@ const CACHING_MODULES = [
           question: 'User updates profile picture. 10 minutes later others still see the old photo. DB was correctly updated. Most likely cause?',
           options: ['DB update failed silently','Browser cache outdated','App cache not invalidated after DB write','CDN cached old image'],
           correctIndex: 2, scenario: true,
-          explanation: 'Stale cache — the application cache was not invalidated on write. The old photo URL stays in cache until TTL expires. Fix: cache.del("user:123") on every profile update.',
+          explanation: 'Stale cache — the application cache was not invalidated on write. The old photo URL stays in cache until TTL expires. Fix: delete the cache entry on every profile update.',
         },
         {
           question: 'One Redis key gets 700K of 1M req/sec. The Redis node is CPU-bottlenecking. Best solution?',
@@ -475,7 +475,7 @@ const CACHING_MODULES = [
           question: 'Designing Twitter timeline. User follows 500 people. Fastest timeline load approach?',
           options: ['Query DB for all 500 followees in real-time','Fan-out-on-write: push tweets to each follower\'s Redis list on write','Cache the SQL query result with 5-min TTL','Load one followee at a time and merge'],
           correctIndex: 1, scenario: true,
-          explanation: 'Fan-out-on-write pre-computes the timeline into Redis. On read it is one O(1) Redis list operation. Fan-out-on-read at 500 followees requires 500 queries and a merge — too slow at scale.',
+          explanation: 'Fan-out-on-write pre-computes the timeline into Redis. On read it is one simple list read. Fan-out-on-read at 500 followees requires 500 queries and a merge — too slow at scale.',
         },
         {
           question: 'Redis is down. Your application should:',
