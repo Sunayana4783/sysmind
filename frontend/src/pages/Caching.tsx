@@ -172,8 +172,9 @@ const InterviewModule = ({ mod, completed, onComplete, completing }: {
 };
 
 // ── Quiz component ────────────────────────────────────────────────────────────
-const QuizModule = ({ mod, completed, onComplete }: {
+const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
   mod: LearningModule; completed: boolean; onComplete: () => void;
+  onQuizStart: () => void; onQuizEnd: () => void;
 }) => {
   type QuizStage = 'locked' | 'info' | 'active' | 'result';
   const [stage, setStage] = useState<QuizStage>(completed ? 'locked' : 'info');
@@ -242,6 +243,7 @@ const QuizModule = ({ mod, completed, onComplete }: {
     setFlagged(false); setFlagCount(0); setShowFlagWarning(false);
     setStartTime(Date.now());
     enterFullscreen();
+    onQuizStart();
     setStage('active');
   };
 
@@ -258,6 +260,7 @@ const QuizModule = ({ mod, completed, onComplete }: {
       setResult(r.data);
       if (r.data.passed) onComplete();
       setRetaking(false);
+      onQuizEnd();
       setStage('result');
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Submit failed');
@@ -519,6 +522,7 @@ const Caching = () => {
   const [completing, setCompleting] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(true);
   const [error, setError] = useState('');
+  const [quizActive, setQuizActive] = useState(false); // true while quiz is in progress
 
   useEffect(() => {
     const init = async () => {
@@ -612,9 +616,9 @@ const Caching = () => {
                   return (
                     <li key={m._id}>
                       <button
-                        className={`caching-sidebar__item${selectedIdx === idx ? ' caching-sidebar__item--active' : ''}${locked ? ' caching-sidebar__item--locked' : ''}`}
-                        onClick={() => !locked && setSelectedIdx(idx)}
-                        title={locked ? 'Complete previous modules first' : ''}
+                        className={`caching-sidebar__item${selectedIdx === idx ? ' caching-sidebar__item--active' : ''}${locked || quizActive ? ' caching-sidebar__item--locked' : ''}`}
+                        onClick={() => !locked && !quizActive && setSelectedIdx(idx)}
+                        title={quizActive ? 'Quiz in progress — complete or submit first' : locked ? 'Complete previous modules first' : ''}
                       >
                         <span className="caching-sidebar__label">{m.title}</span>
                         {done && <span className="caching-sidebar__done">✓</span>}
@@ -653,7 +657,7 @@ const Caching = () => {
                 )}
                 {selectedMod.type === 'quiz' && (
                   <QuizModule mod={selectedMod} completed={completedIds.has(selectedMod._id)}
-                    onComplete={handleMarkComplete} />
+                    onComplete={handleMarkComplete} onQuizStart={() => setQuizActive(true)} onQuizEnd={() => setQuizActive(false)} />
                 )}
               </div>
             ) : (

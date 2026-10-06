@@ -62,11 +62,11 @@
 .fc-sidebar__icon { font-size: 1.1rem; flex-shrink: 0; }
 .fc-detail { background: var(--l-locked-bg); border: 1.5px solid var(--l-border); border-radius: 12px; padding: 1.5rem; }
 .fc-detail__title { font-size: 1.1rem; font-weight: 700; color: var(--l-text); margin-bottom: 1.1rem; }
-.fc-detail__block { border-radius: 8px; padding: 0.875rem 1rem; margin-bottom: 0.75rem; }
-.fc-detail__block--scenario { background: rgba(124,92,252,0.06); border: 1px solid rgba(124,92,252,0.15); }
-.fc-detail__block--impact { background: rgba(220,38,38,0.06); border: 1px solid rgba(220,38,38,0.15); }
-.fc-detail__block--resolution { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.15); }
-.fc-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--l-text-sec); display: block; margin-bottom: 0.35rem; }
+.fc-detail__block { border-radius: 8px; padding: 0.875rem 1rem; margin-bottom: 0.75rem; background: var(--l-locked-bg); border: 1.5px solid var(--l-border); }
+.fc-detail__block--scenario { }
+.fc-detail__block--impact { }
+.fc-detail__block--resolution { }
+.fc-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--l-primary); display: block; margin-bottom: 0.35rem; }
 .fc-detail__block p { font-size: 0.875rem; color: var(--l-text); line-height: 1.65; margin: 0; }
 
 /* ── Interview Questions ─────────────────────────────────────────────────── */
