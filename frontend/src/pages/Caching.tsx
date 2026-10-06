@@ -8,8 +8,8 @@ import './Caching.css';
 import './Modules.css';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const MODULE_ICONS: Record<string, string> = {
-  content: '📖', failureCases: '⚠️', interview: '💬', quiz: '🎯',
+const MODULE_TYPE_LABELS: Record<string, string> = {
+  content: 'Content', failureCases: 'Failure Cases', interview: 'Interview', quiz: 'Quiz',
 };
 
 // ── ContentModule renderer ────────────────────────────────────────────────────
@@ -24,7 +24,7 @@ const ContentModule = ({ mod, completed, onComplete, completing }: {
 
       {c.sections?.map((s, i) => (
         <div key={i} className="mod-section">
-          <h3 className="mod-section__heading"><span>{s.icon}</span> {s.heading}</h3>
+          <h3 className="mod-section__heading">{s.heading}</h3>
           <p className="mod-section__body">{s.body}</p>
           {s.code && <pre className="code-block">{s.code}</pre>}
         </div>
@@ -32,21 +32,21 @@ const ContentModule = ({ mod, completed, onComplete, completing }: {
 
       {c.animationSteps?.length > 0 && (
         <div className="mod-block">
-          <h3 className="mod-section-title">🎬 How it works</h3>
+          <h3 className="mod-section-title">How it works</h3>
           <ModuleAnimation steps={c.animationSteps} topicTitle={mod.title} />
         </div>
       )}
 
       {c.example && (
         <div className="mod-block">
-          <h3 className="mod-section-title">💡 Real-world example</h3>
+          <h3 className="mod-section-title">Real-world example</h3>
           <div className="example-box"><p>{c.example}</p></div>
         </div>
       )}
 
       {c.keyPoints?.length > 0 && (
         <div className="mod-block">
-          <h3 className="mod-section-title">🔑 Key points</h3>
+          <h3 className="mod-section-title">Key points</h3>
           <ul className="keypoints-list">
             {c.keyPoints.map((kp, i) => (
               <li key={i}><span className="keypoints-dot" />{kp}</li>
@@ -84,7 +84,6 @@ const FailureCasesModule = ({ mod, completed, onComplete, completing }: {
             <button key={i}
               className={`fc-sidebar__item${i === openIdx ? ' fc-sidebar__item--active' : ''}`}
               onClick={() => setOpenIdx(i)}>
-              <span className="fc-sidebar__icon">{c.icon}</span>
               <span>{c.title}</span>
             </button>
           ))}
@@ -93,7 +92,7 @@ const FailureCasesModule = ({ mod, completed, onComplete, completing }: {
         {/* Detail */}
         {fc && (
           <div className="fc-detail">
-            <h3 className="fc-detail__title">{fc.icon} {fc.title}</h3>
+            <h3 className="fc-detail__title">{fc.title}</h3>
 
             <div className="fc-detail__block fc-detail__block--scenario">
               <span className="fc-label">📋 Scenario</span>
@@ -138,7 +137,7 @@ const InterviewModule = ({ mod, completed, onComplete, completing }: {
   return (
     <div className="mod-body">
       <p className="mod-overview-text">
-        {questions.length} interview questions — click a question to reveal the answer.
+        {questions.length} interview questions. Click a question to reveal the answer.
       </p>
 
       <div className="iq-list">
@@ -146,7 +145,6 @@ const InterviewModule = ({ mod, completed, onComplete, completing }: {
           <div key={i} className={`iq-item${openIdx === i ? ' iq-item--open' : ''}`}>
             <button className="iq-item__header" onClick={() => setOpenIdx(openIdx === i ? null : i)}>
               <div className="iq-item__left">
-                <span className="iq-item__icon">{q.icon}</span>
                 <span className="iq-item__q">{q.question}</span>
               </div>
               <div className="iq-item__right">
@@ -618,7 +616,6 @@ const Caching = () => {
                         onClick={() => !locked && setSelectedIdx(idx)}
                         title={locked ? 'Complete previous modules first' : ''}
                       >
-                        <span className="caching-sidebar__mod-icon">{MODULE_ICONS[m.type]}</span>
                         <span className="caching-sidebar__label">{m.title}</span>
                         {done && <span className="caching-sidebar__done">✓</span>}
                         {locked && <span className="caching-sidebar__lock">🔒</span>}
@@ -636,7 +633,7 @@ const Caching = () => {
               <div className="content-panel">
                 <div className="content-panel__header">
                   <div>
-                    <span className="content-panel__type-badge">{MODULE_ICONS[selectedMod.type]} {selectedMod.type}</span>
+                    <span className="content-panel__type-badge">{MODULE_TYPE_LABELS[selectedMod.type]}</span>
                     <h2 className="cp__title">{selectedMod.title}</h2>
                   </div>
                   {completedIds.has(selectedMod._id) && <span className="content-panel__done-badge">✅ Completed</span>}

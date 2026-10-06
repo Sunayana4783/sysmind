@@ -11,7 +11,6 @@ interface LearningCard {
   description: string;
   locked: boolean;
   route: string;
-  icon: string;
 }
 
 const CARDS: LearningCard[] = [
@@ -22,7 +21,6 @@ const CARDS: LearningCard[] = [
     description: 'Learn system architecture, scalability, load balancing, distributed systems, and more.',
     locked: false,
     route: '/learning/hld',
-    icon: '🏗️',
   },
   {
     id: 'lld',
@@ -31,7 +29,6 @@ const CARDS: LearningCard[] = [
     description: 'Master object-oriented design, design patterns, class diagrams, and component design.',
     locked: true,
     route: '',
-    icon: '🔧',
   },
   {
     id: 'system-design',
@@ -40,7 +37,6 @@ const CARDS: LearningCard[] = [
     description: 'Practice full system design interviews combining HLD and LLD principles together.',
     locked: true,
     route: '',
-    icon: '⚙️',
   },
 ];
 
@@ -84,8 +80,6 @@ const Learning = () => {
               onKeyDown={(e) => e.key === 'Enter' && handleCardClick(card)}
               aria-label={card.locked ? `${card.title} — locked` : `${card.title} — open`}
             >
-              <div className="lcard__icon">{card.icon}</div>
-
               <div className="lcard__body">
                 <h2 className="lcard__title">{card.title}</h2>
                 <p className="lcard__subtitle">{card.subtitle}</p>
