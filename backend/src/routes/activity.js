@@ -4,20 +4,20 @@ const LearningActivity = require('../models/LearningActivity');
 
 const router = express.Router();
 
-// Helper: get today's date string in YYYY-MM-DD using local server time
+// Helper: get today's date string in YYYY-MM-DD using UTC
 const todayStr = () => {
   const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}`;
 };
 
-// Helper: format a Date object as YYYY-MM-DD
+// Helper: format a Date object as YYYY-MM-DD using UTC
 const dateStr = (d) => {
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}`;
 };
 

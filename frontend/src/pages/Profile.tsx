@@ -14,19 +14,19 @@ interface ContribGraphProps {
 const ContribGraph = ({ activityMap, today }: ContribGraphProps) => {
   const [tooltip, setTooltip] = useState<{ date: string; count: number; x: number; y: number } | null>(null);
 
-  // Helper: format a Date as YYYY-MM-DD using LOCAL time (not UTC)
+  // Helper: format a Date as YYYY-MM-DD using UTC (matches backend storage)
   const toLocalDateStr = (d: Date): string => {
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
+    const yyyy = d.getUTCFullYear();
+    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(d.getUTCDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
   };
 
   // Build 53 weeks starting from a Sunday, going up to today
   const WEEKS = 53;
-  const start = new Date(today + 'T00:00:00'); // local midnight
-  start.setDate(start.getDate() - (WEEKS * 7 - 1));
-  start.setDate(start.getDate() - start.getDay()); // align to Sunday
+  const start = new Date(today + 'T00:00:00Z'); // UTC midnight
+  start.setUTCDate(start.getUTCDate() - (WEEKS * 7 - 1));
+  start.setUTCDate(start.getUTCDate() - start.getUTCDay()); // align to Sunday
 
   const weeks: { date: string; count: number }[][] = [];
   const cur = new Date(start);
@@ -35,7 +35,7 @@ const ContribGraph = ({ activityMap, today }: ContribGraphProps) => {
     for (let d = 0; d < 7; d++) {
       const ds = toLocalDateStr(new Date(cur));
       week.push({ date: ds, count: activityMap[ds] || 0 });
-      cur.setDate(cur.getDate() + 1);
+      cur.setUTCDate(cur.getUTCDate() + 1);
     }
     weeks.push(week);
   }
@@ -139,8 +139,15 @@ const Profile = () => {
   const [loadingActivity, setLoadingActivity] = useState(true);
 
   useEffect(() => {
+    // Calculate today using UTC — matches how backend stores dates
+    const now = new Date();
+    const localToday = `${now.getUTCFullYear()}-${String(now.getUTCMonth()+1).padStart(2,'0')}-${String(now.getUTCDate()).padStart(2,'0')}`;
+
     activityAPI.getStreak()
-      .then(r => setActivityData(r.data))
+      .then(r => {
+        // Override the backend's today with the browser's local today
+        setActivityData({ ...r.data, today: localToday });
+      })
       .catch(() => {})
       .finally(() => setLoadingActivity(false));
 
