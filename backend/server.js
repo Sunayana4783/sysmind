@@ -12,7 +12,20 @@ const app = express();
 
 connectDB();
 
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true }));
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    // Allow localhost for development
+    if (origin.startsWith('http://localhost')) return callback(null, true);
+    // Allow all Vercel deployments for this project
+    if (origin.includes('sysmind') && origin.includes('vercel.app')) return callback(null, true);
+    // Allow the configured CLIENT_URL
+    if (origin === process.env.CLIENT_URL) return callback(null, true);
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
