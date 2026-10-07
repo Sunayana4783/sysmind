@@ -1,31 +1,18 @@
-const nodemailer = require('nodemailer');
+const { BrevoClient } = require('@getbrevo/brevo');
 
-// Brevo SMTP — works on Render free tier, delivers to any email address
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 587,
-    secure: false,
-    auth: {
-      user: 'bcaad1001@smtp-brevo.com',
-      pass: process.env.BREVO_SMTP_KEY,
-    },
-  });
-};
-
+// ── Send OTP email via Brevo HTTP API (port 443 — works on Render free tier) ──
 const sendOTPEmail = async ({ to, username, otp }) => {
-  console.log(`Sending OTP email to: ${to} via Brevo`);
-  const transporter = createTransporter();
+  const client = new BrevoClient({ apiKey: process.env.BREVO_API_KEY });
 
-  await transporter.sendMail({
-    from: '"SysMind" <bcaad1001@smtp-brevo.com>',
-    to,
+  await client.transactionalEmails.sendTransacEmail({
     subject: `${otp} is your SysMind verification code`,
-    text: `Hi ${username},\n\nYour SysMind code: ${otp}\n\nExpires in 10 minutes.`,
-    html: `
+    sender: { name: 'SysMind', email: 'bcaad1001@smtp-brevo.com' },
+    to: [{ email: to }],
+    textContent: `Hi ${username},\n\nYour SysMind verification code is: ${otp}\n\nExpires in 10 minutes. Do not share this code.`,
+    htmlContent: `
 <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:40px 20px;background:#FAF9FC;">
   <div style="background:#7C5CFC;border-radius:12px 12px 0 0;padding:24px;text-align:center;">
-    <h1 style="color:#fff;margin:0;font-size:20px;">⚡ SysMind</h1>
+    <h1 style="color:#fff;margin:0;font-size:20px;">SysMind</h1>
   </div>
   <div style="background:#fff;border:1.5px solid #E5E0EF;border-top:none;border-radius:0 0 12px 12px;padding:32px 24px;text-align:center;">
     <h2 style="color:#24212B;margin:0 0 8px;">Verify your email</h2>
@@ -37,6 +24,8 @@ const sendOTPEmail = async ({ to, username, otp }) => {
   </div>
 </div>`,
   });
+
+  console.log(`OTP email sent via Brevo API to: ${to}`);
 };
 
 module.exports = { sendOTPEmail };
