@@ -7,7 +7,7 @@ const createTransporter = () => {
     port: 587,
     secure: false,
     auth: {
-      user: process.env.BREVO_LOGIN,   // your Brevo account email
+      user: 'bcaad1001@smtp-brevo.com',
       pass: process.env.BREVO_SMTP_KEY,
     },
   });
@@ -18,7 +18,7 @@ const sendOTPEmail = async ({ to, username, otp }) => {
   const transporter = createTransporter();
 
   await transporter.sendMail({
-    from: `"SysMind" <${process.env.BREVO_LOGIN}>`,
+    from: '"SysMind" <bcaad1001@smtp-brevo.com>',
     to,
     subject: `${otp} is your SysMind verification code`,
     text: `Hi ${username},\n\nYour SysMind code: ${otp}\n\nExpires in 10 minutes.`,
