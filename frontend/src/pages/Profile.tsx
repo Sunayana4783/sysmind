@@ -67,6 +67,11 @@ const ContribGraph = ({ activityMap, today }: ContribGraphProps) => {
 
   return (
     <div className="contrib-graph">
+      {/* Debug: show today value */}
+      <div style={{ fontSize: '0.75rem', color: 'var(--l-text-sec)', marginBottom: '0.5rem' }}>
+        Graph today: {today} | Browser today: {new Date().getFullYear()}-{String(new Date().getMonth()+1).padStart(2,'0')}-{String(new Date().getDate()).padStart(2,'0')}
+      </div>
+
       {/* Month labels */}
       <div className="contrib-months">
         <div className="contrib-day-labels-spacer" />
