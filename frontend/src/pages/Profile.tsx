@@ -62,9 +62,9 @@ const ContribGraph = ({ activityMap, today }: ContribGraphProps) => {
 
   const intensityClass = (count: number) => {
     if (count === 0) return 'contrib-cell--0';
-    if (count <= 1)  return 'contrib-cell--1';
-    if (count <= 3)  return 'contrib-cell--2';
-    if (count <= 6)  return 'contrib-cell--3';
+    if (count === 1)  return 'contrib-cell--1';
+    if (count <= 5)   return 'contrib-cell--2';
+    if (count <= 15)  return 'contrib-cell--3';
     return 'contrib-cell--4';
   };
 
