@@ -4,10 +4,10 @@ const nodemailer = require('nodemailer');
 const createTransporter = () => {
   return nodemailer.createTransport({
     host: 'smtp-relay.brevo.com',
-    port: 465,
-    secure: true,
+    port: 587,
+    secure: false,
     auth: {
-      user: 'bcaad1001@smtp-brevo.com',
+      user: process.env.BREVO_LOGIN,   // your Brevo account email
       pass: process.env.BREVO_SMTP_KEY,
     },
   });
@@ -18,7 +18,7 @@ const sendOTPEmail = async ({ to, username, otp }) => {
   const transporter = createTransporter();
 
   await transporter.sendMail({
-    from: '"SysMind" <bcaad1001@smtp-brevo.com>',
+    from: `"SysMind" <${process.env.BREVO_LOGIN}>`,
     to,
     subject: `${otp} is your SysMind verification code`,
     text: `Hi ${username},\n\nYour SysMind code: ${otp}\n\nExpires in 10 minutes.`,
