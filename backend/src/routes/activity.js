@@ -4,22 +4,14 @@ const LearningActivity = require('../models/LearningActivity');
 
 const router = express.Router();
 
-// Helper: get today's date string in YYYY-MM-DD using UTC
-const todayStr = () => {
-  const d = new Date();
-  const yyyy = d.getUTCFullYear();
-  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(d.getUTCDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-};
-
-// Helper: format a Date object as YYYY-MM-DD using UTC
+// Helper: YYYY-MM-DD from a Date using LOCAL time
 const dateStr = (d) => {
-  const yyyy = d.getUTCFullYear();
-  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(d.getUTCDate()).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}`;
 };
+const todayStr = () => dateStr(new Date());
 
 // ── POST /api/activity/log ────────────────────────────────────────────────────
 router.post('/log', protect, async (req, res) => {
@@ -40,7 +32,6 @@ router.post('/log', protect, async (req, res) => {
 // ── GET /api/activity/streak ──────────────────────────────────────────────────
 router.get('/streak', protect, async (req, res) => {
   try {
-    // Get all activity for the past 366 days
     const yearAgo = new Date();
     yearAgo.setDate(yearAgo.getDate() - 366);
     const yearAgoStr = dateStr(yearAgo);
@@ -50,7 +41,6 @@ router.get('/streak', protect, async (req, res) => {
       date: { $gte: yearAgoStr },
     }).sort({ date: 1 }).lean();
 
-    // Build date → count map and total
     const activityMap = {};
     let total = 0;
     activities.forEach(a => {
@@ -60,26 +50,21 @@ router.get('/streak', protect, async (req, res) => {
 
     const today = todayStr();
 
-    // ── Current streak: consecutive days ending today ────────────────────────
+    // ── Current streak ────────────────────────────────────────────────────────
     let currentStreak = 0;
-    const todayDate = todayStr();
-
-    // Walk backwards from today
     for (let i = 0; i < 366; i++) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const ds = dateStr(d);
-
       if (activityMap[ds]) {
         currentStreak++;
       } else {
-        // Allow missing today (streak still counts if yesterday was active)
-        if (i === 0) continue;
+        if (i === 0) continue; // no activity today yet — check yesterday
         break;
       }
     }
 
-    // ── Longest streak: full scan of sorted dates ─────────────────────────────
+    // ── Longest streak ────────────────────────────────────────────────────────
     let longestStreak = 0;
     let tempStreak = 0;
     const sortedDates = Object.keys(activityMap).sort();
@@ -87,16 +72,10 @@ router.get('/streak', protect, async (req, res) => {
       if (i === 0) {
         tempStreak = 1;
       } else {
-        const prev = new Date(sortedDates[i - 1]);
-        const curr = new Date(sortedDates[i]);
-        // Check if consecutive days (exactly 1 day apart)
-        const diffMs = curr.getTime() - prev.getTime();
-        const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-        if (diffDays === 1) {
-          tempStreak++;
-        } else {
-          tempStreak = 1;
-        }
+        const prev = new Date(sortedDates[i - 1] + 'T00:00:00');
+        const curr = new Date(sortedDates[i] + 'T00:00:00');
+        const diffDays = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
+        tempStreak = diffDays === 1 ? tempStreak + 1 : 1;
       }
       if (tempStreak > longestStreak) longestStreak = tempStreak;
     }

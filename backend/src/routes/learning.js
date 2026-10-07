@@ -10,7 +10,7 @@ const router = express.Router();
 // ── Helper: log a learning activity for today ─────────────────────────────────
 const logActivity = async (userId) => {
   const d = new Date();
-  const today = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+  const today = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   try {
     await LearningActivity.findOneAndUpdate(
       { userId, date: today },
