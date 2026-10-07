@@ -14,19 +14,26 @@ interface ContribGraphProps {
 const ContribGraph = ({ activityMap, today }: ContribGraphProps) => {
   const [tooltip, setTooltip] = useState<{ date: string; count: number; x: number; y: number } | null>(null);
 
-  // Build 52 full weeks + partial current week (365 days back from today)
+  // Helper: format a Date as YYYY-MM-DD using LOCAL time (not UTC)
+  const toLocalDateStr = (d: Date): string => {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  // Build 53 weeks starting from a Sunday, going up to today
   const WEEKS = 53;
-  const start = new Date(today);
+  const start = new Date(today + 'T00:00:00'); // local midnight
   start.setDate(start.getDate() - (WEEKS * 7 - 1));
-  // Align to Sunday
-  start.setDate(start.getDate() - start.getDay());
+  start.setDate(start.getDate() - start.getDay()); // align to Sunday
 
   const weeks: { date: string; count: number }[][] = [];
-  let cur = new Date(start);
+  const cur = new Date(start);
   for (let w = 0; w < WEEKS; w++) {
     const week: { date: string; count: number }[] = [];
     for (let d = 0; d < 7; d++) {
-      const ds = cur.toISOString().slice(0, 10);
+      const ds = toLocalDateStr(new Date(cur));
       week.push({ date: ds, count: activityMap[ds] || 0 });
       cur.setDate(cur.getDate() + 1);
     }
@@ -106,7 +113,7 @@ const ContribGraph = ({ activityMap, today }: ContribGraphProps) => {
       {tooltip && (
         <div className="contrib-tooltip" style={{ top: tooltip.y - 48, left: tooltip.x - 40 }}>
           <strong>{tooltip.count} {tooltip.count === 1 ? 'activity' : 'activities'}</strong>
-          <span>{new Date(tooltip.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          <span>{new Date(tooltip.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
         </div>
       )}
 

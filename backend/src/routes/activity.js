@@ -60,20 +60,21 @@ router.get('/streak', protect, async (req, res) => {
 
     const today = todayStr();
 
-    // ── Current streak: consecutive days ending today or yesterday ────────────
+    // ── Current streak: consecutive days ending today ────────────────────────
     let currentStreak = 0;
-    const checkFrom = new Date();
-    // If no activity today, start check from yesterday
-    if (!activityMap[today]) {
-      checkFrom.setDate(checkFrom.getDate() - 1);
-    }
+    const todayDate = todayStr();
+
+    // Walk backwards from today
     for (let i = 0; i < 366; i++) {
-      const d = new Date(checkFrom);
+      const d = new Date();
       d.setDate(d.getDate() - i);
       const ds = dateStr(d);
+
       if (activityMap[ds]) {
         currentStreak++;
       } else {
+        // Allow missing today (streak still counts if yesterday was active)
+        if (i === 0) continue;
         break;
       }
     }
