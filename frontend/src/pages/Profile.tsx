@@ -22,15 +22,20 @@ const ContribGraph = ({ activityMap, today }: ContribGraphProps) => {
     return `${yyyy}-${mm}-${dd}`;
   };
 
-  // Build 53 weeks — use LOCAL time throughout
+  // Build 53 weeks ending with the week that contains today
   const WEEKS = 53;
-  const start = new Date();
-  // Parse today as local date
+
+  // Parse today as a local date object
   const [ty, tm, td] = today.split('-').map(Number);
-  start.setFullYear(ty, tm - 1, td);
-  start.setHours(0, 0, 0, 0);
+  const todayDate = new Date(ty, tm - 1, td); // local midnight
+
+  // Find the Saturday of this week (end of current week)
+  const endDate = new Date(todayDate);
+  endDate.setDate(endDate.getDate() + (6 - endDate.getDay())); // advance to Saturday
+
+  // Go back 53 weeks to find the start (Sunday)
+  const start = new Date(endDate);
   start.setDate(start.getDate() - (WEEKS * 7 - 1));
-  start.setDate(start.getDate() - start.getDay()); // align to Sunday
 
   const weeks: { date: string; count: number }[][] = [];
   const cur = new Date(start);
@@ -67,11 +72,6 @@ const ContribGraph = ({ activityMap, today }: ContribGraphProps) => {
 
   return (
     <div className="contrib-graph">
-      {/* Debug: show today value */}
-      <div style={{ fontSize: '0.75rem', color: 'var(--l-text-sec)', marginBottom: '0.5rem' }}>
-        Graph today: {today} | Browser today: {new Date().getFullYear()}-{String(new Date().getMonth()+1).padStart(2,'0')}-{String(new Date().getDate()).padStart(2,'0')}
-      </div>
-
       {/* Month labels */}
       <div className="contrib-months">
         <div className="contrib-day-labels-spacer" />
