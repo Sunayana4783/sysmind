@@ -6,7 +6,7 @@ const sendOTPEmail = async ({ to, username, otp }) => {
 
   await client.transactionalEmails.sendTransacEmail({
     subject: `${otp} is your SysMind verification code`,
-    sender: { name: 'SysMind', email: 'bcaad1001@smtp-brevo.com' },
+    sender: { name: 'SysMind', email: 'sunayanakatukam4@gmail.com' },
     to: [{ email: to }],
     textContent: `Hi ${username},\n\nYour SysMind verification code is: ${otp}\n\nExpires in 10 minutes. Do not share this code.`,
     htmlContent: `
