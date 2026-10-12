@@ -13,9 +13,10 @@ const MODULE_TYPE_LABELS: Record<string, string> = {
 };
 
 // ── ContentModule renderer ────────────────────────────────────────────────────
-const ContentModule = ({ mod, completed, onComplete, completing }: {
+const ContentModule = ({ mod, completed, onComplete, completing, onNext, isLast }: {
   mod: LearningModule; completed: boolean;
   onComplete: () => void; completing: boolean;
+  onNext: () => void; isLast: boolean;
 }) => {
   const c = mod.content!;
   return (
@@ -26,7 +27,6 @@ const ContentModule = ({ mod, completed, onComplete, completing }: {
         <div key={i} className="mod-section">
           <h3 className="mod-section__heading">{s.heading}</h3>
           <p className="mod-section__body">{s.body}</p>
-          {s.code && <pre className="code-block">{s.code}</pre>}
         </div>
       ))}
 
@@ -44,34 +44,32 @@ const ContentModule = ({ mod, completed, onComplete, completing }: {
         </div>
       )}
 
-      {c.keyPoints?.length > 0 && (
-        <div className="mod-block">
-          <h3 className="mod-section-title">Key points</h3>
-          <ul className="keypoints-list">
-            {c.keyPoints.map((kp, i) => (
-              <li key={i}><span className="keypoints-dot" />{kp}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       <div className="mod-complete-row">
-        <button className={`mark-done-btn${completed ? ' mark-done-btn--done' : ''}`}
-          onClick={onComplete} disabled={completed || completing}>
-          {completed ? '✅ Completed' : completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : '✓ Mark as Completed'}
-        </button>
+        {!completed ? (
+          <button className="mark-done-btn" onClick={onComplete} disabled={completing}>
+            {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : '✓ Mark as Completed'}
+          </button>
+        ) : isLast ? (
+          <button className="mark-done-btn mark-done-btn--done" disabled>✅ Completed</button>
+        ) : (
+          <button className="mark-done-btn" onClick={onNext}>
+            Next Module →
+          </button>
+        )}
       </div>
     </div>
   );
 };
 
 // ── FailureCases renderer ─────────────────────────────────────────────────────
-const FailureCasesModule = ({ mod, completed, onComplete, completing }: {
+const FailureCasesModule = ({ mod, completed, onComplete, completing, onNext, isLast }: {
   mod: LearningModule; completed: boolean; onComplete: () => void; completing: boolean;
+  onNext: () => void; isLast: boolean;
 }) => {
   const [openIdx, setOpenIdx] = useState(0);
   const cases = mod.failureCases || [];
   const fc = cases[openIdx];
+  const isLastCase = openIdx === cases.length - 1;
 
   return (
     <div className="mod-body">
@@ -82,9 +80,10 @@ const FailureCasesModule = ({ mod, completed, onComplete, completing }: {
         <div className="fc-sidebar">
           {cases.map((c, i) => (
             <button key={i}
-              className={`fc-sidebar__item${i === openIdx ? ' fc-sidebar__item--active' : ''}`}
+              className={`fc-sidebar__item${i === openIdx ? ' fc-sidebar__item--active' : ''}${i < openIdx ? ' fc-sidebar__item--visited' : ''}`}
               onClick={() => setOpenIdx(i)}>
               <span>{c.title}</span>
+              {i < openIdx && <span className="fc-sidebar__done">✓</span>}
             </button>
           ))}
         </div>
@@ -95,41 +94,52 @@ const FailureCasesModule = ({ mod, completed, onComplete, completing }: {
             <h3 className="fc-detail__title">{fc.title}</h3>
 
             <div className="fc-detail__block fc-detail__block--scenario">
-              <span className="fc-label">📋 Scenario</span>
+              <span className="fc-label">Scenario</span>
               <p>{fc.scenario}</p>
             </div>
             <div className="fc-detail__block fc-detail__block--impact">
-              <span className="fc-label">💥 Impact</span>
+              <span className="fc-label">Impact</span>
               <p>{fc.impact}</p>
             </div>
             <div className="fc-detail__block fc-detail__block--resolution">
-              <span className="fc-label">✅ Resolution</span>
+              <span className="fc-label">Resolution</span>
               <p>{fc.resolution}</p>
             </div>
 
             {fc.animationSteps?.length > 0 && (
               <div className="mod-block" style={{ marginTop: '1.25rem' }}>
-                <h4 className="mod-section-title">🎬 Failure flow</h4>
+                <h4 className="mod-section-title">Failure flow</h4>
                 <ModuleAnimation steps={fc.animationSteps} animType="cascade" topicTitle={fc.title} />
               </div>
             )}
+
+            {/* Navigation buttons */}
+            <div className="mod-complete-row" style={{ marginTop: '1.5rem', gap: '0.75rem' }}>
+              {!isLastCase ? (
+                <button className="mark-done-btn" onClick={() => setOpenIdx(i => i + 1)}>
+                  Next →
+                </button>
+              ) : !completed ? (
+                <button className="mark-done-btn" onClick={onComplete} disabled={completing}>
+                  {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : '✓ Mark as Completed'}
+                </button>
+              ) : isLast ? (
+                <button className="mark-done-btn mark-done-btn--done" disabled>✅ Completed</button>
+              ) : (
+                <button className="mark-done-btn" onClick={onNext}>Next Module →</button>
+              )}
+            </div>
           </div>
         )}
-      </div>
-
-      <div className="mod-complete-row">
-        <button className={`mark-done-btn${completed ? ' mark-done-btn--done' : ''}`}
-          onClick={onComplete} disabled={completed || completing}>
-          {completed ? '✅ Completed' : completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : '✓ Mark as Completed'}
-        </button>
       </div>
     </div>
   );
 };
 
 // ── InterviewQuestions renderer ───────────────────────────────────────────────
-const InterviewModule = ({ mod, completed, onComplete, completing }: {
+const InterviewModule = ({ mod, completed, onComplete, completing, onNext, isLast }: {
   mod: LearningModule; completed: boolean; onComplete: () => void; completing: boolean;
+  onNext: () => void; isLast: boolean;
 }) => {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const questions = mod.interviewQuestions || [];
@@ -162,10 +172,15 @@ const InterviewModule = ({ mod, completed, onComplete, completing }: {
       </div>
 
       <div className="mod-complete-row">
-        <button className={`mark-done-btn${completed ? ' mark-done-btn--done' : ''}`}
-          onClick={onComplete} disabled={completed || completing}>
-          {completed ? '✅ Completed' : completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : '✓ Mark as Completed'}
-        </button>
+        {!completed ? (
+          <button className="mark-done-btn" onClick={onComplete} disabled={completing}>
+            {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : '✓ Mark as Completed'}
+          </button>
+        ) : isLast ? (
+          <button className="mark-done-btn mark-done-btn--done" disabled>✅ Completed</button>
+        ) : (
+          <button className="mark-done-btn" onClick={onNext}>Next Module →</button>
+        )}
       </div>
     </div>
   );
@@ -561,10 +576,22 @@ const Caching = () => {
       await learningAPI.markComplete(mod._id, 'caching');
       setCompletedIds(prev => new Set([...prev, mod._id]));
       activityAPI.log().catch(() => {});
+      // Auto-advance to next module
+      const nextIdx = selectedIdx + 1;
+      if (nextIdx < modules.length) {
+        setTimeout(() => setSelectedIdx(nextIdx), 400);
+      }
     } catch (e: unknown) {
       console.error(e);
     } finally {
       setCompleting(false);
+    }
+  };
+
+  const handleNextModule = () => {
+    const nextIdx = selectedIdx + 1;
+    if (nextIdx < modules.length && !isLocked(nextIdx)) {
+      setSelectedIdx(nextIdx);
     }
   };
 
@@ -650,15 +677,18 @@ const Caching = () => {
 
                 {selectedMod.type === 'content' && (
                   <ContentModule mod={selectedMod} completed={completedIds.has(selectedMod._id)}
-                    onComplete={handleMarkComplete} completing={completing} />
+                    onComplete={handleMarkComplete} completing={completing}
+                    onNext={handleNextModule} isLast={selectedIdx === modules.length - 1} />
                 )}
                 {selectedMod.type === 'failureCases' && (
                   <FailureCasesModule mod={selectedMod} completed={completedIds.has(selectedMod._id)}
-                    onComplete={handleMarkComplete} completing={completing} />
+                    onComplete={handleMarkComplete} completing={completing}
+                    onNext={handleNextModule} isLast={selectedIdx === modules.length - 1} />
                 )}
                 {selectedMod.type === 'interview' && (
                   <InterviewModule mod={selectedMod} completed={completedIds.has(selectedMod._id)}
-                    onComplete={handleMarkComplete} completing={completing} />
+                    onComplete={handleMarkComplete} completing={completing}
+                    onNext={handleNextModule} isLast={selectedIdx === modules.length - 1} />
                 )}
                 {selectedMod.type === 'quiz' && (
                   <QuizModule mod={selectedMod} completed={completedIds.has(selectedMod._id)}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { type AnimationStep } from '../services/api';
 import './ModuleAnimation.css';
 
@@ -193,9 +193,6 @@ const CacheBasicsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; se
         <span className="arch-step-pill">{activeIdx + 1} / 5</span>
         <span className="arch-step-desc">{['User makes a request to the application','App checks the cache before touching the database','Cache returns data instantly on a hit (< 1ms)','Cache miss — app queries the database','Result stored in cache, returned to user'][activeIdx] || ''}</span>
       </div>
-      <div className="ma-dots" style={{ marginTop: '0.875rem' }}>
-        {[0,1,2,3,4].map(i => <button key={i} className={`ma-dot${activeIdx === i ? ' ma-dot--active' : ''}`} onClick={() => setActiveIdx(i)} />)}
-      </div>
     </div>
   );
 };
@@ -233,9 +230,6 @@ const CacheArchDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setA
       <div className="arch-step-info">
         <span className="arch-step-pill">{activeIdx + 1} / 3</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
-      </div>
-      <div className="ma-dots" style={{ marginTop: '0.875rem' }}>
-        {[0,1,2].map(i => <button key={i} className={`ma-dot${activeIdx === i ? ' ma-dot--active' : ''}`} onClick={() => setActiveIdx(i)} />)}
       </div>
     </div>
   );
@@ -281,9 +275,6 @@ const CacheAsideDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; set
       <div className="arch-step-info">
         <span className="arch-step-pill">{activeIdx + 1} / 6</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
-      </div>
-      <div className="ma-dots" style={{ marginTop: '0.875rem' }}>
-        {[0,1,2,3,4,5].map(i => <button key={i} className={`ma-dot${activeIdx === i ? ' ma-dot--active' : ''}`} onClick={() => setActiveIdx(i)} />)}
       </div>
     </div>
   );
@@ -332,9 +323,6 @@ const ReadWriteDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setA
         <span className="arch-step-pill">{activeIdx + 1} / 6</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
       </div>
-      <div className="ma-dots" style={{ marginTop: '0.875rem' }}>
-        {[0,1,2,3,4,5].map(i => <button key={i} className={`ma-dot${activeIdx === i ? ' ma-dot--active' : ''}`} onClick={() => setActiveIdx(i)} />)}
-      </div>
     </div>
   );
 };
@@ -375,9 +363,6 @@ const EvictionDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAc
         <span className="arch-step-pill">{activeIdx + 1} / 5</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
       </div>
-      <div className="ma-dots" style={{ marginTop: '0.875rem' }}>
-        {[0,1,2,3,4].map(i => <button key={i} className={`ma-dot${activeIdx === i ? ' ma-dot--active' : ''}`} onClick={() => setActiveIdx(i)} />)}
-      </div>
     </div>
   );
 };
@@ -408,9 +393,6 @@ const InvalidationDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; s
       <div className="arch-step-info">
         <span className="arch-step-pill">{activeIdx + 1} / 5</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
-      </div>
-      <div className="ma-dots" style={{ marginTop: '0.875rem' }}>
-        {[0,1,2,3,4].map(i => <button key={i} className={`ma-dot${activeIdx === i ? ' ma-dot--active' : ''}`} onClick={() => setActiveIdx(i)} />)}
       </div>
     </div>
   );
@@ -447,9 +429,6 @@ const RedisDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiv
       <div className="arch-step-info">
         <span className="arch-step-pill">{activeIdx + 1} / 5</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
-      </div>
-      <div className="ma-dots" style={{ marginTop: '0.875rem' }}>
-        {[0,1,2,3,4].map(i => <button key={i} className={`ma-dot${activeIdx === i ? ' ma-dot--active' : ''}`} onClick={() => setActiveIdx(i)} />)}
       </div>
     </div>
   );
@@ -494,9 +473,6 @@ const DistributedDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; se
         <span className="arch-step-pill">{activeIdx + 1} / 5</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
       </div>
-      <div className="ma-dots" style={{ marginTop: '0.875rem' }}>
-        {[0,1,2,3,4].map(i => <button key={i} className={`ma-dot${activeIdx === i ? ' ma-dot--active' : ''}`} onClick={() => setActiveIdx(i)} />)}
-      </div>
     </div>
   );
 };
@@ -537,9 +513,6 @@ const StampedeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAc
         <span className="arch-step-pill">{activeIdx + 1} / 5</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
       </div>
-      <div className="ma-dots" style={{ marginTop: '0.875rem' }}>
-        {[0,1,2,3,4].map(i => <button key={i} className={`ma-dot${activeIdx === i ? ' ma-dot--active' : ''}`} onClick={() => setActiveIdx(i)} />)}
-      </div>
     </div>
   );
 };
@@ -566,9 +539,6 @@ const ConsistencyDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; se
       <div className="arch-step-info">
         <span className="arch-step-pill">{activeIdx + 1} / 5</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
-      </div>
-      <div className="ma-dots" style={{ marginTop: '0.875rem' }}>
-        {[0,1,2,3,4].map(i => <button key={i} className={`ma-dot${activeIdx === i ? ' ma-dot--active' : ''}`} onClick={() => setActiveIdx(i)} />)}
       </div>
     </div>
   );

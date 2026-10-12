@@ -60,7 +60,9 @@
 .fc-sidebar__item { display: flex; align-items: center; gap: 0.6rem; background: transparent; border: 1.5px solid var(--l-border); border-radius: 8px; padding: 0.6rem 0.875rem; font-size: 0.8125rem; font-weight: 500; color: var(--l-text-sec); cursor: pointer; text-align: left; transition: all 0.15s; }
 .fc-sidebar__item:hover { border-color: var(--l-primary); color: var(--l-primary); background: var(--l-accent); }
 .fc-sidebar__item--active { border-color: var(--l-primary); color: var(--l-primary); background: var(--l-accent); font-weight: 700; }
+.fc-sidebar__item--visited { opacity: 0.7; }
 .fc-sidebar__icon { font-size: 1.1rem; flex-shrink: 0; }
+.fc-sidebar__done { color: #22c55e; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; margin-left: auto; }
 .fc-detail { background: var(--l-locked-bg); border: 1.5px solid var(--l-border); border-radius: 12px; padding: 1.5rem; }
 .fc-detail__title { font-size: 1.1rem; font-weight: 700; color: var(--l-text); margin-bottom: 1.1rem; }
 .fc-detail__block { border-radius: 8px; padding: 0.875rem 1rem; margin-bottom: 0.75rem; background: var(--l-locked-bg); border: 1.5px solid var(--l-border); }
