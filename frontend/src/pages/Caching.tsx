@@ -203,6 +203,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
   const [flagged, setFlagged] = useState(false);
   const [flagCount, setFlagCount] = useState(0);
   const [showFlagWarning, setShowFlagWarning] = useState(false);
+  const [warningDismissed, setWarningDismissed] = useState(false); // tracks if user manually dismissed
   const [result, setResult] = useState<QuizResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [startTime, setStartTime] = useState(0);
@@ -232,20 +233,46 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
     return () => clearInterval(iv);
   }, [stage, quizData]);
 
-  // Fullscreen detection
+  // Fullscreen + visibility detection
   useEffect(() => {
     if (stage !== 'active') return;
-    const handler = () => {
+
+    const triggerFlag = (reason: string) => {
+      console.log('Quiz flag triggered:', reason);
+      setFlagged(true);
+      setFlagCount(c => c + 1);
+      setShowFlagWarning(true);
+      setWarningDismissed(false);
+    };
+
+    // Fullscreen exit
+    const fullscreenHandler = () => {
       if (!document.fullscreenElement) {
-        setFlagged(true);
-        setFlagCount(c => c + 1);
-        setShowFlagWarning(true);
-        setTimeout(() => setShowFlagWarning(false), 5000);
-        // Don't call onQuizEnd here — user is still in the quiz, just flagged
+        triggerFlag('fullscreen-exit');
       }
     };
-    document.addEventListener('fullscreenchange', handler);
-    return () => document.removeEventListener('fullscreenchange', handler);
+
+    // Tab switch / window blur / app switch
+    const visibilityHandler = () => {
+      if (document.hidden) {
+        triggerFlag('tab-switch');
+      }
+    };
+
+    // Window blur (alt+tab, clicking outside browser)
+    const blurHandler = () => {
+      triggerFlag('window-blur');
+    };
+
+    document.addEventListener('fullscreenchange', fullscreenHandler);
+    document.addEventListener('visibilitychange', visibilityHandler);
+    window.addEventListener('blur', blurHandler);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', fullscreenHandler);
+      document.removeEventListener('visibilitychange', visibilityHandler);
+      window.removeEventListener('blur', blurHandler);
+    };
   }, [stage]);
 
   const enterFullscreen = () => document.documentElement.requestFullscreen().catch(() => {});
@@ -256,7 +283,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
     setAnswers(new Array(quizData.questions.length).fill(null));
     setCurrent(0);
     setTimeLeft(quizData.timeLimitSeconds);
-    setFlagged(false); setFlagCount(0); setShowFlagWarning(false);
+    setFlagged(false); setFlagCount(0); setShowFlagWarning(false); setWarningDismissed(false);
     setStartTime(Date.now());
     enterFullscreen();
     onQuizStart();
@@ -376,12 +403,28 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
 
     return (
       <div className="quiz-active">
-        {/* Flag warning popup */}
+        {/* Flag warning popup — persistent, blocks quiz until dismissed */}
         {showFlagWarning && (
-          <div className="flag-warning">
-            <strong>⚠️ Warning</strong>
-            <p>You exited full-screen mode. This attempt has been flagged.</p>
-            <button onClick={enterFullscreen} className="resend-btn" style={{ marginTop: '0.5rem' }}>Return to full-screen</button>
+          <div className="flag-warning flag-warning--blocking">
+            <strong>⚠️ Warning — Attempt Flagged</strong>
+            <p>
+              {!document.fullscreenElement
+                ? 'You exited full-screen mode.'
+                : 'You switched away from this tab or window.'}
+              {' '}This attempt has been flagged.
+            </p>
+            <p className="flag-warning__count">Flag count: {flagCount}</p>
+            <button
+              className="mark-done-btn"
+              style={{ marginTop: '0.75rem', width: '100%', justifyContent: 'center' }}
+              onClick={() => {
+                enterFullscreen();
+                setShowFlagWarning(false);
+                setWarningDismissed(true);
+              }}
+            >
+              Return to Full-Screen & Continue
+            </button>
           </div>
         )}
 
