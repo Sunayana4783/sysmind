@@ -660,7 +660,7 @@ const Caching = () => {
 
   return (
     <div className="learn-root">
-      <LearningNav />
+      {!quizActive && <LearningNav />}
       <main className="caching-page">
         {/* Hide breadcrumb and sidebar during active quiz */}
         {!quizActive && (
