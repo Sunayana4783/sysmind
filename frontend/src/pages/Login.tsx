@@ -137,7 +137,7 @@ const Login = () => {
               />
             </div>
             <button type="submit" className="auth-form__submit" disabled={otpLoading || otp.length < 6}>
-              {otpLoading ? <><span className="spinner spinner--sm" /> Verifying…</> : 'Verify Email'}
+              {otpLoading ? <><span className="spinner spinner--sm" /> Verifying</> : 'Verify Email'}
             </button>
           </form>
 
@@ -145,7 +145,7 @@ const Login = () => {
             <p>
               Didn't receive it?{' '}
               <button className="link-btn" onClick={handleResend} disabled={resendLoading}>
-                {resendLoading ? 'Sending…' : 'Resend code'}
+                {resendLoading ? 'Sending' : 'Resend code'}
               </button>
             </p>
             <p style={{ marginTop: '0.5rem' }}>
@@ -196,7 +196,7 @@ const Login = () => {
             </div>
           </div>
           <button type="submit" className="auth-form__submit" disabled={isLoading}>
-            {isLoading ? <><span className="spinner spinner--sm" /> Signing in…</> : 'Sign In'}
+            {isLoading ? <><span className="spinner spinner--sm" /> Signing in</> : 'Sign In'}
           </button>
         </form>
 

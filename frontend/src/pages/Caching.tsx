@@ -47,7 +47,7 @@ const ContentModule = ({ mod, completed, onComplete, completing, onNext, isLast 
       <div className="mod-complete-row">
         {!completed ? (
           <button className="mark-done-btn" onClick={onComplete} disabled={completing}>
-            {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : 'Mark as Completed'}
+            {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving</> : 'Mark as Completed'}
           </button>
         ) : isLast ? (
           <button className="mark-done-btn mark-done-btn--done" disabled>Completed</button>
@@ -121,7 +121,7 @@ const FailureCasesModule = ({ mod, completed, onComplete, completing, onNext, is
                 </button>
               ) : !completed ? (
                 <button className="mark-done-btn" onClick={onComplete} disabled={completing}>
-                  {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : 'Mark as Completed'}
+                  {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving</> : 'Mark as Completed'}
                 </button>
               ) : isLast ? (
                 <button className="mark-done-btn mark-done-btn--done" disabled>Completed</button>
@@ -174,7 +174,7 @@ const InterviewModule = ({ mod, completed, onComplete, completing, onNext, isLas
       <div className="mod-complete-row">
         {!completed ? (
           <button className="mark-done-btn" onClick={onComplete} disabled={completing}>
-            {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : 'Mark as Completed'}
+            {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving</> : 'Mark as Completed'}
           </button>
         ) : isLast ? (
           <button className="mark-done-btn mark-done-btn--done" disabled>Completed</button>
@@ -316,7 +316,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
 
   if (loading) return (
     <div className="mod-body mod-center">
-      <div className="rag-spinner" /><p className="rag-loading-text">Loading quiz…</p>
+      <div className="rag-spinner" /><p className="rag-loading-text">Loading quiz</p>
     </div>
   );
   if (error) return (
@@ -406,7 +406,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
         {/* Flag warning popup — persistent, blocks quiz until dismissed */}
         {showFlagWarning && (
           <div className="flag-warning flag-warning--blocking">
-            <strong>Warning — Attempt Flagged</strong>
+            <strong>Warning: Attempt Flagged</strong>
             <p>
               {!document.fullscreenElement
                 ? 'You exited full-screen mode.'
@@ -469,7 +469,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
           {current < quizData.questions.length - 1
             ? <button className="quiz-nav__btn quiz-nav__btn--primary" onClick={() => setCurrent(c => c + 1)} disabled={answers[current] === null}>Next →</button>
             : <button className="quiz-nav__btn quiz-nav__btn--submit" onClick={handleSubmit} disabled={submitting || answered < quizData.questions.length}>
-                {submitting ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Submitting…</> : 'Submit Quiz'}
+                {submitting ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Submitting</> : 'Submit Quiz'}
               </button>
           }
         </div>
@@ -513,7 +513,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
       {/* Question review — outside score card so text-align:center doesn't affect it */}
       <div className="qr-section">
         <h4 className="qr-section__heading">
-          Question Review — {result.correct} correct, {result.total - result.correct} wrong
+          Question Review: {result.correct} correct, {result.total - result.correct} wrong
         </h4>
         {result.results.map((r, i) => (
           <div key={i} className={`qr-item${r.isCorrect ? ' qr-item--correct' : ' qr-item--wrong'}`}>
@@ -535,7 +535,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
                     <span className="qr-opt__letter">{String.fromCharCode(65 + oi)}</span>
                     <span className="qr-opt__text">{opt}</span>
                     <span className="qr-opt__badge">
-                      {isCorrect && isSelected && 'Correct — your answer'}
+                      {isCorrect && isSelected && 'Correct (your answer)'}
                       {isCorrect && !isSelected && 'Correct answer'}
                       {!isCorrect && isSelected && 'Your answer'}
                     </span>
@@ -645,7 +645,7 @@ const Caching = () => {
     <div className="learn-root"><LearningNav />
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', flexDirection: 'column', gap: '1rem', background: 'var(--l-bg)' }}>
         <div className="rag-spinner" />
-        <p style={{ color: 'var(--l-text-sec)' }}>Loading modules…</p>
+        <p style={{ color: 'var(--l-text-sec)' }}>Loading modules</p>
       </div>
     </div>
   );
