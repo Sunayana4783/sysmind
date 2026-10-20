@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LearningNav from '../components/LearningNav';
 import ModuleAnimation from '../components/ModuleAnimation';
@@ -7,12 +7,12 @@ import '../styles/learning-theme.css';
 import './SystemArchitecture.css';
 import './Modules.css';
 
-// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Helpers ───────────────────────────────────────────────────────────────────
 const MODULE_TYPE_LABELS: Record<string, string> = {
   content: 'Content', failureCases: 'Failure Cases', interview: 'Interview', quiz: 'Quiz',
 };
 
-// â”€â”€ ContentModule renderer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── ContentModule renderer ────────────────────────────────────────────────────
 const ContentModule = ({ mod, completed, onComplete, completing, onNext, isLast }: {
   mod: LearningModule; completed: boolean;
   onComplete: () => void; completing: boolean;
@@ -47,13 +47,13 @@ const ContentModule = ({ mod, completed, onComplete, completing, onNext, isLast 
       <div className="mod-complete-row">
         {!completed ? (
           <button className="mark-done-btn" onClick={onComplete} disabled={completing}>
-            {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Savingâ€¦</> : 'Mark as Completed'}
+            {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : 'Mark as Completed'}
           </button>
         ) : isLast ? (
           <button className="mark-done-btn mark-done-btn--done" disabled>Completed</button>
         ) : (
           <button className="mark-done-btn" onClick={onNext}>
-            Next Module â†’
+            Next Module →
           </button>
         )}
       </div>
@@ -61,7 +61,7 @@ const ContentModule = ({ mod, completed, onComplete, completing, onNext, isLast 
   );
 };
 
-// â”€â”€ FailureCases renderer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── FailureCases renderer ─────────────────────────────────────────────────────
 const FailureCasesModule = ({ mod, completed, onComplete, completing, onNext, isLast }: {
   mod: LearningModule; completed: boolean; onComplete: () => void; completing: boolean;
   onNext: () => void; isLast: boolean;
@@ -117,16 +117,16 @@ const FailureCasesModule = ({ mod, completed, onComplete, completing, onNext, is
             <div className="mod-complete-row" style={{ marginTop: '1.5rem', gap: '0.75rem' }}>
               {!isLastCase ? (
                 <button className="mark-done-btn" onClick={() => setOpenIdx(i => i + 1)}>
-                  Next â†’
+                  Next →
                 </button>
               ) : !completed ? (
                 <button className="mark-done-btn" onClick={onComplete} disabled={completing}>
-                  {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Savingâ€¦</> : 'Mark as Completed'}
+                  {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : 'Mark as Completed'}
                 </button>
               ) : isLast ? (
                 <button className="mark-done-btn mark-done-btn--done" disabled>Completed</button>
               ) : (
-                <button className="mark-done-btn" onClick={onNext}>Next Module â†’</button>
+                <button className="mark-done-btn" onClick={onNext}>Next Module →</button>
               )}
             </div>
           </div>
@@ -136,7 +136,7 @@ const FailureCasesModule = ({ mod, completed, onComplete, completing, onNext, is
   );
 };
 
-// â”€â”€ InterviewQuestions renderer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── InterviewQuestions renderer ───────────────────────────────────────────────
 const InterviewModule = ({ mod, completed, onComplete, completing, onNext, isLast }: {
   mod: LearningModule; completed: boolean; onComplete: () => void; completing: boolean;
   onNext: () => void; isLast: boolean;
@@ -159,7 +159,7 @@ const InterviewModule = ({ mod, completed, onComplete, completing, onNext, isLas
               </div>
               <div className="iq-item__right">
                 <span className={`diff-badge diff-badge--${q.difficulty}`}>{q.difficulty}</span>
-                <span className="iq-item__chevron">{openIdx === i ? 'â–²' : 'â–¼'}</span>
+                <span className="iq-item__chevron">{openIdx === i ? '▲' : '▼'}</span>
               </div>
             </button>
             {openIdx === i && (
@@ -174,19 +174,19 @@ const InterviewModule = ({ mod, completed, onComplete, completing, onNext, isLas
       <div className="mod-complete-row">
         {!completed ? (
           <button className="mark-done-btn" onClick={onComplete} disabled={completing}>
-            {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Savingâ€¦</> : 'Mark as Completed'}
+            {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : 'Mark as Completed'}
           </button>
         ) : isLast ? (
           <button className="mark-done-btn mark-done-btn--done" disabled>Completed</button>
         ) : (
-          <button className="mark-done-btn" onClick={onNext}>Next Module â†’</button>
+          <button className="mark-done-btn" onClick={onNext}>Next Module →</button>
         )}
       </div>
     </div>
   );
 };
 
-// â”€â”€ Quiz component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Quiz component ────────────────────────────────────────────────────────────
 const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
   mod: LearningModule; completed: boolean; onComplete: () => void;
   onQuizStart: () => void; onQuizEnd: () => void;
@@ -316,7 +316,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
 
   if (loading) return (
     <div className="mod-body mod-center">
-      <div className="rag-spinner" /><p className="rag-loading-text">Loading quizâ€¦</p>
+      <div className="rag-spinner" /><p className="rag-loading-text">Loading quiz…</p>
     </div>
   );
   if (error) return (
@@ -326,7 +326,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
     </div>
   );
 
-  // â”€â”€ Already passed â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Already passed ────────────────────────────────────────────────────────
   // Only show this screen when NOT actively retaking
   if ((completed || quizData?.alreadyPassed) && !retaking && stage !== 'result') return (
     <div className="mod-body">
@@ -369,7 +369,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
     </div>
   );
 
-  // â”€â”€ Info screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Info screen ───────────────────────────────────────────────────────────
   if (stage === 'info' && quizData) return (
     <div className="mod-body">
       <div className="quiz-info-card">
@@ -388,14 +388,14 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
           <p>You must pass to unlock the next topic</p>
         </div>
         {quizData.attemptsRemaining > 0
-          ? <button className="mark-done-btn" style={{ width: '100%', justifyContent: 'center' }} onClick={startQuiz}>Start Quiz â†’</button>
+          ? <button className="mark-done-btn" style={{ width: '100%', justifyContent: 'center' }} onClick={startQuiz}>Start Quiz →</button>
           : <p style={{ color: '#dc2626', fontWeight: 600, textAlign: 'center' }}>No attempts remaining</p>
         }
       </div>
     </div>
   );
 
-  // â”€â”€ Active quiz â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Active quiz ───────────────────────────────────────────────────────────
   if (stage === 'active' && quizData) {
     const q = quizData.questions[current];
     const progress = ((current + 1) / quizData.questions.length) * 100;
@@ -403,10 +403,10 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
 
     return (
       <div className="quiz-active">
-        {/* Flag warning popup â€” persistent, blocks quiz until dismissed */}
+        {/* Flag warning popup — persistent, blocks quiz until dismissed */}
         {showFlagWarning && (
           <div className="flag-warning flag-warning--blocking">
-            <strong>Warning â€” Attempt Flagged</strong>
+            <strong>Warning — Attempt Flagged</strong>
             <p>
               {!document.fullscreenElement
                 ? 'You exited full-screen mode.'
@@ -464,12 +464,12 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
 
         {/* Navigation */}
         <div className="quiz-nav">
-          <button className="quiz-nav__btn" onClick={() => setCurrent(c => c - 1)} disabled={current === 0}>â† Previous</button>
+          <button className="quiz-nav__btn" onClick={() => setCurrent(c => c - 1)} disabled={current === 0}>← Previous</button>
           <span className="quiz-nav__answered">{answered}/{quizData.questions.length} answered</span>
           {current < quizData.questions.length - 1
-            ? <button className="quiz-nav__btn quiz-nav__btn--primary" onClick={() => setCurrent(c => c + 1)} disabled={answers[current] === null}>Next â†’</button>
+            ? <button className="quiz-nav__btn quiz-nav__btn--primary" onClick={() => setCurrent(c => c + 1)} disabled={answers[current] === null}>Next →</button>
             : <button className="quiz-nav__btn quiz-nav__btn--submit" onClick={handleSubmit} disabled={submitting || answered < quizData.questions.length}>
-                {submitting ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Submittingâ€¦</> : 'Submit Quiz'}
+                {submitting ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Submitting…</> : 'Submit Quiz'}
               </button>
           }
         </div>
@@ -477,7 +477,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
     );
   }
 
-  // â”€â”€ Result screen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Result screen ─────────────────────────────────────────────────────────
   if (stage === 'result' && result) return (
     <div className="mod-body">
 
@@ -510,10 +510,10 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
         )}
       </div>
 
-      {/* Question review â€” outside score card so text-align:center doesn't affect it */}
+      {/* Question review — outside score card so text-align:center doesn't affect it */}
       <div className="qr-section">
         <h4 className="qr-section__heading">
-          Question Review â€” {result.correct} correct, {result.total - result.correct} wrong
+          Question Review — {result.correct} correct, {result.total - result.correct} wrong
         </h4>
         {result.results.map((r, i) => (
           <div key={i} className={`qr-item${r.isCorrect ? ' qr-item--correct' : ' qr-item--wrong'}`}>
@@ -535,7 +535,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
                     <span className="qr-opt__letter">{String.fromCharCode(65 + oi)}</span>
                     <span className="qr-opt__text">{opt}</span>
                     <span className="qr-opt__badge">
-                      {isCorrect && isSelected && 'Correct â€” your answer'}
+                      {isCorrect && isSelected && 'Correct — your answer'}
                       {isCorrect && !isSelected && 'Correct answer'}
                       {!isCorrect && isSelected && 'Your answer'}
                     </span>
@@ -571,7 +571,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
   return null;
 };
 
-// â”€â”€ Main Caching page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Main Caching page ─────────────────────────────────────────────────────────
 const SystemArchitecture = () => {
   const navigate = useNavigate();
   const [modules, setModules] = useState<LearningModule[]>([]);
@@ -645,7 +645,7 @@ const SystemArchitecture = () => {
     <div className="learn-root"><LearningNav />
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', flexDirection: 'column', gap: '1rem', background: 'var(--l-bg)' }}>
         <div className="rag-spinner" />
-        <p style={{ color: 'var(--l-text-sec)' }}>Loading modulesâ€¦</p>
+        <p style={{ color: 'var(--l-text-sec)' }}>Loading modules…</p>
       </div>
     </div>
   );
@@ -674,12 +674,12 @@ const SystemArchitecture = () => {
         )}
 
         <div className={`caching-layout${quizActive ? ' caching-layout--quiz-active' : ''}`}>
-          {/* Sidebar â€” hidden during quiz */}
+          {/* Sidebar — hidden during quiz */}
           {!quizActive && (
           <aside className="caching-sidebar">
             <button className="caching-dropdown__header" onClick={() => setDropdownOpen(v => !v)} aria-expanded={dropdownOpen}>
               <span className="caching-dropdown__title">System Architecture Topics</span>
-              <span className={`caching-dropdown__chevron${dropdownOpen ? ' caching-dropdown__chevron--open' : ''}`}>â€º</span>
+              <span className={`caching-dropdown__chevron${dropdownOpen ? ' caching-dropdown__chevron--open' : ''}`}>›</span>
             </button>
 
             {dropdownOpen && (
@@ -692,7 +692,7 @@ const SystemArchitecture = () => {
                       <button
                         className={`caching-sidebar__item${selectedIdx === idx ? ' caching-sidebar__item--active' : ''}${locked || quizActive ? ' caching-sidebar__item--locked' : ''}`}
                         onClick={() => !locked && !quizActive && setSelectedIdx(idx)}
-                        title={quizActive ? 'Quiz in progress â€” complete or submit first' : locked ? 'Complete previous modules first' : ''}
+                        title={quizActive ? 'Quiz in progress — complete or submit first' : locked ? 'Complete previous modules first' : ''}
                       >
                         <span className="caching-sidebar__label">{m.title}</span>
                         {done && <span className="caching-sidebar__done">&#10003;</span>}
@@ -753,5 +753,3 @@ const SystemArchitecture = () => {
 };
 
 export default SystemArchitecture;
-
-
