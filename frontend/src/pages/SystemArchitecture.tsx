@@ -33,7 +33,7 @@ const ContentModule = ({ mod, completed, onComplete, completing, onNext, isLast 
       {c.animationSteps?.length > 0 && (
         <div className="mod-block">
           <h3 className="mod-section-title">How it works</h3>
-          <ModuleAnimation steps={c.animationSteps} topicTitle={mod.title} />
+          <ModuleAnimation steps={c.animationSteps} topicTitle={mod.title} topic="system-architecture" />
         </div>
       )}
 
@@ -109,7 +109,7 @@ const FailureCasesModule = ({ mod, completed, onComplete, completing, onNext, is
             {fc.animationSteps?.length > 0 && (
               <div className="mod-block" style={{ marginTop: '1.25rem' }}>
                 <h4 className="mod-section-title">Failure flow</h4>
-                <ModuleAnimation steps={fc.animationSteps} animType="cascade" topicTitle={fc.title} />
+                <ModuleAnimation steps={fc.animationSteps} animType="cascade" topicTitle={fc.title} topic="system-architecture" />
               </div>
             )}
 

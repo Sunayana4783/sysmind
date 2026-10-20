@@ -7,6 +7,7 @@ interface Props {
   animType?: string;
   title?: string;
   topicTitle?: string;
+  topic?: string; // 'caching' | 'system-architecture' — used to scope diagram matching
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -950,71 +951,84 @@ const SAFaultDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
 // ─────────────────────────────────────────────────────────────────────────────
 // DISPATCHER
 // ─────────────────────────────────────────────────────────────────────────────
-const ModuleAnimation = ({ steps, animType, title, topicTitle }: Props) => {
+const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) => {
   const [activeIdx, setActiveIdx] = useState(0);
 
   const t = (topicTitle || title || '').toLowerCase();
+  const isSA = topic === 'system-architecture';
+  const isCache = topic === 'caching' || (!isSA); // default to caching if no topic given
 
-  const getTotal = () => {
-    // ── System Architecture diagrams ──────────────────────────────────────
-    if (t.includes('fundamentals'))                                                                   return TOTAL_SA_FUND;
-    if (t.includes('architectural pattern'))                                                          return TOTAL_SA_PATTERNS;
-    if (t.includes('monolithic') || t.includes('microservice'))                                       return TOTAL_SA_MONO;
-    if (t.includes('component') || t.includes('communication'))                                      return TOTAL_SA_COMM;
-    if (t.includes('scalability') || t.includes('load distribution'))                                return TOTAL_SA_SCALE;
-    if (t.includes('database architecture'))                                                         return TOTAL_SA_DB;
-    if (t.includes('distributed system'))                                                            return TOTAL_SA_DIST;
-    if (t.includes('fault') || t.includes('availability'))                                           return TOTAL_SA_FAULT;
-    // ── Caching diagrams ──────────────────────────────────────────────────
-    if (t.includes('basics'))                                                                        return TOTAL_BASICS;
-    if (t.includes('cache architecture'))                                                            return TOTAL_ARCH;
-    if (t.includes('aside') || t.includes('cache-aside'))                                            return TOTAL_ASIDE;
-    if (t.includes('read') || t.includes('write') || t.includes('strateg'))                         return TOTAL_RW;
-    if (t.includes('eviction') || t.includes('lru') || t.includes('lfu') || t.includes('ttl'))      return TOTAL_EVICT;
-    if (t.includes('invalid'))                                                                       return TOTAL_INVAL;
-    if (t.includes('consisten'))                                                                     return TOTAL_CONSIST;
-    if (t.includes('redis'))                                                                         return TOTAL_REDIS;
-    if (t.includes('distributed'))                                                                   return TOTAL_DIST;
-    if (t.includes('stampede') || t.includes('penetration') || t.includes('avalanche') || t.includes('failure')) return TOTAL_STAMP;
-    return TOTAL_SA_FUND;
-  };
-
-  useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle]);
-
-  useEffect(() => {
-    const total = getTotal();
-    if (total <= 1) return;
-    const iv = setInterval(() => setActiveIdx(i => (i + 1) % total), 2600);
-    return () => clearInterval(iv);
-  }, [steps, title, topicTitle]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const getDiagram = () => {
-    // ── System Architecture diagrams ──────────────────────────────────────
-    if (t.includes('fundamentals'))                                                                   return <SAFundamentalsDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('architectural pattern'))                                                          return <SAPatternsDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('monolithic') || t.includes('microservice'))                                       return <SAMonolithDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('component') || t.includes('communication'))                                      return <SACommDiagram            activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('scalability') || t.includes('load distribution'))                                return <SAScaleDiagram           activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('database architecture'))                                                         return <SADatabaseDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('distributed system'))                                                            return <SADistributedDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('fault') || t.includes('availability'))                                           return <SAFaultDiagram           activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    // ── Caching diagrams ──────────────────────────────────────────────────
-    if (t.includes('basics'))                                                                        return <CacheBasicsDiagram       activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('cache architecture'))                                                            return <CacheArchDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('aside') || t.includes('cache-aside'))                                            return <CacheAsideDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('read') || t.includes('write') || t.includes('strateg'))                         return <ReadWriteDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('eviction') || t.includes('lru') || t.includes('lfu') || t.includes('ttl'))      return <EvictionDiagram           activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('invalid'))                                                                       return <InvalidationDiagram       activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('consisten'))                                                                     return <ConsistencyDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('redis'))                                                                         return <RedisDiagram              activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('distributed'))                                                                   return <DistributedDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('stampede') || t.includes('penetration') || t.includes('avalanche') || t.includes('failure')) return <StampedeDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  const getSADiagram = (): React.ReactNode => {
+    if (t.includes('fundamentals'))                           return <SAFundamentalsDiagram  activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('architectural pattern') || t.includes('architectural patterns')) return <SAPatternsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('monolithic') || t.includes('client-server') || t.includes('client server')) return <SAMonolithDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('component') || t.includes('interaction')) return <SACommDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('service communication') || t.includes('rest') || t.includes('grpc') || t.includes('websocket')) return <SACommDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('scalability') || t.includes('load'))      return <SAScaleDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('database'))                               return <SADatabaseDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('distributed'))                            return <SADistributedDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('fault') || t.includes('reliability') || t.includes('availability')) return <SAFaultDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('design principle') || t.includes('solid') || t.includes('modularity')) return <SAPatternsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('decision') || t.includes('trade-off') || t.includes('trade off')) return <SADatabaseDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('hld') || t.includes('design process') || t.includes('diagram')) return <SAFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('failure') || t.includes('stampede') || t.includes('penetration') || t.includes('avalanche')) return <SAFaultDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     return <SAFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
   };
 
+  const getCacheDiagram = (): React.ReactNode => {
+    if (t.includes('basics'))                                 return <CacheBasicsDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('architecture'))                           return <CacheArchDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('aside') || t.includes('cache-aside'))     return <CacheAsideDiagram       activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('read') || t.includes('write') || t.includes('strateg')) return <ReadWriteDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('eviction') || t.includes('lru') || t.includes('lfu') || t.includes('ttl')) return <EvictionDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('invalid'))                                return <InvalidationDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('consisten'))                              return <ConsistencyDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('redis'))                                  return <RedisDiagram            activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('distributed'))                            return <DistributedDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('stampede') || t.includes('penetration') || t.includes('avalanche') || t.includes('failure')) return <StampedeDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <CacheBasicsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  };
+
+  const getSATotals = (): number => {
+    if (t.includes('fundamentals'))                           return TOTAL_SA_FUND;
+    if (t.includes('architectural pattern') || t.includes('architectural patterns')) return TOTAL_SA_PATTERNS;
+    if (t.includes('monolithic') || t.includes('client-server') || t.includes('client server')) return TOTAL_SA_MONO;
+    if (t.includes('component') || t.includes('interaction') || t.includes('service communication') || t.includes('rest') || t.includes('grpc')) return TOTAL_SA_COMM;
+    if (t.includes('scalability') || t.includes('load'))      return TOTAL_SA_SCALE;
+    if (t.includes('database'))                               return TOTAL_SA_DB;
+    if (t.includes('distributed'))                            return TOTAL_SA_DIST;
+    if (t.includes('fault') || t.includes('reliability') || t.includes('availability') || t.includes('failure')) return TOTAL_SA_FAULT;
+    if (t.includes('design principle') || t.includes('decision') || t.includes('hld') || t.includes('diagram')) return TOTAL_SA_PATTERNS;
+    return TOTAL_SA_FUND;
+  };
+
+  const getCacheTotals = (): number => {
+    if (t.includes('basics'))                                 return TOTAL_BASICS;
+    if (t.includes('architecture'))                           return TOTAL_ARCH;
+    if (t.includes('aside') || t.includes('cache-aside'))     return TOTAL_ASIDE;
+    if (t.includes('read') || t.includes('write') || t.includes('strateg')) return TOTAL_RW;
+    if (t.includes('eviction') || t.includes('lru') || t.includes('lfu') || t.includes('ttl')) return TOTAL_EVICT;
+    if (t.includes('invalid'))                                return TOTAL_INVAL;
+    if (t.includes('consisten'))                              return TOTAL_CONSIST;
+    if (t.includes('redis'))                                  return TOTAL_REDIS;
+    if (t.includes('distributed'))                            return TOTAL_DIST;
+    if (t.includes('stampede') || t.includes('penetration') || t.includes('avalanche') || t.includes('failure')) return TOTAL_STAMP;
+    return TOTAL_BASICS;
+  };
+
+  const total = isSA ? getSATotals() : getCacheTotals();
+
+  useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle, topic]);
+
+  useEffect(() => {
+    if (total <= 1) return;
+    const iv = setInterval(() => setActiveIdx(i => (i + 1) % total), 2600);
+    return () => clearInterval(iv);
+  }, [steps, title, topicTitle, topic, total]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div className="module-animation" aria-label="Architecture diagram">
-      {getDiagram()}
+      {isSA ? getSADiagram() : getCacheDiagram()}
     </div>
   );
 };
