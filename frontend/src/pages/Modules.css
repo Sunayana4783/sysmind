@@ -84,22 +84,142 @@
 }
 .example-box p { font-size: 0.9rem; color: var(--l-text); line-height: 1.7; margin: 0; }
 
-/* Flow animation (reused) */
-.flow-anim { background: var(--l-locked-bg); border: 1.5px solid var(--l-border); border-radius: 12px; padding: 1.25rem 1rem 1rem; }
-.flow-anim__track { display: flex; align-items: flex-start; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.5rem; scrollbar-width: none; }
-.flow-anim__track::-webkit-scrollbar { display: none; }
-.flow-anim__step { flex: 1; min-width: 90px; background: var(--l-card); border: 1.5px solid var(--l-border); border-radius: 10px; padding: 0.75rem 0.625rem; text-align: center; transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s; }
-.flow-anim__step--active { border-color: var(--l-primary); box-shadow: 0 0 0 3px rgba(124,92,252,0.15); transform: translateY(-2px); }
-.flow-anim__step--highlight { background: var(--l-accent); }
-.flow-anim__step-num { width: 22px; height: 22px; background: var(--l-accent); color: var(--l-primary); border-radius: 50%; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.4rem; }
-.flow-anim__step--active .flow-anim__step-num { background: var(--l-primary); color: #fff; }
-.flow-anim__step-label { font-size: 0.7rem; font-weight: 700; color: var(--l-text); margin-bottom: 0.2rem; }
-.flow-anim__step-desc { font-size: 0.65rem; color: var(--l-text-sec); line-height: 1.4; }
-.flow-anim__arrow { color: var(--l-border); font-size: 1rem; padding-top: 1rem; flex-shrink: 0; transition: color 0.25s; }
-.flow-anim__arrow--done { color: var(--l-primary); }
-.flow-anim__dots { display: flex; justify-content: center; gap: 5px; margin-top: 0.875rem; }
-.flow-anim__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--l-border); border: none; cursor: pointer; padding: 0; transition: background 0.2s, transform 0.2s; }
-.flow-anim__dot--active { background: var(--l-primary); transform: scale(1.3); }
+/* ── Flow animation ───────────────────────────────────────────────────────── */
+.flow-anim {
+  background: var(--l-locked-bg);
+  border: 1.5px solid var(--l-border);
+  border-radius: 12px;
+  padding: 1.25rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Cards row — wraps on narrow screens */
+.flow-anim__cards {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  position: relative;
+}
+
+.flow-anim__card {
+  position: relative;
+  flex: 1 1 80px;
+  max-width: 140px;
+  background: var(--l-card);
+  border: 1.5px solid var(--l-border);
+  border-radius: 10px;
+  padding: 0.75rem 0.625rem 0.625rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  margin: 0.2rem;
+}
+.flow-anim__card:hover  { border-color: var(--l-primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(124,92,252,0.12); }
+.flow-anim__card:active { transform: scale(0.97); }
+.flow-anim__card--active {
+  border-color: var(--l-primary);
+  box-shadow: 0 0 0 3px rgba(124,92,252,0.15), 0 4px 16px rgba(124,92,252,0.15);
+  transform: translateY(-3px);
+  background: #FDFCFF;
+}
+.flow-anim__card--highlight { background: var(--l-accent); }
+.flow-anim__card--highlight.flow-anim__card--active { background: #F0EEFF; }
+
+.flow-anim__card-num {
+  width: 22px; height: 22px;
+  background: var(--l-accent); color: var(--l-primary);
+  border-radius: 50%; font-size: 0.7rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 0.4rem;
+  transition: background 0.2s, color 0.2s;
+}
+.flow-anim__card--active .flow-anim__card-num { background: var(--l-primary); color: #fff; }
+
+.flow-anim__card-label { font-size: 0.7rem; font-weight: 700; color: var(--l-text); margin-bottom: 0.2rem; line-height: 1.3; }
+.flow-anim__card-desc  { font-size: 0.62rem; color: var(--l-text-sec); line-height: 1.4; }
+
+/* Arrow badge on card — right side indicator */
+.flow-anim__card-arrow {
+  position: absolute;
+  right: -10px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  color: var(--l-primary);
+  background: var(--l-accent);
+  border-radius: 50%;
+  width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Active step detail bar */
+.flow-anim__detail {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  background: #ffffff;
+  border: 1.5px solid var(--l-border);
+  border-radius: 10px;
+  padding: 0.625rem 0.875rem;
+}
+.flow-anim__detail-pill {
+  background: var(--l-primary);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.flow-anim__detail-text { font-size: 0.8rem; color: var(--l-text); line-height: 1.5; font-weight: 500; }
+
+/* Prev / dots / next nav */
+.flow-anim__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.flow-anim__nav-btn {
+  background: var(--l-primary);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 0.4rem 0.875rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.flow-anim__nav-btn:hover:not(:disabled)  { background: var(--l-primary-h); }
+.flow-anim__nav-btn:active:not(:disabled) { transform: scale(0.96); }
+.flow-anim__nav-btn:disabled { background: var(--l-border); color: var(--l-locked-txt); cursor: not-allowed; }
+
+.flow-anim__dots { display: flex; justify-content: center; gap: 5px; align-items: center; }
+.flow-anim__dot  {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--l-border); border: none; cursor: pointer; padding: 0;
+  transition: background 0.2s, transform 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.flow-anim__dot--active { background: var(--l-primary); transform: scale(1.45); }
+
+/* Mobile */
+@media (max-width: 520px) {
+  .flow-anim__card { flex: 1 1 70px; max-width: 110px; padding: 0.55rem 0.4rem 0.5rem; }
+  .flow-anim__card-label { font-size: 0.62rem; }
+  .flow-anim__card-desc  { display: none; }
+  .flow-anim__detail-text { font-size: 0.75rem; }
+  .flow-anim__nav-btn { font-size: 0.72rem; padding: 0.35rem 0.7rem; }
+}
 
 /* Difficulty badges */
 .diff-badge { font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; letter-spacing: 0.04em; }

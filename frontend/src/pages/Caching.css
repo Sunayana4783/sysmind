@@ -377,3 +377,103 @@
   padding-bottom: 0.5rem;
   border-bottom: 1.5px solid #E5E0EF;
 }
+
+/* ── Emoji-free icon replacements ───────────────────────────────────────── */
+
+/* Lock icon for locked module panel */
+.content-panel__lock-icon {
+  width: 40px; height: 40px;
+  margin: 0 auto 1rem;
+  background: var(--l-border);
+  border-radius: 50%;
+  position: relative;
+}
+.content-panel__lock-icon::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 3px solid var(--l-text-sec);
+  border-radius: 50% 50% 0 0;
+  border-bottom: none;
+  top: 2px;
+}
+.content-panel__lock-icon::after {
+  content: '';
+  position: absolute;
+  left: 8px; right: 8px;
+  bottom: 6px; top: 18px;
+  background: var(--l-text-sec);
+  border-radius: 4px;
+}
+
+/* Quiz info target icon */
+.quiz-info__icon--target {
+  width: 48px; height: 48px;
+  margin: 0 auto 0.75rem;
+  border-radius: 50%;
+  background: var(--l-accent);
+  border: 3px solid var(--l-primary);
+  position: relative;
+}
+.quiz-info__icon--target::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: var(--l-primary);
+}
+
+/* Quiz result pass / fail icons */
+.quiz-result__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem;
+}
+.quiz-result__icon--pass,
+.quiz-result__icon--fail {
+  display: block;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+}
+.quiz-result__icon--pass {
+  background: #dcfce7;
+  border: 3px solid #22c55e;
+  position: relative;
+}
+.quiz-result__icon--pass::after {
+  content: '';
+  position: absolute;
+  left: 11px; top: 22px;
+  width: 10px; height: 6px;
+  border-left: 3px solid #16a34a;
+  border-bottom: 3px solid #16a34a;
+  transform: rotate(-45deg);
+}
+.quiz-result__icon--fail {
+  background: #fee2e2;
+  border: 3px solid #DC2626;
+  position: relative;
+}
+.quiz-result__icon--fail::before,
+.quiz-result__icon--fail::after {
+  content: '';
+  position: absolute;
+  width: 22px; height: 3px;
+  background: #DC2626;
+  border-radius: 2px;
+  top: 50%; left: 50%;
+}
+.quiz-result__icon--fail::before { transform: translate(-50%, -50%) rotate(45deg); }
+.quiz-result__icon--fail::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+
+/* qr-item status text badges */
+.qr-item__status {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.qr-item--correct .qr-item__status { background: #dcfce7; color: #166534; }
+.qr-item--wrong   .qr-item__status { background: #fee2e2; color: #dc2626; }

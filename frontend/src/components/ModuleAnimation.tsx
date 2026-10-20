@@ -6,12 +6,11 @@ interface Props {
   steps: AnimationStep[];
   animType?: string;
   title?: string;
-  topicTitle?: string; // used to pick the right diagram
+  topicTitle?: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SVG SYSTEM COMPONENT ICONS
-// Each one is a self-contained SVG that looks like a real architecture diagram
 // ─────────────────────────────────────────────────────────────────────────────
 
 const UserIcon = ({ active }: { active?: boolean }) => (
@@ -26,7 +25,7 @@ const ServerIcon = ({ active, color }: { active?: boolean; color?: string }) => 
   const c = color || (active ? '#7C5CFC' : '#A78BFA');
   return (
     <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-      <rect x="4" y="8" width="40" height="10" rx="3" fill={active ? '#7C5CFC' : '#EEE9FF'} stroke={c} strokeWidth="1.5"/>
+      <rect x="4" y="8"  width="40" height="10" rx="3" fill={active ? '#7C5CFC' : '#EEE9FF'} stroke={c} strokeWidth="1.5"/>
       <rect x="4" y="22" width="40" height="10" rx="3" fill={active ? '#EEE9FF' : '#F5F3FF'} stroke={c} strokeWidth="1.5"/>
       <rect x="4" y="36" width="40" height="10" rx="3" fill={active ? '#EEE9FF' : '#F5F3FF'} stroke={c} strokeWidth="1.5"/>
       <circle cx="36" cy="13" r="2" fill={active ? 'white' : c}/>
@@ -38,7 +37,6 @@ const ServerIcon = ({ active, color }: { active?: boolean; color?: string }) => 
 
 const CacheIcon = ({ active }: { active?: boolean }) => (
   <svg width="48" height="52" viewBox="0 0 48 52" fill="none">
-    {/* Redis-style stacked cylinder */}
     <ellipse cx="24" cy="10" rx="20" ry="7" fill={active ? '#7C5CFC' : '#EEE9FF'} stroke={active ? '#7C5CFC' : '#C4B5FD'} strokeWidth="2"/>
     <rect x="4" y="10" width="40" height="30" fill={active ? '#EEE9FF' : '#F9F8FF'} stroke={active ? '#7C5CFC' : '#C4B5FD'} strokeWidth="2"/>
     <ellipse cx="24" cy="40" rx="20" ry="7" fill={active ? '#EEE9FF' : '#F5F3FF'} stroke={active ? '#7C5CFC' : '#C4B5FD'} strokeWidth="2"/>
@@ -71,9 +69,9 @@ const RedisIcon = ({ active }: { active?: boolean }) => (
 const NetworkIcon = ({ active }: { active?: boolean }) => (
   <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
     <circle cx="24" cy="24" r="18" fill={active ? '#EEE9FF' : '#F5F3FF'} stroke={active ? '#7C5CFC' : '#C4B5FD'} strokeWidth="2"/>
-    <line x1="6" y1="24" x2="42" y2="24" stroke={active ? '#7C5CFC' : '#C4B5FD'} strokeWidth="1.5"/>
-    <ellipse cx="24" cy="24" rx="9" ry="18" fill="none" stroke={active ? '#7C5CFC' : '#C4B5FD'} strokeWidth="1.5"/>
-    <ellipse cx="24" cy="24" rx="18" ry="9" fill="none" stroke={active ? '#7C5CFC' : '#C4B5FD'} strokeWidth="1.5"/>
+    <line x1="6"  y1="24" x2="42" y2="24" stroke={active ? '#7C5CFC' : '#C4B5FD'} strokeWidth="1.5"/>
+    <ellipse cx="24" cy="24" rx="9"  ry="18" fill="none" stroke={active ? '#7C5CFC' : '#C4B5FD'} strokeWidth="1.5"/>
+    <ellipse cx="24" cy="24" rx="18" ry="9"  fill="none" stroke={active ? '#7C5CFC' : '#C4B5FD'} strokeWidth="1.5"/>
     {active && <circle cx="24" cy="24" r="3" fill="#7C5CFC"/>}
   </svg>
 );
@@ -109,19 +107,19 @@ const BloomIcon = ({ active }: { active?: boolean }) => (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ARROW SVG — connects two nodes
+// ARROW SVG
 // ─────────────────────────────────────────────────────────────────────────────
 const Arrow = ({ active, label, reverse }: { active: boolean; label?: string; reverse?: boolean }) => (
   <div className="arch-arrow">
     <svg width="60" height="30" viewBox="0 0 60 30" fill="none" className={`arch-arrow__svg${active ? ' arch-arrow__svg--active' : ''}`}>
       {reverse ? (
         <>
-          <line x1="58" y1="15" x2="4" y2="15" stroke={active ? '#7C5CFC' : '#E5E0EF'} strokeWidth="2" strokeDasharray={active ? 'none' : '4 2'}/>
+          <line x1="58" y1="15" x2="4"  y2="15" stroke={active ? '#7C5CFC' : '#E5E0EF'} strokeWidth="2" strokeDasharray={active ? 'none' : '4 2'}/>
           <polygon points="4,15 12,10 12,20" fill={active ? '#7C5CFC' : '#E5E0EF'}/>
         </>
       ) : (
         <>
-          <line x1="2" y1="15" x2="56" y2="15" stroke={active ? '#7C5CFC' : '#E5E0EF'} strokeWidth="2" strokeDasharray={active ? 'none' : '4 2'}/>
+          <line x1="2"  y1="15" x2="56" y2="15" stroke={active ? '#7C5CFC' : '#E5E0EF'} strokeWidth="2" strokeDasharray={active ? 'none' : '4 2'}/>
           <polygon points="56,15 48,10 48,20" fill={active ? '#7C5CFC' : '#E5E0EF'}/>
         </>
       )}
@@ -141,10 +139,10 @@ const VertArrow = ({ active, label }: { active: boolean; label?: string }) => (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ARCHITECTURE NODE — box with icon + label
+// ARCHITECTURE NODE
 // ─────────────────────────────────────────────────────────────────────────────
 const ArchNode = ({
-  icon, label, sublabel, active, onClick, danger
+  icon, label, sublabel, active, onClick, danger,
 }: {
   icon: React.ReactNode; label: string; sublabel?: string;
   active?: boolean; onClick?: () => void; danger?: boolean;
@@ -154,6 +152,7 @@ const ArchNode = ({
     onClick={onClick}
     role={onClick ? 'button' : undefined}
     tabIndex={onClick ? 0 : undefined}
+    onKeyDown={onClick ? (e) => (e.key === 'Enter' || e.key === ' ') && onClick() : undefined}
   >
     <div className="arch-node__icon">{icon}</div>
     <div className="arch-node__label">{label}</div>
@@ -163,51 +162,91 @@ const ArchNode = ({
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 1 — Cache Basics: User → App → Cache → DB flow
+// STEP NAV — prev / dot indicators / next — used at the bottom of every diagram
 // ─────────────────────────────────────────────────────────────────────────────
-const CacheBasicsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
-  const steps = [
-    { label: 'User', sub: 'Makes request' },
-    { label: 'App Server', sub: 'Receives request' },
-    { label: 'Cache', sub: 'Redis / Memcached' },
-    { label: 'Database', sub: 'Source of truth' },
-  ];
-  const paths = ['User → App', 'App → Cache', 'Cache hit?', 'Cache miss → DB', 'Store & return'];
-
-  return (
-    <div className="arch-diagram">
-      <div className="arch-row arch-row--center">
-        <ArchNode icon={<UserIcon active={activeIdx === 0} />} label="User" sublabel="Makes request" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
-        <Arrow active={activeIdx >= 1} label="request" />
-        <ArchNode icon={<ServerIcon active={activeIdx === 1} />} label="App Server" sublabel="Checks cache first" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
-        <Arrow active={activeIdx >= 2} label="lookup" />
-        <ArchNode icon={<CacheIcon active={activeIdx === 2} />} label="Cache" sublabel="Redis / Memcached" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
-        <Arrow active={activeIdx >= 3} label="miss" />
-        <ArchNode icon={<DatabaseIcon active={activeIdx === 3} />} label="Database" sublabel="Source of truth" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
-      </div>
-      <div className="arch-return-row">
-        <Arrow active={activeIdx >= 4} label="store result" />
-        <span className="arch-return-label">← response flows back to user</span>
-      </div>
-      <div className="arch-step-info">
-        <span className="arch-step-pill">{activeIdx + 1} / 5</span>
-        <span className="arch-step-desc">{['User makes a request to the application','App checks the cache before touching the database','Cache returns data instantly on a hit (< 1ms)','Cache miss — app queries the database','Result stored in cache, returned to user'][activeIdx] || ''}</span>
-      </div>
+const StepNav = ({
+  activeIdx, total, setActiveIdx,
+}: {
+  activeIdx: number; total: number; setActiveIdx: (i: number) => void;
+}) => (
+  <div className="arch-step-nav">
+    <button
+      className="arch-step-nav__btn"
+      onClick={() => setActiveIdx(activeIdx - 1)}
+      disabled={activeIdx === 0}
+      aria-label="Previous step"
+    >
+      &#8592; Prev
+    </button>
+    <div className="arch-step-nav__dots">
+      {Array.from({ length: total }).map((_, i) => (
+        <button
+          key={i}
+          className={`arch-step-nav__dot${i === activeIdx ? ' arch-step-nav__dot--active' : ''}`}
+          onClick={() => setActiveIdx(i)}
+          aria-label={`Step ${i + 1}`}
+        />
+      ))}
     </div>
-  );
-};
+    <button
+      className="arch-step-nav__btn"
+      onClick={() => setActiveIdx(activeIdx + 1)}
+      disabled={activeIdx === total - 1}
+      aria-label="Next step"
+    >
+      Next &#8594;
+    </button>
+  </div>
+);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 2 — Cache Architecture: 3-tier layered diagram
+// DIAGRAM 1 — Cache Basics
 // ─────────────────────────────────────────────────────────────────────────────
+const TOTAL_BASICS = 5;
+const CacheBasicsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => (
+  <div className="arch-diagram">
+    <div className="arch-row arch-row--center">
+      <ArchNode icon={<UserIcon   active={activeIdx === 0} />} label="User"       sublabel="Makes request"      active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+      <Arrow active={activeIdx >= 1} label="request" />
+      <ArchNode icon={<ServerIcon active={activeIdx === 1} />} label="App Server" sublabel="Checks cache first" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+      <Arrow active={activeIdx >= 2} label="lookup" />
+      <ArchNode icon={<CacheIcon  active={activeIdx === 2} />} label="Cache"      sublabel="Redis / Memcached"  active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+      <Arrow active={activeIdx >= 3} label="miss" />
+      <ArchNode icon={<DatabaseIcon active={activeIdx === 3} />} label="Database" sublabel="Source of truth"   active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+    </div>
+    <div className="arch-return-row">
+      <Arrow active={activeIdx >= 4} label="store result" />
+      <span className="arch-return-label">response flows back to user</span>
+    </div>
+    <div className="arch-step-info">
+      <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_BASICS}</span>
+      <span className="arch-step-desc">{[
+        'User makes a request to the application',
+        'App checks the cache before touching the database',
+        'Cache returns data instantly on a hit (< 1ms)',
+        'Cache miss — app queries the database',
+        'Result stored in cache, returned to user',
+      ][activeIdx]}</span>
+    </div>
+    <StepNav activeIdx={activeIdx} total={TOTAL_BASICS} setActiveIdx={setActiveIdx} />
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DIAGRAM 2 — Cache Architecture
+// ─────────────────────────────────────────────────────────────────────────────
+const TOTAL_ARCH = 3;
 const CacheArchDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const layers = [
-    { label: 'L1: In-Process', sub: 'HashMap in memory', icon: <ServerIcon active={activeIdx === 0} />, ns: '< 1µs' },
-    { label: 'L2: Redis', sub: 'Distributed cache', icon: <CacheIcon active={activeIdx === 1} />, ns: '< 1ms' },
-    { label: 'L3: Database', sub: 'PostgreSQL / MySQL', icon: <DatabaseIcon active={activeIdx === 2} />, ns: '5–50ms' },
+    { label: 'L1: In-Process', sub: 'HashMap in memory',    icon: <ServerIcon   active={activeIdx === 0} />, ns: '< 1µs' },
+    { label: 'L2: Redis',      sub: 'Distributed cache',    icon: <CacheIcon    active={activeIdx === 1} />, ns: '< 1ms' },
+    { label: 'L3: Database',   sub: 'PostgreSQL / MySQL',   icon: <DatabaseIcon active={activeIdx === 2} />, ns: '5–50ms' },
   ];
-  const descs = ['L1 is in-process app memory — fastest (nanoseconds), not shared across servers','L2 is a shared Redis cluster — fast (sub-ms), shared across all app instances','L3 is the database — slowest but always the source of truth'];
-
+  const descs = [
+    'L1 is in-process app memory — fastest (nanoseconds), not shared across servers',
+    'L2 is a shared Redis cluster — fast (sub-ms), shared across all app instances',
+    'L3 is the database — slowest but always the source of truth',
+  ];
   return (
     <div className="arch-diagram">
       <div className="arch-col arch-col--center">
@@ -223,66 +262,71 @@ const CacheArchDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setA
               </div>
               <div className="arch-layer__latency">{layer.ns}</div>
             </div>
-            {i < layers.length - 1 && <VertArrow active={activeIdx > i} label={`${i+2}. miss → check next`} />}
+            {i < layers.length - 1 && <VertArrow active={activeIdx > i} label={`${i + 2}. miss — check next`} />}
           </React.Fragment>
         ))}
       </div>
       <div className="arch-step-info">
-        <span className="arch-step-pill">{activeIdx + 1} / 3</span>
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_ARCH}</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
       </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_ARCH} setActiveIdx={setActiveIdx} />
     </div>
   );
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 3 — Cache-Aside: read + write paths side by side
+// DIAGRAM 3 — Cache-Aside
 // ─────────────────────────────────────────────────────────────────────────────
+const TOTAL_ASIDE = 6;
 const CacheAsideDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const isWrite = activeIdx >= 3;
-  const descs = ['Read path: App checks cache first','Cache miss — query DB for data','Store result in cache with TTL','Write path: Write to DB first — always','Then invalidate the cache key','Next read will fetch fresh data from DB'];
-
+  const descs = [
+    'Read path: App checks cache first',
+    'Cache miss — query DB for data',
+    'Store result in cache with TTL',
+    'Write path: Write to DB first — always',
+    'Then invalidate the cache key',
+    'Next read will fetch fresh data from DB',
+  ];
   return (
     <div className="arch-diagram">
       <div className="arch-two-path">
-        {/* READ PATH */}
         <div className={`arch-path${!isWrite ? ' arch-path--active' : ''}`}>
-          <div className="arch-path__label arch-path__label--read">📖 READ PATH</div>
+          <div className="arch-path__label arch-path__label--read">READ PATH</div>
           <div className="arch-row arch-row--col">
-            <ArchNode icon={<ServerIcon active={activeIdx === 0} />} label="App" sublabel="Check cache" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+            <ArchNode icon={<ServerIcon   active={activeIdx === 0} />} label="App"   sublabel="Check cache" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
             <VertArrow active={activeIdx >= 1} label="miss" />
-            <ArchNode icon={<CacheIcon active={activeIdx === 1} />} label="Cache" sublabel="MISS" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+            <ArchNode icon={<CacheIcon    active={activeIdx === 1} />} label="Cache" sublabel="MISS"        active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
             <VertArrow active={activeIdx >= 2} label="fetch" />
-            <ArchNode icon={<DatabaseIcon active={activeIdx === 2} />} label="DB" sublabel="Query" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+            <ArchNode icon={<DatabaseIcon active={activeIdx === 2} />} label="DB"    sublabel="Query"       active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
           </div>
         </div>
-
         <div className="arch-path-divider" />
-
-        {/* WRITE PATH */}
         <div className={`arch-path${isWrite ? ' arch-path--active' : ''}`}>
-          <div className="arch-path__label arch-path__label--write">✍️ WRITE PATH</div>
+          <div className="arch-path__label arch-path__label--write">WRITE PATH</div>
           <div className="arch-row arch-row--col">
-            <ArchNode icon={<ServerIcon active={activeIdx === 3} />} label="App" sublabel="Write" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+            <ArchNode icon={<ServerIcon   active={activeIdx === 3} />} label="App"   sublabel="Write"       active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
             <VertArrow active={activeIdx >= 4} label="1. write first" />
-            <ArchNode icon={<DatabaseIcon active={activeIdx === 4} />} label="DB" sublabel="Updated" active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+            <ArchNode icon={<DatabaseIcon active={activeIdx === 4} />} label="DB"    sublabel="Updated"     active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
             <VertArrow active={activeIdx >= 5} label="2. invalidate" />
-            <ArchNode icon={<LockIcon active={activeIdx === 5} />} label="Cache" sublabel="Deleted" active={activeIdx === 5} onClick={() => setActiveIdx(5)} />
+            <ArchNode icon={<LockIcon     active={activeIdx === 5} />} label="Cache" sublabel="Deleted"     active={activeIdx === 5} onClick={() => setActiveIdx(5)} />
           </div>
         </div>
       </div>
-
       <div className="arch-step-info">
-        <span className="arch-step-pill">{activeIdx + 1} / 6</span>
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_ASIDE}</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
       </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_ASIDE} setActiveIdx={setActiveIdx} />
     </div>
   );
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 4 — Read/Write Strategies: write-through vs write-back comparison
+// DIAGRAM 4 — Read / Write Strategies
 // ─────────────────────────────────────────────────────────────────────────────
+const TOTAL_RW = 6;
 const ReadWriteDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const isWriteBack = activeIdx >= 3;
   const descs = [
@@ -293,48 +337,53 @@ const ReadWriteDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setA
     'DB updated asynchronously in background later',
     'Faster writes, but risk of data loss if cache crashes before flush',
   ];
-
   return (
     <div className="arch-diagram">
       <div className="arch-two-path">
         <div className={`arch-path${!isWriteBack ? ' arch-path--active' : ''}`}>
           <div className="arch-path__label arch-path__label--read">WRITE-THROUGH</div>
           <div className="arch-row arch-row--col">
-            <ArchNode icon={<UserIcon active={activeIdx === 0} />} label="Write" sublabel="User update" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+            <ArchNode icon={<UserIcon     active={activeIdx === 0} />} label="Write" sublabel="User update"   active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
             <VertArrow active={activeIdx >= 1} label="sync write" />
-            <ArchNode icon={<CacheIcon active={activeIdx === 1} />} label="Cache" sublabel="Updated first" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+            <ArchNode icon={<CacheIcon    active={activeIdx === 1} />} label="Cache" sublabel="Updated first" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
             <VertArrow active={activeIdx >= 2} label="sync write" />
-            <ArchNode icon={<DatabaseIcon active={activeIdx === 2} />} label="DB" sublabel="Also updated" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+            <ArchNode icon={<DatabaseIcon active={activeIdx === 2} />} label="DB"    sublabel="Also updated"  active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
           </div>
         </div>
         <div className="arch-path-divider" />
         <div className={`arch-path${isWriteBack ? ' arch-path--active' : ''}`}>
           <div className="arch-path__label arch-path__label--write">WRITE-BACK</div>
           <div className="arch-row arch-row--col">
-            <ArchNode icon={<UserIcon active={activeIdx === 3} />} label="Write" sublabel="User update" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+            <ArchNode icon={<UserIcon     active={activeIdx === 3} />} label="Write" sublabel="User update"     active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
             <VertArrow active={activeIdx >= 4} label="write cache only" />
-            <ArchNode icon={<CacheIcon active={activeIdx === 4} />} label="Cache" sublabel="Written, ack sent" active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+            <ArchNode icon={<CacheIcon    active={activeIdx === 4} />} label="Cache" sublabel="Written, ack sent" active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
             <VertArrow active={activeIdx >= 5} label="async later" />
-            <ArchNode icon={<DatabaseIcon active={activeIdx === 5} />} label="DB" sublabel="Updated async" active={activeIdx === 5} onClick={() => setActiveIdx(5)} danger={activeIdx === 5} />
+            <ArchNode icon={<DatabaseIcon active={activeIdx === 5} />} label="DB"    sublabel="Updated async"    active={activeIdx === 5} danger={activeIdx === 5} onClick={() => setActiveIdx(5)} />
           </div>
         </div>
       </div>
       <div className="arch-step-info">
-        <span className="arch-step-pill">{activeIdx + 1} / 6</span>
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RW}</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
       </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RW} setActiveIdx={setActiveIdx} />
     </div>
   );
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 5 — Eviction: LRU memory slots animation
+// DIAGRAM 5 — Eviction
 // ─────────────────────────────────────────────────────────────────────────────
+const TOTAL_EVICT = 5;
 const EvictionDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const slots = ['A', 'B', 'C', 'D', 'E'];
-  const evict = activeIdx >= 1;
-  const descs = ['Cache is full — 5 slots occupied, no space for new entry','LRU identifies slot A as least recently used — evict it','Slot A removed from cache, space freed','New entry inserted into the freed slot','TTL timers run independently — expired entries also removed'];
-
+  const descs = [
+    'Cache is full — 5 slots occupied, no space for new entry',
+    'LRU identifies slot A as least recently used — evict it',
+    'Slot A removed from cache, space freed',
+    'New entry inserted into the freed slot',
+    'TTL timers run independently — expired entries also removed',
+  ];
   return (
     <div className="arch-diagram">
       <div className="arch-eviction">
@@ -343,13 +392,13 @@ const EvictionDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAc
           {slots.map((s, i) => (
             <div key={s} className={`arch-eviction__slot
               ${i === 0 && activeIdx === 1 ? ' arch-eviction__slot--victim' : ''}
-              ${i === 0 && activeIdx >= 2 ? ' arch-eviction__slot--empty' : ''}
-              ${i === 0 && activeIdx >= 3 ? ' arch-eviction__slot--new' : ''}
-              ${activeIdx === 0 ? ' arch-eviction__slot--full' : ''}
+              ${i === 0 && activeIdx >= 2 ? ' arch-eviction__slot--empty'  : ''}
+              ${i === 0 && activeIdx >= 3 ? ' arch-eviction__slot--new'    : ''}
+              ${activeIdx === 0           ? ' arch-eviction__slot--full'   : ''}
             `}>
               {i === 0 && activeIdx >= 3 ? 'NEW' : i === 0 && activeIdx >= 2 ? '—' : s}
-              {i === 0 && activeIdx === 1 && <span className="arch-eviction__evict-badge">LRU ×</span>}
-              {i === 0 && activeIdx >= 3 && <div className="arch-eviction__new-pulse" />}
+              {i === 0 && activeIdx === 1 && <span className="arch-eviction__evict-badge">LRU x</span>}
+              {i === 0 && activeIdx >= 3  && <div className="arch-eviction__new-pulse" />}
             </div>
           ))}
         </div>
@@ -360,98 +409,123 @@ const EvictionDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAc
         </div>
       </div>
       <div className="arch-step-info">
-        <span className="arch-step-pill">{activeIdx + 1} / 5</span>
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_EVICT}</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
       </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_EVICT} setActiveIdx={setActiveIdx} />
     </div>
   );
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 6 — Invalidation: event-driven flow
+// DIAGRAM 6 — Invalidation
 // ─────────────────────────────────────────────────────────────────────────────
+const TOTAL_INVAL = 5;
 const InvalidationDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
-  const descs = ['App writes updated data to the database','DB fires an update event (via CDC or app logic)','Cache key invalidated — old data removed','Next read is a cache miss — fresh data fetched from DB','Fresh data stored back in cache with new TTL'];
+  const descs = [
+    'App writes updated data to the database',
+    'DB fires an update event (via CDC or app logic)',
+    'Cache key invalidated — old data removed',
+    'Next read is a cache miss — fresh data fetched from DB',
+    'Fresh data stored back in cache with new TTL',
+  ];
   return (
     <div className="arch-diagram">
       <div className="arch-row arch-row--center">
-        <ArchNode icon={<ServerIcon active={activeIdx === 0} />} label="App Server" sublabel="Write operation" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <ArchNode icon={<ServerIcon   active={activeIdx === 0} />} label="App Server" sublabel="Write operation"    active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
         <Arrow active={activeIdx >= 1} label="1. write" />
-        <ArchNode icon={<DatabaseIcon active={activeIdx === 1} />} label="Database" sublabel="Updated" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <ArchNode icon={<DatabaseIcon active={activeIdx === 1} />} label="Database"   sublabel="Updated"            active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
       </div>
       <div className="arch-event-row">
         <Arrow active={activeIdx >= 2} label="2. event" />
-        <ArchNode icon={<NetworkIcon active={activeIdx === 2} />} label="Event Bus" sublabel="Invalidation event" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <ArchNode icon={<NetworkIcon  active={activeIdx === 2} />} label="Event Bus"  sublabel="Invalidation event" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
         <Arrow active={activeIdx >= 3} label="3. delete key" />
-        <ArchNode icon={<LockIcon active={activeIdx === 3} />} label="Cache" sublabel="Key deleted" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <ArchNode icon={<LockIcon     active={activeIdx === 3} />} label="Cache"      sublabel="Key deleted"        active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
       </div>
       <div className="arch-row arch-row--center" style={{ marginTop: '0.5rem' }}>
-        <ArchNode icon={<UserIcon active={activeIdx === 4} />} label="Next Read" sublabel="Cache miss → DB" active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+        <ArchNode icon={<UserIcon     active={activeIdx === 4} />} label="Next Read"  sublabel="Cache miss -> DB"   active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
         <Arrow active={activeIdx >= 4} label="4. fetch fresh" />
-        <ArchNode icon={<CacheIcon active={activeIdx >= 4} />} label="Cache" sublabel="Repopulated" active={activeIdx >= 4} />
+        <ArchNode icon={<CacheIcon    active={activeIdx >= 4} />}  label="Cache"      sublabel="Repopulated"        active={activeIdx >= 4} />
       </div>
       <div className="arch-step-info">
-        <span className="arch-step-pill">{activeIdx + 1} / 5</span>
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_INVAL}</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
       </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_INVAL} setActiveIdx={setActiveIdx} />
     </div>
   );
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 7 — Redis: Redis architecture overview
+// DIAGRAM 7 — Redis
 // ─────────────────────────────────────────────────────────────────────────────
+const TOTAL_REDIS = 5;
 const RedisDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
-  const descs = ['App sends GET or SET command to Redis over TCP','Redis looks up the key in its in-memory hash table','Data found — returned in sub-millisecond','On write: Redis AOF logs every command for persistence','Redis stores data in RAM — eviction policy controls memory'];
+  const descs = [
+    'App sends GET or SET command to Redis over TCP',
+    'Redis looks up the key in its in-memory hash table',
+    'Data found — returned in sub-millisecond',
+    'On write: Redis AOF logs every command for persistence',
+    'Redis stores data in RAM — eviction policy controls memory',
+  ];
   return (
     <div className="arch-diagram">
       <div className="arch-redis-layout">
         <div className="arch-redis__apps">
-          {['App 1','App 2','App 3'].map((a, i) => (
+          {['App 1', 'App 2', 'App 3'].map((a) => (
             <ArchNode key={a} icon={<ServerIcon active={activeIdx === 0} color="#7C5CFC" />} label={a} sublabel="Client" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
           ))}
         </div>
         <div className="arch-redis__arrows">
-          {[0,1,2].map(i => <Arrow key={i} active={activeIdx >= 1} label="TCP cmd" />)}
+          {[0, 1, 2].map(i => <Arrow key={i} active={activeIdx >= 1} label="TCP cmd" />)}
         </div>
         <div className="arch-redis__core">
           <ArchNode icon={<RedisIcon active={activeIdx >= 1} />} label="Redis" sublabel="In-memory store" active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
           <div className="arch-redis__sub">
             <div className={`arch-redis__module${activeIdx === 3 ? ' arch-redis__module--active' : ''}`} onClick={() => setActiveIdx(3)}>
-              💾 AOF Persistence
+              AOF Persistence
             </div>
             <div className={`arch-redis__module${activeIdx === 4 ? ' arch-redis__module--active' : ''}`} onClick={() => setActiveIdx(4)}>
-              📊 Eviction Policy
+              Eviction Policy
             </div>
           </div>
         </div>
       </div>
       <div className="arch-step-info">
-        <span className="arch-step-pill">{activeIdx + 1} / 5</span>
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_REDIS}</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
       </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_REDIS} setActiveIdx={setActiveIdx} />
     </div>
   );
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 8 — Distributed Cache: cluster with consistent hashing
+// DIAGRAM 8 — Distributed Cache
 // ─────────────────────────────────────────────────────────────────────────────
+const TOTAL_DIST = 5;
 const DistributedDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
-  const nodes = ['Node 1\nSlots 0–5460', 'Node 2\nSlots 5461–10922', 'Node 3\nSlots 10923–16383'];
-  const descs = ['Client sends key — consistent hash maps it to a slot','Hash slot determines which node owns the key','Node 2 holds this slot — client queries it directly','Primary fails — replica takes over automatically in <30s','New node added — only 1/N keys remapped (minimal disruption)'];
+  const nodes = ['Slots 0–5460', 'Slots 5461–10922', 'Slots 10923–16383'];
+  const descs = [
+    'Client sends key — consistent hash maps it to a slot',
+    'Hash slot determines which node owns the key',
+    'Node 2 holds this slot — client queries it directly',
+    'Primary fails — replica takes over automatically in <30s',
+    'New node added — only 1/N keys remapped (minimal disruption)',
+  ];
   return (
     <div className="arch-diagram">
       <div className="arch-cluster">
         <div className="arch-cluster__client">
-          <ArchNode icon={<UserIcon active={activeIdx === 0} />} label="Client" sublabel={`CRC16(key) % 16384\n= slot ${activeIdx === 1 ? '7638' : '...'}`} active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+          <ArchNode icon={<UserIcon active={activeIdx === 0} />} label="Client" sublabel={activeIdx === 1 ? 'slot 7638' : 'CRC16 hash'} active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
         </div>
-        <Arrow active={activeIdx >= 1} label={activeIdx === 1 ? 'slot 7638 → Node 2' : 'hash'} />
+        <Arrow active={activeIdx >= 1} label={activeIdx === 1 ? 'slot 7638 -> Node 2' : 'hash'} />
         <div className="arch-cluster__nodes">
           {nodes.map((n, i) => (
-            <ArchNode key={i} icon={<CacheIcon active={activeIdx - 1 === i} />}
+            <ArchNode key={i}
+              icon={<CacheIcon active={activeIdx - 1 === i} />}
               label={`Node ${i + 1}`}
-              sublabel={n.split('\n')[1]}
+              sublabel={n}
               active={activeIdx - 1 === i}
               danger={activeIdx === 3 && i === 0}
               onClick={() => setActiveIdx(i + 1)}
@@ -460,44 +534,52 @@ const DistributedDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; se
         </div>
       </div>
       {activeIdx === 3 && (
-        <div className="arch-failover-banner">
-          ⚠️ Node 1 failed → Replica promoted to primary
-        </div>
+        <div className="arch-danger-banner">Node 1 failed — Replica promoted to primary</div>
       )}
       {activeIdx === 4 && (
-        <div className="arch-failover-banner arch-failover-banner--ok">
-          ✅ New node added — only ~1/N keys remapped
-        </div>
+        <div className="arch-failover-banner">New node added — only ~1/N keys remapped</div>
       )}
       <div className="arch-step-info">
-        <span className="arch-step-pill">{activeIdx + 1} / 5</span>
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DIST}</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
       </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DIST} setActiveIdx={setActiveIdx} />
     </div>
   );
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 9 — Stampede/Penetration/Avalanche
+// DIAGRAM 9 — Stampede / Penetration / Avalanche
 // ─────────────────────────────────────────────────────────────────────────────
+const TOTAL_STAMP = 5;
 const StampedeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
-  const descs = ['Popular cache key expires — everyone misses simultaneously','Thousands of requests all query the DB at once','Database overwhelmed — CPU 100%, response degraded','Mutex lock: only ONE request rebuilds, others wait','Cache repopulated — all waiting requests served'];
+  const descs = [
+    'Popular cache key expires — everyone misses simultaneously',
+    'Thousands of requests all query the DB at once',
+    'Database overwhelmed — CPU 100%, response degraded',
+    'Mutex lock: only ONE request rebuilds, others wait',
+    'Cache repopulated — all waiting requests served',
+  ];
   const isDanger = activeIdx >= 1 && activeIdx <= 2;
-
   return (
     <div className="arch-diagram">
       <div className="arch-stampede">
         <div className="arch-stampede__users">
-          {['User 1','User 2','...','User N'].map((u, i) => (
+          {['User 1', 'User 2', '...', 'User N'].map((u) => (
             <div key={u} className={`arch-stampede__user${activeIdx >= 1 ? ' arch-stampede__user--flood' : ''}`}>
               <UserIcon active={activeIdx >= 1} />
               <span>{u}</span>
             </div>
           ))}
         </div>
-        <Arrow active={activeIdx >= 1} label={activeIdx >= 1 ? '⚡ all miss!' : 'requests'} />
+        <Arrow active={activeIdx >= 1} label={activeIdx >= 1 ? 'all miss!' : 'requests'} />
         <div className="arch-stampede__center">
-          <ArchNode icon={<CacheIcon active={activeIdx === 0} />} label="Cache" sublabel={activeIdx === 0 ? 'Key expires ⏱️' : activeIdx >= 4 ? 'Repopulated ✅' : 'EMPTY ❌'} active={activeIdx === 0 || activeIdx >= 4} danger={activeIdx >= 1 && activeIdx <= 2} />
+          <ArchNode icon={<CacheIcon active={activeIdx === 0} />}
+            label="Cache"
+            sublabel={activeIdx === 0 ? 'Key expires' : activeIdx >= 4 ? 'Repopulated' : 'EMPTY'}
+            active={activeIdx === 0 || activeIdx >= 4}
+            danger={activeIdx >= 1 && activeIdx <= 2}
+          />
           {activeIdx >= 3 && (
             <>
               <VertArrow active label="mutex lock" />
@@ -506,71 +588,110 @@ const StampedeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAc
           )}
         </div>
         {isDanger && <Arrow active label="flood" />}
-        {isDanger && <ArchNode icon={<DatabaseIcon active={isDanger} />} label="Database" sublabel="Overwhelmed 🔥" active danger />}
+        {isDanger && <ArchNode icon={<DatabaseIcon active={isDanger} />} label="Database" sublabel="Overwhelmed" active danger />}
       </div>
-      {isDanger && <div className="arch-danger-banner">🔥 Database CPU at 100% — stampede in progress</div>}
+      {isDanger && <div className="arch-danger-banner">Database CPU at 100% — stampede in progress</div>}
       <div className="arch-step-info">
-        <span className="arch-step-pill">{activeIdx + 1} / 5</span>
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_STAMP}</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
       </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_STAMP} setActiveIdx={setActiveIdx} />
     </div>
   );
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CONSISTENCY DIAGRAM
+// DIAGRAM 10 — Consistency
 // ─────────────────────────────────────────────────────────────────────────────
+const TOTAL_CONSIST = 5;
 const ConsistencyDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
-  const descs = ['App writes new data to the database','Cache still holds old stale value','Other users read stale data from cache','TTL expires — cache entry removed','Fresh data fetched — all users see consistent data'];
+  const descs = [
+    'App writes new data to the database',
+    'Cache still holds old stale value',
+    'Other users read stale data from cache',
+    'TTL expires — cache entry removed',
+    'Fresh data fetched — all users see consistent data',
+  ];
   return (
     <div className="arch-diagram">
       <div className="arch-row arch-row--center">
-        <ArchNode icon={<ServerIcon active={activeIdx === 0} />} label="App" sublabel="Writes update" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <ArchNode icon={<ServerIcon   active={activeIdx === 0} />} label="App"      sublabel="Writes update"  active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
         <Arrow active={activeIdx >= 0} label="write" />
-        <ArchNode icon={<DatabaseIcon active={activeIdx >= 0} />} label="Database" sublabel="Updated ✅" active={activeIdx >= 0} onClick={() => setActiveIdx(1)} />
+        <ArchNode icon={<DatabaseIcon active={activeIdx >= 0} />}  label="Database" sublabel="Updated"        active={activeIdx >= 0} onClick={() => setActiveIdx(1)} />
       </div>
       <div className="arch-row arch-row--center" style={{ marginTop: '1rem' }}>
-        <ArchNode icon={<UserIcon active={activeIdx === 2} />} label="Users" sublabel={activeIdx >= 2 && activeIdx <= 3 ? 'See stale data ⚠️' : activeIdx >= 4 ? 'See fresh data ✅' : 'Reading...'} active={activeIdx >= 2} onClick={() => setActiveIdx(2)} danger={activeIdx === 2} />
+        <ArchNode icon={<UserIcon active={activeIdx === 2} />}
+          label="Users"
+          sublabel={activeIdx >= 2 && activeIdx <= 3 ? 'Stale data' : activeIdx >= 4 ? 'Fresh data' : 'Reading...'}
+          active={activeIdx >= 2}
+          danger={activeIdx === 2}
+          onClick={() => setActiveIdx(2)}
+        />
         <Arrow active={activeIdx >= 2} label="read" />
-        <ArchNode icon={<CacheIcon active={activeIdx >= 1} />} label="Cache" sublabel={activeIdx <= 2 ? 'STALE ⚠️' : activeIdx === 3 ? 'TTL expired' : 'Fresh ✅'} active={activeIdx >= 1} danger={activeIdx === 2} onClick={() => setActiveIdx(3)} />
+        <ArchNode icon={<CacheIcon active={activeIdx >= 1} />}
+          label="Cache"
+          sublabel={activeIdx <= 2 ? 'STALE' : activeIdx === 3 ? 'TTL expired' : 'Fresh'}
+          active={activeIdx >= 1}
+          danger={activeIdx === 2}
+          onClick={() => setActiveIdx(3)}
+        />
       </div>
-      {activeIdx === 2 && <div className="arch-danger-banner">⚠️ Cache and DB are out of sync — stale data period</div>}
-      {activeIdx >= 4 && <div className="arch-failover-banner--ok arch-failover-banner">✅ Cache and DB are now consistent</div>}
+      {activeIdx === 2 && <div className="arch-danger-banner">Cache and DB are out of sync — stale data period</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Cache and DB are now consistent</div>}
       <div className="arch-step-info">
-        <span className="arch-step-pill">{activeIdx + 1} / 5</span>
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_CONSIST}</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
       </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_CONSIST} setActiveIdx={setActiveIdx} />
     </div>
   );
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DISPATCHER — pick the right diagram based on topic title
+// DISPATCHER
 // ─────────────────────────────────────────────────────────────────────────────
 const ModuleAnimation = ({ steps, animType, title, topicTitle }: Props) => {
   const [activeIdx, setActiveIdx] = useState(0);
 
+  // Determine total steps for the chosen diagram
+  const t = (topicTitle || title || '').toLowerCase();
+  const getTotal = () => {
+    if (t.includes('basics') || t.includes('fundamentals'))                                           return TOTAL_BASICS;
+    if (t.includes('architecture'))                                                                   return TOTAL_ARCH;
+    if (t.includes('aside') || t.includes('cache-aside'))                                             return TOTAL_ASIDE;
+    if (t.includes('read') || t.includes('write') || t.includes('strateg'))                          return TOTAL_RW;
+    if (t.includes('eviction') || t.includes('lru') || t.includes('lfu') || t.includes('ttl'))       return TOTAL_EVICT;
+    if (t.includes('invalid'))                                                                        return TOTAL_INVAL;
+    if (t.includes('consisten'))                                                                      return TOTAL_CONSIST;
+    if (t.includes('redis'))                                                                          return TOTAL_REDIS;
+    if (t.includes('distributed'))                                                                    return TOTAL_DIST;
+    if (t.includes('stampede') || t.includes('penetration') || t.includes('avalanche') || t.includes('failure')) return TOTAL_STAMP;
+    return TOTAL_BASICS;
+  };
+
+  // Auto-play — pauses after user clicks a node (activeIdx doesn't reset until steps change)
   useEffect(() => {
     setActiveIdx(0);
-    if (steps.length <= 1) return;
-    const iv = setInterval(() => setActiveIdx(i => (i + 1) % steps.length), 2600);
-    return () => clearInterval(iv);
-  }, [steps]);
+  }, [steps, title, topicTitle]);
 
-  const t = (topicTitle || title || '').toLowerCase();
+  useEffect(() => {
+    const total = getTotal();
+    if (total <= 1) return;
+    const iv = setInterval(() => setActiveIdx(i => (i + 1) % total), 2600);
+    return () => clearInterval(iv);
+  }, [steps, title, topicTitle]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getDiagram = () => {
-    if (t.includes('basics') || t.includes('fundamentals')) return <CacheBasicsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('architecture')) return <CacheArchDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('aside') || t.includes('cache-aside')) return <CacheAsideDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('read') || t.includes('write') || t.includes('strateg')) return <ReadWriteDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('eviction') || t.includes('lru') || t.includes('lfu') || t.includes('ttl')) return <EvictionDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('invalid')) return <InvalidationDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('consisten')) return <ConsistencyDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('redis')) return <RedisDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('distributed')) return <DistributedDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('basics') || t.includes('fundamentals'))                                           return <CacheBasicsDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('architecture'))                                                                   return <CacheArchDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('aside') || t.includes('cache-aside'))                                             return <CacheAsideDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('read') || t.includes('write') || t.includes('strateg'))                          return <ReadWriteDiagram       activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('eviction') || t.includes('lru') || t.includes('lfu') || t.includes('ttl'))       return <EvictionDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('invalid'))                                                                        return <InvalidationDiagram    activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('consisten'))                                                                      return <ConsistencyDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('redis'))                                                                          return <RedisDiagram           activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('distributed'))                                                                    return <DistributedDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     if (t.includes('stampede') || t.includes('penetration') || t.includes('avalanche') || t.includes('failure')) return <StampedeDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    // Default flow diagram
     return <CacheBasicsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
   };
 

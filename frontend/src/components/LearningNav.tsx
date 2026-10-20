@@ -19,9 +19,9 @@ interface LearningNavProps {
 }
 
 const NAV_ITEMS = [
-  { label: 'Learning Interface', to: '/learning',   icon: '🎓' },
-  { label: 'Dashboard',          to: '/dashboard',  icon: '📊' },
-  { label: 'Profile',            to: '/profile',    icon: '👤' },
+  { label: 'Learning Interface', to: '/learning'  },
+  { label: 'Dashboard',          to: '/dashboard' },
+  { label: 'Profile',            to: '/profile'   },
 ];
 
 const LearningNav = ({ subItems }: LearningNavProps) => {
@@ -78,7 +78,6 @@ const LearningNav = ({ subItems }: LearningNavProps) => {
                   className={`lnav__menu-item${location.pathname === item.to ? ' lnav__menu-item--active' : ''}`}
                   role="menuitem"
                 >
-                  <span className="lnav__menu-icon">{item.icon}</span>
                   {item.label}
                 </Link>
               ))}
@@ -108,7 +107,6 @@ const LearningNav = ({ subItems }: LearningNavProps) => {
                 onClick={handleLogout}
                 role="menuitem"
               >
-                <span className="lnav__menu-icon">🚪</span>
                 Logout
               </button>
             </div>

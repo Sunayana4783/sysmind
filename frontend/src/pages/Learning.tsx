@@ -87,7 +87,7 @@ const Learning = () => {
               </div>
 
               <div className={`lcard__tag${card.locked ? ' lcard__tag--locked' : ' lcard__tag--unlocked'}`}>
-                {card.locked ? '🔒 LOCKED' : '✅ UNLOCKED'}
+                {card.locked ? 'LOCKED' : 'UNLOCKED'}
               </div>
 
               {!card.locked && (
@@ -101,7 +101,7 @@ const Learning = () => {
       {/* Toast notification */}
       {toast && (
         <div className="learning-toast" role="status" aria-live="polite">
-          🔒 {toast}
+          {toast}
         </div>
       )}
     </div>

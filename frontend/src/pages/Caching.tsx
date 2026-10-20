@@ -47,10 +47,10 @@ const ContentModule = ({ mod, completed, onComplete, completing, onNext, isLast 
       <div className="mod-complete-row">
         {!completed ? (
           <button className="mark-done-btn" onClick={onComplete} disabled={completing}>
-            {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : '✓ Mark as Completed'}
+            {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : 'Mark as Completed'}
           </button>
         ) : isLast ? (
-          <button className="mark-done-btn mark-done-btn--done" disabled>✅ Completed</button>
+          <button className="mark-done-btn mark-done-btn--done" disabled>Completed</button>
         ) : (
           <button className="mark-done-btn" onClick={onNext}>
             Next Module →
@@ -83,7 +83,7 @@ const FailureCasesModule = ({ mod, completed, onComplete, completing, onNext, is
               className={`fc-sidebar__item${i === openIdx ? ' fc-sidebar__item--active' : ''}${i < openIdx ? ' fc-sidebar__item--visited' : ''}`}
               onClick={() => setOpenIdx(i)}>
               <span>{c.title}</span>
-              {i < openIdx && <span className="fc-sidebar__done">✓</span>}
+              {i < openIdx && <span className="fc-sidebar__done">&#10003;</span>}
             </button>
           ))}
         </div>
@@ -121,10 +121,10 @@ const FailureCasesModule = ({ mod, completed, onComplete, completing, onNext, is
                 </button>
               ) : !completed ? (
                 <button className="mark-done-btn" onClick={onComplete} disabled={completing}>
-                  {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : '✓ Mark as Completed'}
+                  {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : 'Mark as Completed'}
                 </button>
               ) : isLast ? (
-                <button className="mark-done-btn mark-done-btn--done" disabled>✅ Completed</button>
+                <button className="mark-done-btn mark-done-btn--done" disabled>Completed</button>
               ) : (
                 <button className="mark-done-btn" onClick={onNext}>Next Module →</button>
               )}
@@ -174,10 +174,10 @@ const InterviewModule = ({ mod, completed, onComplete, completing, onNext, isLas
       <div className="mod-complete-row">
         {!completed ? (
           <button className="mark-done-btn" onClick={onComplete} disabled={completing}>
-            {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : '✓ Mark as Completed'}
+            {completing ? <><span className="spinner spinner--sm" style={{borderTopColor:'#fff'}} /> Saving…</> : 'Mark as Completed'}
           </button>
         ) : isLast ? (
-          <button className="mark-done-btn mark-done-btn--done" disabled>✅ Completed</button>
+          <button className="mark-done-btn mark-done-btn--done" disabled>Completed</button>
         ) : (
           <button className="mark-done-btn" onClick={onNext}>Next Module →</button>
         )}
@@ -321,7 +321,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
   );
   if (error) return (
     <div className="mod-body mod-center">
-      <p className="rag-error-msg">⚠️ {error}</p>
+      <p className="rag-error-msg">Error: {error}</p>
       <button className="mark-done-btn" onClick={() => { setError(''); setStage('info'); }}>Retry</button>
     </div>
   );
@@ -331,13 +331,13 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
   if ((completed || quizData?.alreadyPassed) && !retaking && stage !== 'result') return (
     <div className="mod-body">
       <div className="quiz-result-card quiz-result-card--pass">
-        <div className="quiz-result__icon">🏆</div>
+        <div className="quiz-result__icon quiz-result__icon--pass" />
         <h3 className="quiz-result__title">Quiz Passed!</h3>
         {quizData && (
           <>
             <div className="quiz-result__stats-row">
               <div className="quiz-result__stat">
-                <span className="quiz-result__stat-val quiz-result__stat-val--green">✅ Passed</span>
+                <span className="quiz-result__stat-val quiz-result__stat-val--green">Passed</span>
                 <span className="quiz-result__stat-label">Status</span>
               </div>
               <div className="quiz-result__stat">
@@ -354,13 +354,13 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
               </div>
             </div>
             <p className="quiz-result__sub" style={{ marginTop: '1rem' }}>
-              🎉 Next topic unlocked. Well done!
+              Next topic unlocked. Well done!
             </p>
             {/* Allow retake even after passing if attempts remain */}
             {quizData.attemptsRemaining > 0 && (
               <button className="mark-done-btn" style={{ marginTop: '1rem', background: 'var(--l-primary)' }}
                 onClick={() => { setRetaking(true); setStage('info'); }}>
-                🔁 Retake Quiz ({quizData.attemptsRemaining} attempt{quizData.attemptsRemaining !== 1 ? 's' : ''} left)
+                Retake Quiz ({quizData.attemptsRemaining} attempt{quizData.attemptsRemaining !== 1 ? 's' : ''} left)
               </button>
             )}
           </>
@@ -373,7 +373,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
   if (stage === 'info' && quizData) return (
     <div className="mod-body">
       <div className="quiz-info-card">
-        <div className="quiz-info__icon">🎯</div>
+        <div className="quiz-info__icon quiz-info__icon--target" />
         <h3 className="quiz-info__title">{quizData.title}</h3>
         <div className="quiz-info__stats">
           <div className="quiz-stat"><span className="quiz-stat__val">{quizData.questions.length}</span><span className="quiz-stat__label">Questions</span></div>
@@ -382,10 +382,10 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
           <div className="quiz-stat"><span className="quiz-stat__val">{quizData.attemptsRemaining}</span><span className="quiz-stat__label">Attempts Left</span></div>
         </div>
         <div className="quiz-info__rules">
-          <p>⚡ Most questions are real-world scenario-based</p>
-          <p>🖥️ Quiz will open in full-screen mode</p>
-          <p>⚠️ Exiting full-screen will flag your attempt</p>
-          <p>🔒 You must pass to unlock the next topic</p>
+          <p>Most questions are real-world scenario-based</p>
+          <p>Quiz will open in full-screen mode</p>
+          <p>Exiting full-screen will flag your attempt</p>
+          <p>You must pass to unlock the next topic</p>
         </div>
         {quizData.attemptsRemaining > 0
           ? <button className="mark-done-btn" style={{ width: '100%', justifyContent: 'center' }} onClick={startQuiz}>Start Quiz →</button>
@@ -406,7 +406,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
         {/* Flag warning popup — persistent, blocks quiz until dismissed */}
         {showFlagWarning && (
           <div className="flag-warning flag-warning--blocking">
-            <strong>⚠️ Warning — Attempt Flagged</strong>
+            <strong>Warning — Attempt Flagged</strong>
             <p>
               {!document.fullscreenElement
                 ? 'You exited full-screen mode.'
@@ -432,11 +432,11 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
         <div className="quiz-active__header">
           <div className="quiz-active__meta">
             <span className="quiz-q-counter">Question {current + 1} / {quizData.questions.length}</span>
-            {flagged && <span className="quiz-flag-badge">🚩 Flagged</span>}
+            {flagged && <span className="quiz-flag-badge">Flagged</span>}
           </div>
           <div className="quiz-active__right">
             {quizData.timeLimitSeconds > 0 && (
-              <span className={`quiz-timer${timeLeft < 60 ? ' quiz-timer--urgent' : ''}`}>⏱ {fmt(timeLeft)}</span>
+              <span className={`quiz-timer${timeLeft < 60 ? ' quiz-timer--urgent' : ''}`}>{fmt(timeLeft)}</span>
             )}
           </div>
         </div>
@@ -448,7 +448,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
 
         {/* Question */}
         <div className="quiz-question-card">
-          {q.scenario && <span className="scenario-tag">📋 Scenario-based</span>}
+          {q.scenario && <span className="scenario-tag">Scenario-based</span>}
           <p className="quiz-question__text">{q.question}</p>
           <div className="quiz-options">
             {q.options.map((opt, oi) => (
@@ -483,7 +483,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
 
       {/* Score summary card */}
       <div className={`quiz-result-card${result.passed ? ' quiz-result-card--pass' : ' quiz-result-card--fail'}`}>
-        <div className="quiz-result__icon">{result.passed ? '🏆' : '📚'}</div>
+        <div className="quiz-result__icon">{result.passed ? <span className="quiz-result__icon--pass" /> : <span className="quiz-result__icon--fail" />}</div>
         <h3 className="quiz-result__title">{result.passed ? 'Quiz Passed!' : 'Not Passed'}</h3>
         <div className="quiz-result__stats-row">
           <div className="quiz-result__stat">
@@ -505,7 +505,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
         </div>
         {result.flagged && (
           <div className="quiz-flag-notice">
-            <span>🚩</span><p>This attempt was flagged for exiting full-screen.</p>
+            <p>This attempt was flagged for exiting full-screen.</p>
           </div>
         )}
       </div>
@@ -513,12 +513,12 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
       {/* Question review — outside score card so text-align:center doesn't affect it */}
       <div className="qr-section">
         <h4 className="qr-section__heading">
-          📋 Question Review — {result.correct} correct, {result.total - result.correct} wrong
+          Question Review — {result.correct} correct, {result.total - result.correct} wrong
         </h4>
         {result.results.map((r, i) => (
           <div key={i} className={`qr-item${r.isCorrect ? ' qr-item--correct' : ' qr-item--wrong'}`}>
             <div className="qr-item__header">
-              <span className="qr-item__status">{r.isCorrect ? '✅' : '❌'}</span>
+              <span className="qr-item__status">{r.isCorrect ? 'Correct' : 'Wrong'}</span>
               <span className="qr-item__num">Q{i + 1}</span>
               <span className="qr-item__question">{r.question}</span>
             </div>
@@ -535,9 +535,9 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
                     <span className="qr-opt__letter">{String.fromCharCode(65 + oi)}</span>
                     <span className="qr-opt__text">{opt}</span>
                     <span className="qr-opt__badge">
-                      {isCorrect && isSelected && '✓ Correct — your answer'}
-                      {isCorrect && !isSelected && '✓ Correct answer'}
-                      {!isCorrect && isSelected && '✗ Your answer'}
+                      {isCorrect && isSelected && 'Correct — your answer'}
+                      {isCorrect && !isSelected && 'Correct answer'}
+                      {!isCorrect && isSelected && 'Your answer'}
                     </span>
                   </div>
                 );
@@ -545,7 +545,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
             </div>
             {r.explanation && (
               <div className="qr-item__explanation">
-                <span className="qr-item__exp-label">💡 Explanation</span>
+                <span className="qr-item__exp-label">Explanation</span>
                 <p>{r.explanation}</p>
               </div>
             )}
@@ -558,7 +558,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
         {result.attemptsRemaining > 0 && (
           <button className="mark-done-btn"
             onClick={() => { setResult(null); setRetaking(true); setStage('info'); }}>
-            🔁 {result.passed ? 'Retake' : 'Try Again'} ({result.attemptsRemaining} attempt{result.attemptsRemaining !== 1 ? 's' : ''} left)
+            {result.passed ? 'Retake' : 'Try Again'} ({result.attemptsRemaining} attempt{result.attemptsRemaining !== 1 ? 's' : ''} left)
           </button>
         )}
         {!result.passed && result.attemptsRemaining === 0 && (
@@ -653,7 +653,7 @@ const Caching = () => {
   if (error) return (
     <div className="learn-root"><LearningNav />
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', flexDirection: 'column', gap: '1rem', background: 'var(--l-bg)' }}>
-        <p style={{ color: '#dc2626' }}>⚠️ {error}</p>
+        <p style={{ color: '#dc2626' }}>Error: {error}</p>
       </div>
     </div>
   );
@@ -695,8 +695,8 @@ const Caching = () => {
                         title={quizActive ? 'Quiz in progress — complete or submit first' : locked ? 'Complete previous modules first' : ''}
                       >
                         <span className="caching-sidebar__label">{m.title}</span>
-                        {done && <span className="caching-sidebar__done">✓</span>}
-                        {locked && <span className="caching-sidebar__lock">🔒</span>}
+                        {done && <span className="caching-sidebar__done">&#10003;</span>}
+                        {locked && <span className="caching-sidebar__lock">&#128274;</span>}
                       </button>
                     </li>
                   );
@@ -715,7 +715,7 @@ const Caching = () => {
                     <span className="content-panel__type-badge">{MODULE_TYPE_LABELS[selectedMod.type]}</span>
                     <h2 className="cp__title">{selectedMod.title}</h2>
                   </div>
-                  {completedIds.has(selectedMod._id) && <span className="content-panel__done-badge">✅ Completed</span>}
+                  {completedIds.has(selectedMod._id) && <span className="content-panel__done-badge">Completed</span>}
                 </div>
 
                 {selectedMod.type === 'content' && (
@@ -740,7 +740,7 @@ const Caching = () => {
               </div>
             ) : (
               <div className="content-panel content-panel--center">
-                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🔒</div>
+                <div className="content-panel__lock-icon" />
                 <h3 style={{ color: 'var(--l-text)', marginBottom: '0.5rem' }}>Module Locked</h3>
                 <p style={{ color: 'var(--l-text-sec)' }}>Complete previous modules to unlock this one.</p>
               </div>

@@ -306,7 +306,41 @@
   border-top-color: #fff;
 }
 
-/* ── OTP input — large centered digits ───────────────────────────────────── */
+/* ── Password field with eye toggle ─────────────────────────────────────── */
+.auth-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-input-wrap .auth-form__input {
+  padding-right: 2.75rem; /* make room for the eye button */
+  width: 100%;
+}
+
+.auth-eye-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #A89FC0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: color 0.15s;
+  /* always visible — positioned inside the input */
+}
+
+.auth-eye-btn:hover { color: #7C5CFC; }
+
+/* light-theme override */
+.learn-root .auth-eye-btn { color: var(--l-locked-txt); }
+.learn-root .auth-eye-btn:hover { color: var(--l-primary); }
 .otp-input {
   text-align: center;
   font-size: 1.75rem !important;
