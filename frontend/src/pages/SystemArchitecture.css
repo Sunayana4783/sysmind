@@ -1,0 +1,12 @@
+/* SystemArchitecture.css
+   All layout/component styles come from Caching.css via shared classnames.
+   This file adds any SA-specific overrides. */
+@import './Caching.css';
+
+/* Override breadcrumb current label width for longer title */
+.sa-page .caching-breadcrumb__current {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

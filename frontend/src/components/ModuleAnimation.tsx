@@ -648,31 +648,338 @@ const ConsistencyDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; se
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ── SYSTEM ARCHITECTURE DIAGRAMS ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+
+// SA DIAGRAM 1 — System Fundamentals: full request flow
+const TOTAL_SA_FUND = 5;
+const SAFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Client sends request from browser or mobile app',
+    'Load Balancer distributes traffic across app servers',
+    'App Server processes business logic',
+    'Cache layer checked before hitting the database',
+    'Database persists and returns the data',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}     label="Client"        sublabel="Browser / App"     active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="request" />
+        <ArchNode icon={<NetworkIcon active={activeIdx === 1} />}  label="Load Balancer" sublabel="Distributes traffic" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="route" />
+        <ArchNode icon={<ServerIcon active={activeIdx === 2} />}   label="App Server"    sublabel="Business logic"    active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<CacheIcon active={activeIdx === 3} />}    label="Cache"         sublabel="Redis / Memcached" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="miss" />
+        <ArchNode icon={<DatabaseIcon active={activeIdx === 4} />} label="Database"      sublabel="Source of truth"  active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_FUND}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SA_FUND} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SA DIAGRAM 2 — Architectural Patterns: layered architecture
+const TOTAL_SA_PATTERNS = 5;
+const SAPatternsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const layers = [
+    { label: 'Presentation Layer',   sub: 'UI — what users see',           latency: 'Browser' },
+    { label: 'API Layer',            sub: 'Routes and validates requests',  latency: 'REST / GraphQL' },
+    { label: 'Business Logic',       sub: 'Rules and processing',           latency: 'Core' },
+    { label: 'Data Access Layer',    sub: 'Queries and persistence',        latency: 'ORM / SQL' },
+    { label: 'Database',             sub: 'PostgreSQL / MongoDB',           latency: 'Storage' },
+  ];
+  const descs = [
+    'Presentation layer — handles what users see and interact with',
+    'API layer — receives requests, validates input, routes to services',
+    'Business logic layer — applies rules, processes data, orchestrates',
+    'Data access layer — translates between objects and database queries',
+    'Database — persists data, enforces integrity constraints',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-col arch-col--center">
+        {layers.map((layer, i) => (
+          <React.Fragment key={i}>
+            <div
+              className={`arch-layer${activeIdx === i ? ' arch-layer--active' : ''}`}
+              onClick={() => setActiveIdx(i)}
+            >
+              <div className="arch-layer__icon">
+                {i === 0 && <UserIcon active={activeIdx === i} />}
+                {i === 1 && <NetworkIcon active={activeIdx === i} />}
+                {i === 2 && <ServerIcon active={activeIdx === i} />}
+                {i === 3 && <LockIcon active={activeIdx === i} />}
+                {i === 4 && <DatabaseIcon active={activeIdx === i} />}
+              </div>
+              <div className="arch-layer__info">
+                <span className="arch-layer__label">{layer.label}</span>
+                <span className="arch-layer__sub">{layer.sub}</span>
+              </div>
+              <div className="arch-layer__latency">{layer.latency}</div>
+            </div>
+            {i < layers.length - 1 && <VertArrow active={activeIdx > i} />}
+          </React.Fragment>
+        ))}
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_PATTERNS}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SA_PATTERNS} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SA DIAGRAM 3 — Monolith vs Microservices
+const TOTAL_SA_MONO = 5;
+const SAMonolithDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const isMS = activeIdx >= 3;
+  const descs = [
+    'Monolith: all features in one single deployable codebase',
+    'Monolith grows: harder to deploy, scale, and change safely',
+    'Problem: one bug can take down all features simultaneously',
+    'Microservices: each service owns one business capability',
+    'Independent deploy and scale — teams work without stepping on each other',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={`arch-path${!isMS ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--read">MONOLITH</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<ServerIcon active={activeIdx === 0} />} label="One Codebase" sublabel="Users + Orders + Payments" active={activeIdx === 0} onClick={() => setActiveIdx(0)} danger={activeIdx === 2} />
+            <VertArrow active={activeIdx >= 1} label="grows large" />
+            <ArchNode icon={<DatabaseIcon active={activeIdx === 1} />} label="One DB" sublabel="Shared by all features" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+            {activeIdx === 2 && <div className="arch-danger-banner" style={{ marginTop: '0.5rem' }}>One bug = total outage</div>}
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={`arch-path${isMS ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--write">MICROSERVICES</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<NetworkIcon active={activeIdx === 3} />} label="API Gateway" sublabel="Single entry point" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+            <VertArrow active={activeIdx >= 4} label="routes" />
+            <div className="arch-row arch-row--center" style={{ gap: '0.4rem' }}>
+              <ArchNode icon={<ServerIcon active={activeIdx === 4} />} label="Users" sublabel="Service" active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+              <ArchNode icon={<ServerIcon active={activeIdx === 4} />} label="Orders" sublabel="Service" active={activeIdx === 4} />
+              <ArchNode icon={<ServerIcon active={activeIdx === 4} />} label="Pay" sublabel="Service" active={activeIdx === 4} />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_MONO}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SA_MONO} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SA DIAGRAM 4 — Components and Communication: API Gateway + Queue
+const TOTAL_SA_COMM = 5;
+const SACommDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Client request arrives at the API Gateway',
+    'Gateway authenticates the JWT token',
+    'Gateway routes to the correct microservice',
+    'Service pushes async job to the message queue',
+    'Background worker picks up and processes the job',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}     label="Client"      sublabel="Request"         active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="request" />
+        <ArchNode icon={<NetworkIcon active={activeIdx === 1} />}  label="API Gateway" sublabel="Auth + Route"    active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="route" />
+        <ArchNode icon={<ServerIcon active={activeIdx === 2} />}   label="Service"     sublabel="Business logic"  active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-event-row" style={{ marginTop: '0.75rem' }}>
+        <Arrow active={activeIdx >= 3} label="push job" />
+        <ArchNode icon={<CacheIcon active={activeIdx === 3} />}    label="Message Queue" sublabel="RabbitMQ / Kafka" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="consume" />
+        <ArchNode icon={<ServerIcon active={activeIdx === 4} color="#22c55e" />} label="Worker" sublabel="Async processing" active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_COMM}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SA_COMM} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SA DIAGRAM 5 — Scalability: load balancer + auto-scale
+const TOTAL_SA_SCALE = 5;
+const SAScaleDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Traffic surge arrives — load balancer receives all requests',
+    'Requests distributed across existing server pool',
+    'Server 1 and Server 2 each handle their share',
+    'Load spikes beyond capacity — auto-scaler triggers',
+    'New Server 3 added automatically to absorb extra load',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}     label="Traffic surge" sublabel="High request volume" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="all requests" />
+        <ArchNode icon={<NetworkIcon active={activeIdx === 1} />}  label="Load Balancer" sublabel="Round Robin / LCM"   active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<ServerIcon active={activeIdx === 2} />}   label="Server 1"  sublabel="Handles share" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <ArchNode icon={<ServerIcon active={activeIdx === 2} />}   label="Server 2"  sublabel="Handles share" active={activeIdx === 2} />
+        <ArchNode icon={<ServerIcon active={activeIdx === 4} />}   label="Server 3"  sublabel={activeIdx >= 4 ? 'Auto-added' : 'Standby'}  active={activeIdx === 4} danger={activeIdx === 3} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 3 && <div className="arch-danger-banner">CPU above 80% — auto-scaler triggered</div>}
+      {activeIdx === 4 && <div className="arch-failover-banner">Server 3 added — load distributed</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_SCALE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SA_SCALE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SA DIAGRAM 6 — Database Architecture: primary + replicas
+const TOTAL_SA_DB = 5;
+const SADatabaseDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'All write operations go exclusively to the Primary database',
+    'Primary replicates every write to Replica 1 asynchronously',
+    'Primary replicates every write to Replica 2 as well',
+    'Read operations are distributed across all replicas',
+    'Primary fails — Replica 1 is promoted automatically',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon active={activeIdx <= 2} />}    label="App Server"  sublabel="Writes + Reads"    active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 0} label="writes" />
+        <ArchNode icon={<DatabaseIcon active={activeIdx <= 2} />}  label="Primary DB"  sublabel="Handles all writes" active={activeIdx <= 2} danger={activeIdx === 4} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<DatabaseIcon active={activeIdx === 3 || activeIdx === 4} />} label="Replica 1" sublabel={activeIdx === 4 ? 'Promoted to Primary' : 'Read traffic'} active={activeIdx === 3 || activeIdx === 4} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 2} label="replicate" reverse />
+        <ArchNode icon={<DatabaseIcon active={activeIdx === 3} />} label="Replica 2" sublabel="Read traffic" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      {activeIdx === 4 && <div className="arch-failover-banner">Primary failed — Replica 1 promoted automatically</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_DB}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SA_DB} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SA DIAGRAM 7 — Distributed Systems: Raft consensus
+const TOTAL_SA_DIST = 5;
+const SADistributedDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Leader node receives all write requests from clients',
+    'Leader sends the write to all follower nodes',
+    'Majority of followers acknowledge the write (quorum)',
+    'Leader commits the write and confirms to client',
+    'Remaining nodes sync when network allows — eventual consistency',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}    label="Client"     sublabel="Write request"      active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="write" />
+        <ArchNode icon={<ServerIcon active={activeIdx <= 3} />}   label="Leader"     sublabel="Raft leader node"   active={activeIdx <= 3} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="replicate" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          <ArchNode icon={<ServerIcon active={activeIdx >= 2} />} label="Follower 1" sublabel={activeIdx >= 3 ? 'Ack sent' : 'Waiting'} active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+          <ArchNode icon={<ServerIcon active={activeIdx >= 2} />} label="Follower 2" sublabel={activeIdx >= 3 ? 'Ack sent' : 'Waiting'} active={activeIdx >= 2} />
+          <ArchNode icon={<ServerIcon active={activeIdx === 4} />} label="Follower 3" sublabel={activeIdx === 4 ? 'Syncing' : 'Offline'} active={activeIdx === 4} />
+        </div>
+      </div>
+      {activeIdx === 3 && <div className="arch-failover-banner">Quorum reached — write committed</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_DIST}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SA_DIST} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SA DIAGRAM 8 — Fault Tolerance: circuit breaker + failover
+const TOTAL_SA_FAULT = 5;
+const SAFaultDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Primary server becomes unresponsive',
+    'Load balancer health check detects failure within seconds',
+    'All traffic rerouted to healthy servers immediately',
+    'Circuit breaker opens — stops calls to failed dependency',
+    'Failed server recovers and rejoins the pool',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}  label="Load Balancer"  sublabel="Health checks"     active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="reroute" />
+        <ArchNode icon={<ServerIcon active={activeIdx >= 2} />}   label="Healthy Server" sublabel="Still running"     active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-event-row" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<ServerIcon active={activeIdx === 0} />}  label="Server"         sublabel={activeIdx === 0 ? 'Failing' : activeIdx === 4 ? 'Recovered' : 'Down'} active={activeIdx === 0 || activeIdx === 4} danger={activeIdx >= 0 && activeIdx <= 3} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 3} label="circuit open" />
+        <ArchNode icon={<LockIcon active={activeIdx >= 3} />}     label="Circuit Breaker" sublabel={activeIdx >= 3 ? 'OPEN — blocking' : 'Closed'} active={activeIdx >= 3} danger={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      {activeIdx === 0 && <div className="arch-danger-banner">Server unresponsive — health check failing</div>}
+      {activeIdx === 4 && <div className="arch-failover-banner">Server recovered — rejoining pool</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_FAULT}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SA_FAULT} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // DISPATCHER
 // ─────────────────────────────────────────────────────────────────────────────
 const ModuleAnimation = ({ steps, animType, title, topicTitle }: Props) => {
   const [activeIdx, setActiveIdx] = useState(0);
 
-  // Determine total steps for the chosen diagram
   const t = (topicTitle || title || '').toLowerCase();
+
   const getTotal = () => {
-    if (t.includes('basics') || t.includes('fundamentals'))                                           return TOTAL_BASICS;
-    if (t.includes('architecture'))                                                                   return TOTAL_ARCH;
-    if (t.includes('aside') || t.includes('cache-aside'))                                             return TOTAL_ASIDE;
-    if (t.includes('read') || t.includes('write') || t.includes('strateg'))                          return TOTAL_RW;
-    if (t.includes('eviction') || t.includes('lru') || t.includes('lfu') || t.includes('ttl'))       return TOTAL_EVICT;
-    if (t.includes('invalid'))                                                                        return TOTAL_INVAL;
-    if (t.includes('consisten'))                                                                      return TOTAL_CONSIST;
-    if (t.includes('redis'))                                                                          return TOTAL_REDIS;
-    if (t.includes('distributed'))                                                                    return TOTAL_DIST;
+    // ── System Architecture diagrams ──────────────────────────────────────
+    if (t.includes('fundamentals'))                                                                   return TOTAL_SA_FUND;
+    if (t.includes('architectural pattern'))                                                          return TOTAL_SA_PATTERNS;
+    if (t.includes('monolithic') || t.includes('microservice'))                                       return TOTAL_SA_MONO;
+    if (t.includes('component') || t.includes('communication'))                                      return TOTAL_SA_COMM;
+    if (t.includes('scalability') || t.includes('load distribution'))                                return TOTAL_SA_SCALE;
+    if (t.includes('database architecture'))                                                         return TOTAL_SA_DB;
+    if (t.includes('distributed system'))                                                            return TOTAL_SA_DIST;
+    if (t.includes('fault') || t.includes('availability'))                                           return TOTAL_SA_FAULT;
+    // ── Caching diagrams ──────────────────────────────────────────────────
+    if (t.includes('basics'))                                                                        return TOTAL_BASICS;
+    if (t.includes('cache architecture'))                                                            return TOTAL_ARCH;
+    if (t.includes('aside') || t.includes('cache-aside'))                                            return TOTAL_ASIDE;
+    if (t.includes('read') || t.includes('write') || t.includes('strateg'))                         return TOTAL_RW;
+    if (t.includes('eviction') || t.includes('lru') || t.includes('lfu') || t.includes('ttl'))      return TOTAL_EVICT;
+    if (t.includes('invalid'))                                                                       return TOTAL_INVAL;
+    if (t.includes('consisten'))                                                                     return TOTAL_CONSIST;
+    if (t.includes('redis'))                                                                         return TOTAL_REDIS;
+    if (t.includes('distributed'))                                                                   return TOTAL_DIST;
     if (t.includes('stampede') || t.includes('penetration') || t.includes('avalanche') || t.includes('failure')) return TOTAL_STAMP;
-    return TOTAL_BASICS;
+    return TOTAL_SA_FUND;
   };
 
-  // Auto-play — pauses after user clicks a node (activeIdx doesn't reset until steps change)
-  useEffect(() => {
-    setActiveIdx(0);
-  }, [steps, title, topicTitle]);
+  useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle]);
 
   useEffect(() => {
     const total = getTotal();
@@ -682,17 +989,27 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle }: Props) => {
   }, [steps, title, topicTitle]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getDiagram = () => {
-    if (t.includes('basics') || t.includes('fundamentals'))                                           return <CacheBasicsDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('architecture'))                                                                   return <CacheArchDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('aside') || t.includes('cache-aside'))                                             return <CacheAsideDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('read') || t.includes('write') || t.includes('strateg'))                          return <ReadWriteDiagram       activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('eviction') || t.includes('lru') || t.includes('lfu') || t.includes('ttl'))       return <EvictionDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('invalid'))                                                                        return <InvalidationDiagram    activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('consisten'))                                                                      return <ConsistencyDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('redis'))                                                                          return <RedisDiagram           activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('distributed'))                                                                    return <DistributedDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    // ── System Architecture diagrams ──────────────────────────────────────
+    if (t.includes('fundamentals'))                                                                   return <SAFundamentalsDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('architectural pattern'))                                                          return <SAPatternsDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('monolithic') || t.includes('microservice'))                                       return <SAMonolithDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('component') || t.includes('communication'))                                      return <SACommDiagram            activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('scalability') || t.includes('load distribution'))                                return <SAScaleDiagram           activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('database architecture'))                                                         return <SADatabaseDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('distributed system'))                                                            return <SADistributedDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('fault') || t.includes('availability'))                                           return <SAFaultDiagram           activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    // ── Caching diagrams ──────────────────────────────────────────────────
+    if (t.includes('basics'))                                                                        return <CacheBasicsDiagram       activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('cache architecture'))                                                            return <CacheArchDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('aside') || t.includes('cache-aside'))                                            return <CacheAsideDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('read') || t.includes('write') || t.includes('strateg'))                         return <ReadWriteDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('eviction') || t.includes('lru') || t.includes('lfu') || t.includes('ttl'))      return <EvictionDiagram           activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('invalid'))                                                                       return <InvalidationDiagram       activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('consisten'))                                                                     return <ConsistencyDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('redis'))                                                                         return <RedisDiagram              activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('distributed'))                                                                   return <DistributedDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     if (t.includes('stampede') || t.includes('penetration') || t.includes('avalanche') || t.includes('failure')) return <StampedeDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    return <CacheBasicsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <SAFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
   };
 
   return (

@@ -10,7 +10,8 @@ import Login     from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Learning  from './pages/Learning';
 import HLD       from './pages/HLD';
-import Caching   from './pages/Caching';
+import Caching          from './pages/Caching';
+import SystemArchitecture from './pages/SystemArchitecture';
 import Profile   from './pages/Profile';
 import AuthNav   from './components/AuthNav';
 
@@ -61,7 +62,8 @@ const AppRoutes = () => {
         <Route path="/dashboard"          element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/learning"           element={<ProtectedRoute><Learning /></ProtectedRoute>} />
         <Route path="/learning/hld"       element={<ProtectedRoute><HLD /></ProtectedRoute>} />
-        <Route path="/learning/hld/caching" element={<ProtectedRoute><Caching /></ProtectedRoute>} />
+        <Route path="/learning/hld/caching"             element={<ProtectedRoute><Caching /></ProtectedRoute>} />
+        <Route path="/learning/hld/system-architecture" element={<ProtectedRoute><SystemArchitecture /></ProtectedRoute>} />
         <Route path="/profile"            element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
         <Route path="*" element={<Navigate to="/signup" replace />} />

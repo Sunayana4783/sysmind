@@ -13,7 +13,7 @@ interface HLDTopic {
 }
 
 const HLD_TOPICS: HLDTopic[] = [
-  { id: 'system-architecture', title: 'System Architecture', locked: true, description: 'Monolithic, SOA, microservices and serverless patterns.' },
+  { id: 'system-architecture', title: 'System Architecture', locked: false, route: '/learning/hld/system-architecture', description: 'Monolithic, SOA, microservices and serverless patterns.' },
   { id: 'scalability', title: 'Scalability', locked: true, description: 'Horizontal vs vertical scaling, capacity planning.' },
   { id: 'load-balancing', title: 'Load Balancing', locked: true, description: 'Round-robin, least connections, consistent hashing.' },
   { id: 'database-design', title: 'Database Design', locked: true, description: 'SQL vs NoSQL, sharding, replication, CAP theorem.' },
