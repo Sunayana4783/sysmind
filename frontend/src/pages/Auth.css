@@ -363,3 +363,83 @@
 }
 .link-btn:hover { opacity: 0.8; }
 .link-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Auth card icon replacements (no emojis) ─────────────────────────────── */
+.auth-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin: 0 auto 0.75rem;
+  background: #EEE9FF;
+}
+
+/* Wave hand → simple greeting arc */
+.auth-card__icon--wave {
+  background: #EEE9FF;
+  position: relative;
+}
+.auth-card__icon--wave::before {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 28px;
+  border: 3px solid #7C5CFC;
+  border-radius: 50% 50% 50% 10%;
+  transform: rotate(-15deg);
+}
+
+/* Rocket → upward arrow triangle */
+.auth-card__icon--rocket {
+  background: #EEE9FF;
+  position: relative;
+}
+.auth-card__icon--rocket::before {
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 22px solid #7C5CFC;
+  margin-bottom: 2px;
+}
+.auth-card__icon--rocket::after {
+  content: '';
+  display: block;
+  width: 14px;
+  height: 8px;
+  background: #7C5CFC;
+  border-radius: 0 0 6px 6px;
+  margin-top: -4px;
+  margin-left: 6px;
+}
+
+/* Email → envelope shape */
+.auth-card__icon--email {
+  background: #EEE9FF;
+  position: relative;
+  overflow: hidden;
+}
+.auth-card__icon--email::before {
+  content: '';
+  position: absolute;
+  inset: 14px 10px;
+  border: 2.5px solid #7C5CFC;
+  border-radius: 3px;
+}
+.auth-card__icon--email::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 10px;
+  right: 10px;
+  height: 14px;
+  background: linear-gradient(135deg, transparent 45%, #7C5CFC 45%, #7C5CFC 55%, transparent 55%),
+              linear-gradient(225deg, transparent 45%, #7C5CFC 45%, #7C5CFC 55%, transparent 55%);
+  background-size: 50% 100%;
+  background-repeat: no-repeat;
+  background-position: left, right;
+}

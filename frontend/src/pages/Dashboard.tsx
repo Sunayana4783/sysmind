@@ -108,7 +108,7 @@ const Dashboard = () => {
         {/* ── Header ──────────────────────────────────────────────────── */}
         <header className="db-header">
           <div className="db-welcome">
-            <h1 className="db-title">Welcome back, {user?.username} 👋</h1>
+            <h1 className="db-title">Welcome back, {user?.username}</h1>
             <p className="db-meta">
               <span className="db-concepts-link">0 concepts mastered</span>
               &nbsp;·&nbsp; Phase: <strong>Foundation</strong>
@@ -116,7 +116,7 @@ const Dashboard = () => {
           </div>
           <div className="db-actions">
             <button className="db-btn-continue" onClick={() => navigate('/learning')}>
-              <span>⚡</span> Continue Learning
+              Continue Learning
             </button>
           </div>
         </header>
@@ -138,12 +138,12 @@ const Dashboard = () => {
           </div>
 
           <div className="db-card">
-            <h3 className="db-card__title"><span>⚠️</span> Weak Areas</h3>
+            <h3 className="db-card__title">Weak Areas</h3>
             <p className="db-card__empty">No weak areas detected yet.</p>
           </div>
 
           <div className="db-card">
-            <h3 className="db-card__title"><span>🔄</span> Due for Review</h3>
+            <h3 className="db-card__title">Due for Review</h3>
             <p className="db-card__empty">Nothing due today.</p>
           </div>
         </section>

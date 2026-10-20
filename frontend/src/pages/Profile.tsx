@@ -208,7 +208,7 @@ const Profile = () => {
             <span className="profile-stat__value profile-stat__value--purple">
               {activityData?.currentStreak ?? 0}
             </span>
-            <span className="profile-stat__label">Day Streak 🔥</span>
+            <span className="profile-stat__label">Day Streak</span>
           </div>
           <div className="profile-stat">
             <span className="profile-stat__value profile-stat__value--purple">

@@ -110,17 +110,17 @@ const Login = () => {
       <div className="learn-root auth-page">
         <div className="auth-card">
           <div className="auth-card__header">
-            <div className="auth-card__icon">📧</div>
+          <div className="auth-card__icon auth-card__icon--email" />
             <h1 className="auth-card__title">Verify your email</h1>
             <p className="auth-card__subtitle">
               Enter the 6-digit code sent to <strong>{notVerifiedEmail}</strong>
             </p>
           </div>
 
-          {otpError && <div className="auth-alert auth-alert--error"><span>⚠</span> {otpError}</div>}
+          {otpError && <div className="auth-alert auth-alert--error">{otpError}</div>}
           {resendMsg && (
             <div className={`auth-alert ${resendMsg.includes('sent') ? 'auth-alert--success' : 'auth-alert--error'}`}>
-              <span>{resendMsg.includes('sent') ? '✓' : '⚠'}</span> {resendMsg}
+              {resendMsg}
             </div>
           )}
 
@@ -163,13 +163,13 @@ const Login = () => {
     <div className="learn-root auth-page">
       <div className="auth-card">
         <div className="auth-card__header">
-          <div className="auth-card__icon">👋</div>
+          <div className="auth-card__icon auth-card__icon--wave" />
           <h1 className="auth-card__title">Welcome back</h1>
           <p className="auth-card__subtitle">Sign in to your account</p>
         </div>
 
-        {successMsg && <div className="auth-alert auth-alert--success"><span>✓</span> {successMsg}</div>}
-        {error && <div className="auth-alert auth-alert--error" role="alert"><span>⚠</span> {error}</div>}
+        {successMsg && <div className="auth-alert auth-alert--success">{successMsg}</div>}
+        {error && <div className="auth-alert auth-alert--error" role="alert">{error}</div>}
 
         <form onSubmit={handleSubmit} className="auth-form" noValidate>
           <div className="auth-form__group">
