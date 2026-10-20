@@ -46,7 +46,7 @@ const HLD = () => {
           <div className="hld-page__badge">High Level Design</div>
           <h1 className="hld-page__title">HLD Topics</h1>
           <p className="hld-page__subtitle">
-            Start with <strong>Caching</strong> — the only unlocked topic. More topics unlock as you progress.
+            Start with <strong>Caching</strong> - the only unlocked topic. More topics unlock as you progress.
           </p>
         </header>
 
@@ -59,7 +59,7 @@ const HLD = () => {
               role={topic.locked ? 'presentation' : 'button'}
               tabIndex={topic.locked ? -1 : 0}
               onKeyDown={(e) => e.key === 'Enter' && handleClick(topic)}
-              aria-label={topic.locked ? `${topic.title} — locked` : `${topic.title} — start`}
+              aria-label={topic.locked ? `${topic.title} - locked` : `${topic.title} - start`}
             >
               <div className="hld-topic__left">
                 <div className="hld-topic__info">

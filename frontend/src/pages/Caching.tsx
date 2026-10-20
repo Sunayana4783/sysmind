@@ -403,7 +403,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
 
     return (
       <div className="quiz-active">
-        {/* Flag warning popup — persistent, blocks quiz until dismissed */}
+        {/* Flag warning popup - persistent, blocks quiz until dismissed */}
         {showFlagWarning && (
           <div className="flag-warning flag-warning--blocking">
             <strong>Warning: Attempt Flagged</strong>
@@ -510,7 +510,7 @@ const QuizModule = ({ mod, completed, onComplete, onQuizStart, onQuizEnd }: {
         )}
       </div>
 
-      {/* Question review — outside score card so text-align:center doesn't affect it */}
+      {/* Question review - outside score card so text-align:center doesn't affect it */}
       <div className="qr-section">
         <h4 className="qr-section__heading">
           Question Review: {result.correct} correct, {result.total - result.correct} wrong
@@ -674,7 +674,7 @@ const Caching = () => {
         )}
 
         <div className={`caching-layout${quizActive ? ' caching-layout--quiz-active' : ''}`}>
-          {/* Sidebar — hidden during quiz */}
+          {/* Sidebar - hidden during quiz */}
           {!quizActive && (
           <aside className="caching-sidebar">
             <button className="caching-dropdown__header" onClick={() => setDropdownOpen(v => !v)} aria-expanded={dropdownOpen}>
@@ -692,7 +692,7 @@ const Caching = () => {
                       <button
                         className={`caching-sidebar__item${selectedIdx === idx ? ' caching-sidebar__item--active' : ''}${locked || quizActive ? ' caching-sidebar__item--locked' : ''}`}
                         onClick={() => !locked && !quizActive && setSelectedIdx(idx)}
-                        title={quizActive ? 'Quiz in progress — complete or submit first' : locked ? 'Complete previous modules first' : ''}
+                        title={quizActive ? 'Quiz in progress - complete or submit first' : locked ? 'Complete previous modules first' : ''}
                       >
                         <span className="caching-sidebar__label">{m.title}</span>
                         {done && <span className="caching-sidebar__done">&#10003;</span>}

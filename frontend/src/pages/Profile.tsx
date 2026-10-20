@@ -170,7 +170,7 @@ const Profile = () => {
 
   const joinDate = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-    : '—';
+    : '-';
 
   const initials = user?.username?.slice(0, 2).toUpperCase() ?? '??';
 
@@ -189,11 +189,11 @@ const Profile = () => {
           <div className="profile-fields">
             <div className="profile-field">
               <span className="profile-field__label">Username</span>
-              <span className="profile-field__value">{user?.username ?? '—'}</span>
+              <span className="profile-field__value">{user?.username ?? '-'}</span>
             </div>
             <div className="profile-field">
               <span className="profile-field__label">Email</span>
-              <span className="profile-field__value">{user?.email ?? '—'}</span>
+              <span className="profile-field__value">{user?.email ?? '-'}</span>
             </div>
             <div className="profile-field">
               <span className="profile-field__label">Member since</span>

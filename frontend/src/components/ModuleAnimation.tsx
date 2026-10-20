@@ -162,7 +162,7 @@ const ArchNode = ({
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// STEP NAV — prev / dot indicators / next — used at the bottom of every diagram
+// STEP NAV - prev / dot indicators / next - used at the bottom of every diagram
 // ─────────────────────────────────────────────────────────────────────────────
 const StepNav = ({
   activeIdx, total, setActiveIdx,
@@ -200,7 +200,7 @@ const StepNav = ({
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 1 — Cache Basics
+// DIAGRAM 1 - Cache Basics
 // ─────────────────────────────────────────────────────────────────────────────
 const TOTAL_BASICS = 5;
 const CacheBasicsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => (
@@ -224,7 +224,7 @@ const CacheBasicsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; se
         'User makes a request to the application',
         'App checks the cache before touching the database',
         'Cache returns data instantly on a hit (< 1ms)',
-        'Cache miss — app queries the database',
+        'Cache miss - app queries the database',
         'Result stored in cache, returned to user',
       ][activeIdx]}</span>
     </div>
@@ -233,19 +233,19 @@ const CacheBasicsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; se
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 2 — Cache Architecture
+// DIAGRAM 2 - Cache Architecture
 // ─────────────────────────────────────────────────────────────────────────────
 const TOTAL_ARCH = 3;
 const CacheArchDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const layers = [
     { label: 'L1: In-Process', sub: 'HashMap in memory',    icon: <ServerIcon   active={activeIdx === 0} />, ns: '< 1µs' },
     { label: 'L2: Redis',      sub: 'Distributed cache',    icon: <CacheIcon    active={activeIdx === 1} />, ns: '< 1ms' },
-    { label: 'L3: Database',   sub: 'PostgreSQL / MySQL',   icon: <DatabaseIcon active={activeIdx === 2} />, ns: '5–50ms' },
+    { label: 'L3: Database',   sub: 'PostgreSQL / MySQL',   icon: <DatabaseIcon active={activeIdx === 2} />, ns: '5-50ms' },
   ];
   const descs = [
-    'L1 is in-process app memory — fastest (nanoseconds), not shared across servers',
-    'L2 is a shared Redis cluster — fast (sub-ms), shared across all app instances',
-    'L3 is the database — slowest but always the source of truth',
+    'L1 is in-process app memory - fastest (nanoseconds), not shared across servers',
+    'L2 is a shared Redis cluster - fast (sub-ms), shared across all app instances',
+    'L3 is the database - slowest but always the source of truth',
   ];
   return (
     <div className="arch-diagram">
@@ -262,7 +262,7 @@ const CacheArchDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setA
               </div>
               <div className="arch-layer__latency">{layer.ns}</div>
             </div>
-            {i < layers.length - 1 && <VertArrow active={activeIdx > i} label={`${i + 2}. miss — check next`} />}
+            {i < layers.length - 1 && <VertArrow active={activeIdx > i} label={`${i + 2}. miss - check next`} />}
           </React.Fragment>
         ))}
       </div>
@@ -276,16 +276,16 @@ const CacheArchDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setA
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 3 — Cache-Aside
+// DIAGRAM 3 - Cache-Aside
 // ─────────────────────────────────────────────────────────────────────────────
 const TOTAL_ASIDE = 6;
 const CacheAsideDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const isWrite = activeIdx >= 3;
   const descs = [
     'Read path: App checks cache first',
-    'Cache miss — query DB for data',
+    'Cache miss - query DB for data',
     'Store result in cache with TTL',
-    'Write path: Write to DB first — always',
+    'Write path: Write to DB first - always',
     'Then invalidate the cache key',
     'Next read will fetch fresh data from DB',
   ];
@@ -324,14 +324,14 @@ const CacheAsideDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; set
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 4 — Read / Write Strategies
+// DIAGRAM 4 - Read / Write Strategies
 // ─────────────────────────────────────────────────────────────────────────────
 const TOTAL_RW = 6;
 const ReadWriteDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const isWriteBack = activeIdx >= 3;
   const descs = [
     'Write-Through: Write to cache AND DB at the same time',
-    'Both cache and DB updated synchronously — always consistent',
+    'Both cache and DB updated synchronously - always consistent',
     'Slower writes, but no data loss if cache crashes',
     'Write-Back: Write to cache ONLY, return immediately',
     'DB updated asynchronously in background later',
@@ -372,17 +372,17 @@ const ReadWriteDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setA
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 5 — Eviction
+// DIAGRAM 5 - Eviction
 // ─────────────────────────────────────────────────────────────────────────────
 const TOTAL_EVICT = 5;
 const EvictionDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const slots = ['A', 'B', 'C', 'D', 'E'];
   const descs = [
-    'Cache is full — 5 slots occupied, no space for new entry',
-    'LRU identifies slot A as least recently used — evict it',
+    'Cache is full - 5 slots occupied, no space for new entry',
+    'LRU identifies slot A as least recently used - evict it',
     'Slot A removed from cache, space freed',
     'New entry inserted into the freed slot',
-    'TTL timers run independently — expired entries also removed',
+    'TTL timers run independently - expired entries also removed',
   ];
   return (
     <div className="arch-diagram">
@@ -396,7 +396,7 @@ const EvictionDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAc
               ${i === 0 && activeIdx >= 3 ? ' arch-eviction__slot--new'    : ''}
               ${activeIdx === 0           ? ' arch-eviction__slot--full'   : ''}
             `}>
-              {i === 0 && activeIdx >= 3 ? 'NEW' : i === 0 && activeIdx >= 2 ? '—' : s}
+              {i === 0 && activeIdx >= 3 ? 'NEW' : i === 0 && activeIdx >= 2 ? '-' : s}
               {i === 0 && activeIdx === 1 && <span className="arch-eviction__evict-badge">LRU x</span>}
               {i === 0 && activeIdx >= 3  && <div className="arch-eviction__new-pulse" />}
             </div>
@@ -418,15 +418,15 @@ const EvictionDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAc
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 6 — Invalidation
+// DIAGRAM 6 - Invalidation
 // ─────────────────────────────────────────────────────────────────────────────
 const TOTAL_INVAL = 5;
 const InvalidationDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const descs = [
     'App writes updated data to the database',
     'DB fires an update event (via CDC or app logic)',
-    'Cache key invalidated — old data removed',
-    'Next read is a cache miss — fresh data fetched from DB',
+    'Cache key invalidated - old data removed',
+    'Next read is a cache miss - fresh data fetched from DB',
     'Fresh data stored back in cache with new TTL',
   ];
   return (
@@ -457,16 +457,16 @@ const InvalidationDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; s
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 7 — Redis
+// DIAGRAM 7 - Redis
 // ─────────────────────────────────────────────────────────────────────────────
 const TOTAL_REDIS = 5;
 const RedisDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const descs = [
     'App sends GET or SET command to Redis over TCP',
     'Redis looks up the key in its in-memory hash table',
-    'Data found — returned in sub-millisecond',
+    'Data found - returned in sub-millisecond',
     'On write: Redis AOF logs every command for persistence',
-    'Redis stores data in RAM — eviction policy controls memory',
+    'Redis stores data in RAM - eviction policy controls memory',
   ];
   return (
     <div className="arch-diagram">
@@ -501,17 +501,17 @@ const RedisDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiv
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 8 — Distributed Cache
+// DIAGRAM 8 - Distributed Cache
 // ─────────────────────────────────────────────────────────────────────────────
 const TOTAL_DIST = 5;
 const DistributedDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
-  const nodes = ['Slots 0–5460', 'Slots 5461–10922', 'Slots 10923–16383'];
+  const nodes = ['Slots 0-5460', 'Slots 5461-10922', 'Slots 10923-16383'];
   const descs = [
-    'Client sends key — consistent hash maps it to a slot',
+    'Client sends key - consistent hash maps it to a slot',
     'Hash slot determines which node owns the key',
-    'Node 2 holds this slot — client queries it directly',
-    'Primary fails — replica takes over automatically in <30s',
-    'New node added — only 1/N keys remapped (minimal disruption)',
+    'Node 2 holds this slot - client queries it directly',
+    'Primary fails - replica takes over automatically in <30s',
+    'New node added - only 1/N keys remapped (minimal disruption)',
   ];
   return (
     <div className="arch-diagram">
@@ -534,10 +534,10 @@ const DistributedDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; se
         </div>
       </div>
       {activeIdx === 3 && (
-        <div className="arch-danger-banner">Node 1 failed — Replica promoted to primary</div>
+        <div className="arch-danger-banner">Node 1 failed - Replica promoted to primary</div>
       )}
       {activeIdx === 4 && (
-        <div className="arch-failover-banner">New node added — only ~1/N keys remapped</div>
+        <div className="arch-failover-banner">New node added - only ~1/N keys remapped</div>
       )}
       <div className="arch-step-info">
         <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DIST}</span>
@@ -549,16 +549,16 @@ const DistributedDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; se
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 9 — Stampede / Penetration / Avalanche
+// DIAGRAM 9 - Stampede / Penetration / Avalanche
 // ─────────────────────────────────────────────────────────────────────────────
 const TOTAL_STAMP = 5;
 const StampedeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const descs = [
-    'Popular cache key expires — everyone misses simultaneously',
+    'Popular cache key expires - everyone misses simultaneously',
     'Thousands of requests all query the DB at once',
-    'Database overwhelmed — CPU 100%, response degraded',
+    'Database overwhelmed - CPU 100%, response degraded',
     'Mutex lock: only ONE request rebuilds, others wait',
-    'Cache repopulated — all waiting requests served',
+    'Cache repopulated - all waiting requests served',
   ];
   const isDanger = activeIdx >= 1 && activeIdx <= 2;
   return (
@@ -590,7 +590,7 @@ const StampedeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAc
         {isDanger && <Arrow active label="flood" />}
         {isDanger && <ArchNode icon={<DatabaseIcon active={isDanger} />} label="Database" sublabel="Overwhelmed" active danger />}
       </div>
-      {isDanger && <div className="arch-danger-banner">Database CPU at 100% — stampede in progress</div>}
+      {isDanger && <div className="arch-danger-banner">Database CPU at 100% - stampede in progress</div>}
       <div className="arch-step-info">
         <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_STAMP}</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
@@ -601,7 +601,7 @@ const StampedeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAc
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIAGRAM 10 — Consistency
+// DIAGRAM 10 - Consistency
 // ─────────────────────────────────────────────────────────────────────────────
 const TOTAL_CONSIST = 5;
 const ConsistencyDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
@@ -609,8 +609,8 @@ const ConsistencyDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; se
     'App writes new data to the database',
     'Cache still holds old stale value',
     'Other users read stale data from cache',
-    'TTL expires — cache entry removed',
-    'Fresh data fetched — all users see consistent data',
+    'TTL expires - cache entry removed',
+    'Fresh data fetched - all users see consistent data',
   ];
   return (
     <div className="arch-diagram">
@@ -636,7 +636,7 @@ const ConsistencyDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; se
           onClick={() => setActiveIdx(3)}
         />
       </div>
-      {activeIdx === 2 && <div className="arch-danger-banner">Cache and DB are out of sync — stale data period</div>}
+      {activeIdx === 2 && <div className="arch-danger-banner">Cache and DB are out of sync - stale data period</div>}
       {activeIdx >= 4  && <div className="arch-failover-banner">Cache and DB are now consistent</div>}
       <div className="arch-step-info">
         <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_CONSIST}</span>
@@ -651,7 +651,7 @@ const ConsistencyDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; se
 // ── SYSTEM ARCHITECTURE DIAGRAMS ─────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────────────────────────
 
-// SA DIAGRAM 1 — System Fundamentals: full request flow
+// SA DIAGRAM 1 - System Fundamentals: full request flow
 const TOTAL_SA_FUND = 5;
 const SAFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const descs = [
@@ -684,22 +684,22 @@ const SAFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number;
   );
 };
 
-// SA DIAGRAM 2 — Architectural Patterns: layered architecture
+// SA DIAGRAM 2 - Architectural Patterns: layered architecture
 const TOTAL_SA_PATTERNS = 5;
 const SAPatternsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const layers = [
-    { label: 'Presentation Layer',   sub: 'UI — what users see',           latency: 'Browser' },
+    { label: 'Presentation Layer',   sub: 'UI - what users see',           latency: 'Browser' },
     { label: 'API Layer',            sub: 'Routes and validates requests',  latency: 'REST / GraphQL' },
     { label: 'Business Logic',       sub: 'Rules and processing',           latency: 'Core' },
     { label: 'Data Access Layer',    sub: 'Queries and persistence',        latency: 'ORM / SQL' },
     { label: 'Database',             sub: 'PostgreSQL / MongoDB',           latency: 'Storage' },
   ];
   const descs = [
-    'Presentation layer — handles what users see and interact with',
-    'API layer — receives requests, validates input, routes to services',
-    'Business logic layer — applies rules, processes data, orchestrates',
-    'Data access layer — translates between objects and database queries',
-    'Database — persists data, enforces integrity constraints',
+    'Presentation layer - handles what users see and interact with',
+    'API layer - receives requests, validates input, routes to services',
+    'Business logic layer - applies rules, processes data, orchestrates',
+    'Data access layer - translates between objects and database queries',
+    'Database - persists data, enforces integrity constraints',
   ];
   return (
     <div className="arch-diagram">
@@ -736,7 +736,7 @@ const SAPatternsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; set
   );
 };
 
-// SA DIAGRAM 3 — Monolith vs Microservices
+// SA DIAGRAM 3 - Monolith vs Microservices
 const TOTAL_SA_MONO = 5;
 const SAMonolithDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const isMS = activeIdx >= 3;
@@ -745,7 +745,7 @@ const SAMonolithDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; set
     'Monolith grows: harder to deploy, scale, and change safely',
     'Problem: one bug can take down all features simultaneously',
     'Microservices: each service owns one business capability',
-    'Independent deploy and scale — teams work without stepping on each other',
+    'Independent deploy and scale - teams work without stepping on each other',
   ];
   return (
     <div className="arch-diagram">
@@ -782,7 +782,7 @@ const SAMonolithDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; set
   );
 };
 
-// SA DIAGRAM 4 — Components and Communication: API Gateway + Queue
+// SA DIAGRAM 4 - Components and Communication: API Gateway + Queue
 const TOTAL_SA_COMM = 5;
 const SACommDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const descs = [
@@ -816,14 +816,14 @@ const SACommDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActi
   );
 };
 
-// SA DIAGRAM 5 — Scalability: load balancer + auto-scale
+// SA DIAGRAM 5 - Scalability: load balancer + auto-scale
 const TOTAL_SA_SCALE = 5;
 const SAScaleDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const descs = [
-    'Traffic surge arrives — load balancer receives all requests',
+    'Traffic surge arrives - load balancer receives all requests',
     'Requests distributed across existing server pool',
     'Server 1 and Server 2 each handle their share',
-    'Load spikes beyond capacity — auto-scaler triggers',
+    'Load spikes beyond capacity - auto-scaler triggers',
     'New Server 3 added automatically to absorb extra load',
   ];
   return (
@@ -838,8 +838,8 @@ const SAScaleDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
         <ArchNode icon={<ServerIcon active={activeIdx === 2} />}   label="Server 2"  sublabel="Handles share" active={activeIdx === 2} />
         <ArchNode icon={<ServerIcon active={activeIdx === 4} />}   label="Server 3"  sublabel={activeIdx >= 4 ? 'Auto-added' : 'Standby'}  active={activeIdx === 4} danger={activeIdx === 3} onClick={() => setActiveIdx(4)} />
       </div>
-      {activeIdx === 3 && <div className="arch-danger-banner">CPU above 80% — auto-scaler triggered</div>}
-      {activeIdx === 4 && <div className="arch-failover-banner">Server 3 added — load distributed</div>}
+      {activeIdx === 3 && <div className="arch-danger-banner">CPU above 80% - auto-scaler triggered</div>}
+      {activeIdx === 4 && <div className="arch-failover-banner">Server 3 added - load distributed</div>}
       <div className="arch-step-info">
         <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_SCALE}</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
@@ -849,7 +849,7 @@ const SAScaleDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
   );
 };
 
-// SA DIAGRAM 6 — Database Architecture: primary + replicas
+// SA DIAGRAM 6 - Database Architecture: primary + replicas
 const TOTAL_SA_DB = 5;
 const SADatabaseDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const descs = [
@@ -857,7 +857,7 @@ const SADatabaseDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; set
     'Primary replicates every write to Replica 1 asynchronously',
     'Primary replicates every write to Replica 2 as well',
     'Read operations are distributed across all replicas',
-    'Primary fails — Replica 1 is promoted automatically',
+    'Primary fails - Replica 1 is promoted automatically',
   ];
   return (
     <div className="arch-diagram">
@@ -871,7 +871,7 @@ const SADatabaseDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; set
         <Arrow active={activeIdx >= 2} label="replicate" reverse />
         <ArchNode icon={<DatabaseIcon active={activeIdx === 3} />} label="Replica 2" sublabel="Read traffic" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
       </div>
-      {activeIdx === 4 && <div className="arch-failover-banner">Primary failed — Replica 1 promoted automatically</div>}
+      {activeIdx === 4 && <div className="arch-failover-banner">Primary failed - Replica 1 promoted automatically</div>}
       <div className="arch-step-info">
         <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_DB}</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
@@ -881,7 +881,7 @@ const SADatabaseDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; set
   );
 };
 
-// SA DIAGRAM 7 — Distributed Systems: Raft consensus
+// SA DIAGRAM 7 - Distributed Systems: Raft consensus
 const TOTAL_SA_DIST = 5;
 const SADistributedDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const descs = [
@@ -889,7 +889,7 @@ const SADistributedDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; 
     'Leader sends the write to all follower nodes',
     'Majority of followers acknowledge the write (quorum)',
     'Leader commits the write and confirms to client',
-    'Remaining nodes sync when network allows — eventual consistency',
+    'Remaining nodes sync when network allows - eventual consistency',
   ];
   return (
     <div className="arch-diagram">
@@ -904,7 +904,7 @@ const SADistributedDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; 
           <ArchNode icon={<ServerIcon active={activeIdx === 4} />} label="Follower 3" sublabel={activeIdx === 4 ? 'Syncing' : 'Offline'} active={activeIdx === 4} />
         </div>
       </div>
-      {activeIdx === 3 && <div className="arch-failover-banner">Quorum reached — write committed</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">Quorum reached - write committed</div>}
       <div className="arch-step-info">
         <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_DIST}</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>
@@ -914,14 +914,14 @@ const SADistributedDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; 
   );
 };
 
-// SA DIAGRAM 8 — Fault Tolerance: circuit breaker + failover
+// SA DIAGRAM 8 - Fault Tolerance: circuit breaker + failover
 const TOTAL_SA_FAULT = 5;
 const SAFaultDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
   const descs = [
     'Primary server becomes unresponsive',
     'Load balancer health check detects failure within seconds',
     'All traffic rerouted to healthy servers immediately',
-    'Circuit breaker opens — stops calls to failed dependency',
+    'Circuit breaker opens - stops calls to failed dependency',
     'Failed server recovers and rejoins the pool',
   ];
   return (
@@ -934,10 +934,10 @@ const SAFaultDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
       <div className="arch-event-row" style={{ marginTop: '0.75rem' }}>
         <ArchNode icon={<ServerIcon active={activeIdx === 0} />}  label="Server"         sublabel={activeIdx === 0 ? 'Failing' : activeIdx === 4 ? 'Recovered' : 'Down'} active={activeIdx === 0 || activeIdx === 4} danger={activeIdx >= 0 && activeIdx <= 3} onClick={() => setActiveIdx(0)} />
         <Arrow active={activeIdx >= 3} label="circuit open" />
-        <ArchNode icon={<LockIcon active={activeIdx >= 3} />}     label="Circuit Breaker" sublabel={activeIdx >= 3 ? 'OPEN — blocking' : 'Closed'} active={activeIdx >= 3} danger={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <ArchNode icon={<LockIcon active={activeIdx >= 3} />}     label="Circuit Breaker" sublabel={activeIdx >= 3 ? 'OPEN - blocking' : 'Closed'} active={activeIdx >= 3} danger={activeIdx === 3} onClick={() => setActiveIdx(3)} />
       </div>
-      {activeIdx === 0 && <div className="arch-danger-banner">Server unresponsive — health check failing</div>}
-      {activeIdx === 4 && <div className="arch-failover-banner">Server recovered — rejoining pool</div>}
+      {activeIdx === 0 && <div className="arch-danger-banner">Server unresponsive - health check failing</div>}
+      {activeIdx === 4 && <div className="arch-failover-banner">Server recovered - rejoining pool</div>}
       <div className="arch-step-info">
         <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_FAULT}</span>
         <span className="arch-step-desc">{descs[activeIdx]}</span>

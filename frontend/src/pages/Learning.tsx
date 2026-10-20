@@ -78,7 +78,7 @@ const Learning = () => {
               role="button"
               tabIndex={0}
               onKeyDown={(e) => e.key === 'Enter' && handleCardClick(card)}
-              aria-label={card.locked ? `${card.title} — locked` : `${card.title} — open`}
+              aria-label={card.locked ? `${card.title} - locked` : `${card.title} - open`}
             >
               <div className="lcard__body">
                 <h2 className="lcard__title">{card.title}</h2>

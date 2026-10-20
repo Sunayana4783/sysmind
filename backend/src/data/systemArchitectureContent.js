@@ -10,11 +10,11 @@ const SYSTEM_ARCHITECTURE_MODULES = [
   {
     order: 1, type: 'content', title: 'System Architecture Fundamentals',
     content: {
-      overview: 'When you build a small app, one computer is enough. But when millions of people use it at the same time, you need a plan — a blueprint for how all the pieces fit together. That blueprint is called system architecture.\n\nSystem architecture answers: where does code run, how do parts talk to each other, and what happens when something breaks? Getting this right early saves months of painful rework later.',
+      overview: 'When you build a small app, one computer is enough. But when millions of people use it at the same time, you need a plan - a blueprint for how all the pieces fit together. That blueprint is called system architecture.\n\nSystem architecture answers: where does code run, how do parts talk to each other, and what happens when something breaks? Getting this right early saves months of painful rework later.',
       sections: [
         {
           heading: 'What is System Architecture?',
-          body: 'System architecture is the high-level structure of a software system. It defines the major components — like servers, databases, caches, and queues — and describes how they connect and communicate. Think of it like the blueprint of a building. Before laying any bricks, you need to know where the walls, doors, and pipes go.',
+          body: 'System architecture is the high-level structure of a software system. It defines the major components - like servers, databases, caches, and queues - and describes how they connect and communicate. Think of it like the blueprint of a building. Before laying any bricks, you need to know where the walls, doors, and pipes go.',
           code: null,
         },
         {
@@ -24,7 +24,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         },
         {
           heading: 'Key Quality Attributes',
-          body: 'Every architectural decision involves tradeoffs between five qualities: Scalability (handles more users), Reliability (stays up when things fail), Maintainability (easy to change), Performance (responds fast), and Security (protects data). No system is perfect at all five — you always choose which ones matter most for your product.',
+          body: 'Every architectural decision involves tradeoffs between five qualities: Scalability (handles more users), Reliability (stays up when things fail), Maintainability (easy to change), Performance (responds fast), and Security (protects data). No system is perfect at all five - you always choose which ones matter most for your product.',
           code: null,
         },
         {
@@ -40,7 +40,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         { label: 'Cache',         description: 'Returns fast response if data already cached', highlight: false },
         { label: 'Database',      description: 'Persists and retrieves data when needed',      highlight: false },
       ],
-      example: 'Instagram started as a single server. As users grew, they added load balancers, then multiple app servers, then caches, then database replicas. Each step was an architectural decision driven by scale. Today Instagram serves over a billion users with a deeply distributed architecture — all built one layer at a time.',
+      example: 'Instagram started as a single server. As users grew, they added load balancers, then multiple app servers, then caches, then database replicas. Each step was an architectural decision driven by scale. Today Instagram serves over a billion users with a deeply distributed architecture - all built one layer at a time.',
     },
   },
 
@@ -48,7 +48,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
   {
     order: 2, type: 'content', title: 'Architectural Patterns',
     content: {
-      overview: 'Over decades of building software, engineers kept solving the same types of problems. They named and documented the solutions — these are called architectural patterns. Instead of reinventing the wheel, you pick the pattern that best fits your problem.\n\nThe three most important patterns to understand are Layered Architecture, Service-Oriented Architecture (SOA), and Serverless.',
+      overview: 'Over decades of building software, engineers kept solving the same types of problems. They named and documented the solutions - these are called architectural patterns. Instead of reinventing the wheel, you pick the pattern that best fits your problem.\n\nThe three most important patterns to understand are Layered Architecture, Service-Oriented Architecture (SOA), and Serverless.',
       sections: [
         {
           heading: 'Layered Architecture',
@@ -62,17 +62,17 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         },
         {
           heading: 'Serverless Architecture',
-          body: 'In serverless, you write individual functions and deploy them to a cloud provider. The cloud automatically runs them when triggered (by an HTTP request, a file upload, a timer). You do not manage any servers — the provider handles scaling, availability, and infrastructure. You pay only for each function execution. AWS Lambda, Google Cloud Functions, and Vercel Functions are examples.',
+          body: 'In serverless, you write individual functions and deploy them to a cloud provider. The cloud automatically runs them when triggered (by an HTTP request, a file upload, a timer). You do not manage any servers - the provider handles scaling, availability, and infrastructure. You pay only for each function execution. AWS Lambda, Google Cloud Functions, and Vercel Functions are examples.',
           code: null,
         },
         {
           heading: 'Choosing the Right Pattern',
-          body: 'Layered is the simplest starting point for most apps. SOA suits large enterprises that need to integrate many existing systems over a shared bus. Serverless is best for event-driven workloads, unpredictable traffic spikes, or tasks that run infrequently. Most real systems combine patterns — a layered monolith with some serverless functions for background jobs is completely normal.',
+          body: 'Layered is the simplest starting point for most apps. SOA suits large enterprises that need to integrate many existing systems over a shared bus. Serverless is best for event-driven workloads, unpredictable traffic spikes, or tasks that run infrequently. Most real systems combine patterns - a layered monolith with some serverless functions for background jobs is completely normal.',
           code: null,
         },
       ],
       animationSteps: [
-        { label: 'Presentation', description: 'UI layer — handles what users see and click',       highlight: false },
+        { label: 'Presentation', description: 'UI layer - handles what users see and click',       highlight: false },
         { label: 'API Layer',    description: 'Routes and validates incoming requests',             highlight: true  },
         { label: 'Business',     description: 'Applies rules, orchestrates services',              highlight: true  },
         { label: 'Data Access',  description: 'Translates between objects and database queries',   highlight: false },
@@ -86,26 +86,26 @@ const SYSTEM_ARCHITECTURE_MODULES = [
   {
     order: 3, type: 'content', title: 'Monolithic Architecture',
     content: {
-      overview: 'A monolith is the simplest architecture: everything lives in one codebase, one deployable unit, one database. You build it, test it, and deploy it as a single thing. This is how almost every successful product starts — and for good reason.\n\nUnderstanding monoliths deeply is important because most systems begin as one, and knowing when to move away from it is one of the most consequential architectural decisions you will make.',
+      overview: 'A monolith is the simplest architecture: everything lives in one codebase, one deployable unit, one database. You build it, test it, and deploy it as a single thing. This is how almost every successful product starts - and for good reason.\n\nUnderstanding monoliths deeply is important because most systems begin as one, and knowing when to move away from it is one of the most consequential architectural decisions you will make.',
       sections: [
         {
           heading: 'What a Monolith Is',
-          body: 'In a monolithic application, all features — user management, payments, notifications, search — live in the same codebase and run as one process. When you deploy, you deploy everything at once. The whole application shares one database. There is no network between components — function calls are direct and fast.',
+          body: 'In a monolithic application, all features - user management, payments, notifications, search - live in the same codebase and run as one process. When you deploy, you deploy everything at once. The whole application shares one database. There is no network between components - function calls are direct and fast.',
           code: null,
         },
         {
           heading: 'Why Monoliths Are a Good Starting Point',
-          body: 'Monoliths are simple to develop, test, and deploy. There is no distributed system complexity — no network calls between services, no service discovery, no distributed tracing. A small team can move very fast. Many hugely successful products — Stack Overflow, Shopify, GitHub — ran as monoliths for years and some still do.',
+          body: 'Monoliths are simple to develop, test, and deploy. There is no distributed system complexity - no network calls between services, no service discovery, no distributed tracing. A small team can move very fast. Many hugely successful products - Stack Overflow, Shopify, GitHub - ran as monoliths for years and some still do.',
           code: null,
         },
         {
           heading: 'When Monoliths Become Painful',
-          body: 'As the team grows, problems emerge. Everyone edits the same codebase — a change by one team can break another team\'s feature. Build and deployment times grow to 30-40 minutes. One bug in any part of the system can take down the whole application. Scaling requires copying the entire application even if only one feature needs more resources.',
+          body: 'As the team grows, problems emerge. Everyone edits the same codebase - a change by one team can break another team\'s feature. Build and deployment times grow to 30-40 minutes. One bug in any part of the system can take down the whole application. Scaling requires copying the entire application even if only one feature needs more resources.',
           code: null,
         },
         {
           heading: 'The Strangler Fig Pattern',
-          body: 'When a monolith becomes painful, do not rewrite everything at once — that is extremely risky. Instead use the Strangler Fig pattern: gradually extract individual features into separate services while the monolith continues running. Route traffic to new services one feature at a time. The monolith shrinks over months until it is gone. Amazon and Netflix both used this approach.',
+          body: 'When a monolith becomes painful, do not rewrite everything at once - that is extremely risky. Instead use the Strangler Fig pattern: gradually extract individual features into separate services while the monolith continues running. Route traffic to new services one feature at a time. The monolith shrinks over months until it is gone. Amazon and Netflix both used this approach.',
           code: null,
         },
       ],
@@ -114,13 +114,13 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         { label: 'Team grows',  description: 'Multiple teams editing the same code',              highlight: true  },
         { label: 'Slow deploy', description: 'Full rebuild required for any small change',        highlight: true  },
         { label: 'Extract',     description: 'One service extracted behind an API boundary',      highlight: false },
-        { label: 'Strangled',   description: 'Monolith gradually replaced — no big-bang rewrite', highlight: false },
+        { label: 'Strangled',   description: 'Monolith gradually replaced - no big-bang rewrite', highlight: false },
       ],
-      example: 'Amazon started as a monolith in 1995. By 2002, Jeff Bezos issued a famous mandate: all teams must expose functionality via service APIs with no exceptions. That memo began Amazon\'s decomposition — and the internal infrastructure they built eventually became AWS.',
+      example: 'Amazon started as a monolith in 1995. By 2002, Jeff Bezos issued a famous mandate: all teams must expose functionality via service APIs with no exceptions. That memo began Amazon\'s decomposition - and the internal infrastructure they built eventually became AWS.',
     },
   },
 
-  // ── 4. Client–Server Architecture ─────────────────────────────────────────
+  // ── 4. Client-Server Architecture ─────────────────────────────────────────
   {
     order: 4, type: 'content', title: 'Client-Server Architecture',
     content: {
@@ -128,22 +128,22 @@ const SYSTEM_ARCHITECTURE_MODULES = [
       sections: [
         {
           heading: 'How It Works',
-          body: 'The client holds the user interface and sends requests. The server holds the business logic and data, and responds to requests. The separation is clean: the server does not care whether a web browser, mobile app, or command-line tool is making the request — it just processes the input and returns output. This allows multiple client types to share a single backend.',
+          body: 'The client holds the user interface and sends requests. The server holds the business logic and data, and responds to requests. The separation is clean: the server does not care whether a web browser, mobile app, or command-line tool is making the request - it just processes the input and returns output. This allows multiple client types to share a single backend.',
           code: null,
         },
         {
           heading: '2-Tier vs 3-Tier Architecture',
-          body: 'In 2-tier architecture, the client talks directly to the database — common in simple desktop apps. In 3-tier architecture, there is a middle application server between client and database. The client talks to the app server; the app server talks to the database. This separation allows the business logic to be changed without touching the client, and the database to be changed without touching the client.',
+          body: 'In 2-tier architecture, the client talks directly to the database - common in simple desktop apps. In 3-tier architecture, there is a middle application server between client and database. The client talks to the app server; the app server talks to the database. This separation allows the business logic to be changed without touching the client, and the database to be changed without touching the client.',
           code: null,
         },
         {
           heading: 'Thin Client vs Thick Client',
-          body: 'A thin client does minimal work — it just displays data received from the server. A thick (fat) client does significant processing locally. Traditional web apps (server-rendered HTML) are thin clients. Modern Single Page Applications (React, Vue, Angular) are thick clients — they fetch data as JSON and render it themselves. Thick clients are faster for users but more complex to build.',
+          body: 'A thin client does minimal work - it just displays data received from the server. A thick (fat) client does significant processing locally. Traditional web apps (server-rendered HTML) are thin clients. Modern Single Page Applications (React, Vue, Angular) are thick clients - they fetch data as JSON and render it themselves. Thick clients are faster for users but more complex to build.',
           code: null,
         },
         {
           heading: 'Stateless Servers',
-          body: 'Servers should be stateless — each request must contain all the information needed to process it. The server does not remember previous requests. User state (who is logged in) is stored in tokens sent with each request (like JWT), not on the server. Stateless servers can be scaled horizontally without problems — any server can handle any request.',
+          body: 'Servers should be stateless - each request must contain all the information needed to process it. The server does not remember previous requests. User state (who is logged in) is stored in tokens sent with each request (like JWT), not on the server. Stateless servers can be scaled horizontally without problems - any server can handle any request.',
           code: null,
         },
       ],
@@ -154,7 +154,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         { label: 'Database',    description: 'Database returns requested data',               highlight: false },
         { label: 'Response',    description: 'Server sends response back to client',          highlight: false },
       ],
-      example: 'When you open Twitter, your browser (client) sends a request to Twitter\'s servers. The server checks your JWT token, fetches your timeline from the database, and returns JSON. Your browser renders it. The server itself holds no memory of you — all your state is in the token you send with every request.',
+      example: 'When you open Twitter, your browser (client) sends a request to Twitter\'s servers. The server checks your JWT token, fetches your timeline from the database, and returns JSON. Your browser renders it. The server itself holds no memory of you - all your state is in the token you send with every request.',
     },
   },
 
@@ -176,7 +176,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         },
         {
           heading: 'Message Queue',
-          body: 'A message queue lets services communicate asynchronously. Service A puts a message in the queue and immediately continues. Service B picks it up when ready. If B is slow or down, messages wait safely in the queue — nothing is lost. This decouples services completely. RabbitMQ and Kafka are the most popular choices.',
+          body: 'A message queue lets services communicate asynchronously. Service A puts a message in the queue and immediately continues. Service B picks it up when ready. If B is slow or down, messages wait safely in the queue - nothing is lost. This decouples services completely. RabbitMQ and Kafka are the most popular choices.',
           code: null,
         },
         {
@@ -192,7 +192,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         { label: 'Queue',         description: 'Async jobs pushed to message queue',            highlight: false },
         { label: 'Worker',        description: 'Background worker processes queue jobs',        highlight: false },
       ],
-      example: 'When you upload a photo to Instagram, the load balancer routes your request to an available server. The server checks cache for your profile data, stores the photo to object storage, then pushes a message to a queue. A background worker picks it up and generates multiple sizes of the photo — without making you wait.',
+      example: 'When you upload a photo to Instagram, the load balancer routes your request to an available server. The server checks cache for your profile data, stores the photo to object storage, then pushes a message to a queue. A background worker picks it up and generates multiple sizes of the photo - without making you wait.',
     },
   },
 
@@ -204,7 +204,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
       sections: [
         {
           heading: 'REST (Representational State Transfer)',
-          body: 'REST is the most widely used API style. It uses standard HTTP methods: GET to read, POST to create, PUT to update, DELETE to remove. Data is usually sent as JSON. REST is stateless — every request contains all needed information. It is simple, well-understood, and works with every programming language and tool. The downside is it can be verbose and slower than binary protocols.',
+          body: 'REST is the most widely used API style. It uses standard HTTP methods: GET to read, POST to create, PUT to update, DELETE to remove. Data is usually sent as JSON. REST is stateless - every request contains all needed information. It is simple, well-understood, and works with every programming language and tool. The downside is it can be verbose and slower than binary protocols.',
           code: null,
         },
         {
@@ -214,12 +214,12 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         },
         {
           heading: 'WebSockets',
-          body: 'HTTP is request-response — the client asks, the server answers. But what if the server needs to push data to the client without being asked? WebSockets create a persistent two-way connection. Once established, either side can send messages at any time. This is essential for real-time features: chat, live notifications, collaborative editing, live sports scores.',
+          body: 'HTTP is request-response - the client asks, the server answers. But what if the server needs to push data to the client without being asked? WebSockets create a persistent two-way connection. Once established, either side can send messages at any time. This is essential for real-time features: chat, live notifications, collaborative editing, live sports scores.',
           code: null,
         },
         {
           heading: 'Synchronous vs Asynchronous',
-          body: 'REST and gRPC are synchronous — the caller waits for a response. This is simple but means the caller is blocked. Message queues are asynchronous — fire and forget. Use synchronous for user-facing reads that need an immediate response (fetch a product page). Use asynchronous for background work that does not need an instant answer (send a welcome email, process a payment notification).',
+          body: 'REST and gRPC are synchronous - the caller waits for a response. This is simple but means the caller is blocked. Message queues are asynchronous - fire and forget. Use synchronous for user-facing reads that need an immediate response (fetch a product page). Use asynchronous for background work that does not need an instant answer (send a welcome email, process a payment notification).',
           code: null,
         },
       ],
@@ -247,7 +247,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         },
         {
           heading: 'Modularity',
-          body: 'A modular system is split into independent pieces that can be developed, tested, and deployed separately. A change to one module should not require changes to others. Modules communicate through well-defined interfaces — they do not need to know how each other is implemented internally. This allows large teams to work in parallel without stepping on each other.',
+          body: 'A modular system is split into independent pieces that can be developed, tested, and deployed separately. A change to one module should not require changes to others. Modules communicate through well-defined interfaces - they do not need to know how each other is implemented internally. This allows large teams to work in parallel without stepping on each other.',
           code: null,
         },
         {
@@ -276,21 +276,21 @@ const SYSTEM_ARCHITECTURE_MODULES = [
   {
     order: 8, type: 'content', title: 'Architecture Decision-Making',
     content: {
-      overview: 'There is no perfect architecture. Every decision you make — which database to use, how services communicate, where to put caches — involves giving something up to gain something else. This is called a trade-off.\n\nSenior engineers are not defined by knowing all the answers. They are defined by knowing the right questions to ask, understanding the trade-offs, and making defensible decisions for their specific context.',
+      overview: 'There is no perfect architecture. Every decision you make - which database to use, how services communicate, where to put caches - involves giving something up to gain something else. This is called a trade-off.\n\nSenior engineers are not defined by knowing all the answers. They are defined by knowing the right questions to ask, understanding the trade-offs, and making defensible decisions for their specific context.',
       sections: [
         {
           heading: 'The Trade-off Triangle',
-          body: 'The three things every system wants — fast, cheap, and reliable — cannot all be maximised at once. A fast, reliable system costs more money (more servers, more redundancy). A fast, cheap system cuts corners on reliability. A cheap, reliable system may be slower. Architecture is about deciding which two matter most for your specific product and accepting the third as a constraint.',
+          body: 'The three things every system wants - fast, cheap, and reliable - cannot all be maximised at once. A fast, reliable system costs more money (more servers, more redundancy). A fast, cheap system cuts corners on reliability. A cheap, reliable system may be slower. Architecture is about deciding which two matter most for your specific product and accepting the third as a constraint.',
           code: null,
         },
         {
           heading: 'SQL vs NoSQL',
-          body: 'SQL databases (PostgreSQL, MySQL) store structured data with relationships. They guarantee ACID transactions and support complex queries. Use SQL when data integrity and complex querying matter — financial records, user accounts. NoSQL databases (MongoDB, Cassandra, DynamoDB) store flexible or unstructured data and scale horizontally more easily. Use NoSQL for massive scale, flexible schemas, or simple key-value access patterns.',
+          body: 'SQL databases (PostgreSQL, MySQL) store structured data with relationships. They guarantee ACID transactions and support complex queries. Use SQL when data integrity and complex querying matter - financial records, user accounts. NoSQL databases (MongoDB, Cassandra, DynamoDB) store flexible or unstructured data and scale horizontally more easily. Use NoSQL for massive scale, flexible schemas, or simple key-value access patterns.',
           code: null,
         },
         {
           heading: 'Consistency vs Availability',
-          body: 'In a distributed system, when a network failure occurs, you must choose: should the system refuse requests until it can guarantee consistent data (CP), or should it serve potentially stale data to stay available (AP)? Banking apps choose consistency — stale balance data causes real harm. Social media apps choose availability — seeing a like count that is 2 seconds out of date is fine.',
+          body: 'In a distributed system, when a network failure occurs, you must choose: should the system refuse requests until it can guarantee consistent data (CP), or should it serve potentially stale data to stay available (AP)? Banking apps choose consistency - stale balance data causes real harm. Social media apps choose availability - seeing a like count that is 2 seconds out of date is fine.',
           code: null,
         },
         {
@@ -306,7 +306,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         { label: 'Trade-off',     description: 'Choose based on: read vs write pattern, team skill', highlight: false },
         { label: 'ADR written',   description: 'Decision documented with rationale for future team', highlight: false },
       ],
-      example: 'When Netflix moved to the cloud in 2008, they had to choose between building their own infrastructure or using AWS. They chose AWS — giving up control and paying cloud prices to gain speed of deployment and global scale. That trade-off decision, documented and deliberate, shaped the entire company\'s future.',
+      example: 'When Netflix moved to the cloud in 2008, they had to choose between building their own infrastructure or using AWS. They chose AWS - giving up control and paying cloud prices to gain speed of deployment and global scale. That trade-off decision, documented and deliberate, shaped the entire company\'s future.',
     },
   },
 
@@ -323,17 +323,17 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         },
         {
           heading: 'Circuit Breaker Pattern',
-          body: 'Without a circuit breaker, if Service B goes down and Service A keeps calling it, every request to A fails slowly while waiting for B to time out. This cascades — A gets overwhelmed and goes down too. A circuit breaker monitors call failures. After 5 failures in a row it "opens" — immediately returning an error without actually calling B. After 30 seconds it tries one request. If successful it closes again.',
+          body: 'Without a circuit breaker, if Service B goes down and Service A keeps calling it, every request to A fails slowly while waiting for B to time out. This cascades - A gets overwhelmed and goes down too. A circuit breaker monitors call failures. After 5 failures in a row it "opens" - immediately returning an error without actually calling B. After 30 seconds it tries one request. If successful it closes again.',
           code: null,
         },
         {
           heading: 'Health Checks and Failover',
-          body: 'Load balancers continuously ping each server with health check requests every 5-10 seconds. If a server stops responding, the load balancer marks it unhealthy and stops sending traffic to it. When it recovers, traffic automatically resumes. This is automatic failover — no human required. The key metric is recovery time: how quickly the system detects a failure and routes around it.',
+          body: 'Load balancers continuously ping each server with health check requests every 5-10 seconds. If a server stops responding, the load balancer marks it unhealthy and stops sending traffic to it. When it recovers, traffic automatically resumes. This is automatic failover - no human required. The key metric is recovery time: how quickly the system detects a failure and routes around it.',
           code: null,
         },
         {
           heading: 'Graceful Degradation',
-          body: 'When part of a system fails, it should degrade gracefully rather than fail completely. If the recommendation engine is down, Amazon still shows the product page — just without personalised recommendations. If the payment service is slow, show a loading state. Plan explicitly for partial failures and define the degraded user experience for each scenario. This is called a fallback.',
+          body: 'When part of a system fails, it should degrade gracefully rather than fail completely. If the recommendation engine is down, Amazon still shows the product page - just without personalised recommendations. If the payment service is slow, show a loading state. Plan explicitly for partial failures and define the degraded user experience for each scenario. This is called a fallback.',
           code: null,
         },
       ],
@@ -344,7 +344,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         { label: 'Circuit open',  description: 'Circuit breaker stops calls to failed service', highlight: false },
         { label: 'Recovery',      description: 'Failed server restarts and rejoins the pool',  highlight: false },
       ],
-      example: 'AWS S3 achieves 99.999999999% (11 nines) durability by storing every object across at least three availability zones. Netflix runs Chaos Monkey — a tool that randomly kills production servers — to continuously verify that their system handles failures gracefully. If it cannot survive Chaos Monkey, it will not survive real outages.',
+      example: 'AWS S3 achieves 99.999999999% (11 nines) durability by storing every object across at least three availability zones. Netflix runs Chaos Monkey - a tool that randomly kills production servers - to continuously verify that their system handles failures gracefully. If it cannot survive Chaos Monkey, it will not survive real outages.',
     },
   },
 
@@ -352,11 +352,11 @@ const SYSTEM_ARCHITECTURE_MODULES = [
   {
     order: 10, type: 'content', title: 'HLD Design Process and Architecture Diagrams',
     content: {
-      overview: 'High Level Design (HLD) is the process of defining the overall structure of a system before writing any code. It answers: what are the major components, how do they interact, and how will the system meet its requirements at scale?\n\nIn system design interviews, this is exactly what you are expected to do. Having a structured process — rather than randomly drawing boxes — is what separates a strong answer from a weak one.',
+      overview: 'High Level Design (HLD) is the process of defining the overall structure of a system before writing any code. It answers: what are the major components, how do they interact, and how will the system meet its requirements at scale?\n\nIn system design interviews, this is exactly what you are expected to do. Having a structured process - rather than randomly drawing boxes - is what separates a strong answer from a weak one.',
       sections: [
         {
           heading: 'Step 1: Clarify Requirements',
-          body: 'Before designing anything, ask clarifying questions. What is the scale — 1,000 users or 1 billion? What are the read vs write patterns? What are the latency requirements? What needs to be consistent vs eventually consistent? Do not design a system until you understand what problem you are actually solving. In an interview, spending 5 minutes here saves 30 minutes of redesigning.',
+          body: 'Before designing anything, ask clarifying questions. What is the scale - 1,000 users or 1 billion? What are the read vs write patterns? What are the latency requirements? What needs to be consistent vs eventually consistent? Do not design a system until you understand what problem you are actually solving. In an interview, spending 5 minutes here saves 30 minutes of redesigning.',
           code: null,
         },
         {
@@ -366,7 +366,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         },
         {
           heading: 'Step 3: Define the High-Level Components',
-          body: 'Draw the major boxes: clients, load balancers, application servers, caches, databases, message queues, CDN. Label the connections between them with the protocol used (REST, gRPC, WebSocket). At this stage do not go deep into any single component — get the whole picture down first. This bird\'s-eye view is the HLD diagram.',
+          body: 'Draw the major boxes: clients, load balancers, application servers, caches, databases, message queues, CDN. Label the connections between them with the protocol used (REST, gRPC, WebSocket). At this stage do not go deep into any single component - get the whole picture down first. This bird\'s-eye view is the HLD diagram.',
           code: null,
         },
         {
@@ -392,7 +392,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
     failureCases: [
       {
         title: 'Cascading Service Failure',
-        scenario: 'Service A calls Service B which calls Service C. Service C is slow due to a database issue. Service B threads pile up waiting for C. Service A threads pile up waiting for B. Within 60 seconds the entire system is unresponsive — brought down by one slow database query.',
+        scenario: 'Service A calls Service B which calls Service C. Service C is slow due to a database issue. Service B threads pile up waiting for C. Service A threads pile up waiting for B. Within 60 seconds the entire system is unresponsive - brought down by one slow database query.',
         impact: 'Total system outage from a single slow dependency. All three services crash even though only C had the original problem. Users see complete downtime.',
         resolution: 'Implement circuit breakers between every service pair. Set aggressive timeouts (500ms max). Use the bulkhead pattern to isolate thread pools so B\'s slowness cannot consume all of A\'s threads.',
         animationSteps: [
@@ -400,26 +400,26 @@ const SYSTEM_ARCHITECTURE_MODULES = [
           { label: 'B fills up',   description: 'Service B threads all waiting for C',           highlight: true  },
           { label: 'A fills up',   description: 'Service A threads all waiting for B',           highlight: true  },
           { label: 'Outage',       description: 'All three services unresponsive',               highlight: false },
-          { label: 'Fix',          description: 'Circuit breaker opens — stops cascade',         highlight: false },
+          { label: 'Fix',          description: 'Circuit breaker opens - stops cascade',         highlight: false },
         ],
       },
       {
         title: 'Split-Brain in Distributed Database',
         scenario: 'A network partition splits a 2-node database cluster. Both nodes believe the other is dead. Both promote themselves to primary. Users on each side write to different primaries. When the network heals, the two primaries have conflicting data.',
         impact: 'Data corruption and loss. Orders placed during the partition may be duplicated or lost. User records on the two sides have diverged and must be manually reconciled.',
-        resolution: 'Always run an odd number of nodes (3 minimum) so a quorum majority can be established. Use Raft or Paxos consensus — only one partition can have the majority and therefore only one can elect a primary.',
+        resolution: 'Always run an odd number of nodes (3 minimum) so a quorum majority can be established. Use Raft or Paxos consensus - only one partition can have the majority and therefore only one can elect a primary.',
         animationSteps: [
           { label: 'Split',        description: 'Network partition divides cluster in two',      highlight: true  },
           { label: 'Two primaries', description: 'Each node promotes itself to primary',        highlight: true  },
           { label: 'Conflict',     description: 'Both primaries accept writes independently',   highlight: true  },
-          { label: 'Heals',        description: 'Network reconnects — conflicting data found',  highlight: false },
-          { label: 'Fix',          description: 'Quorum writes require majority — one wins',    highlight: false },
+          { label: 'Heals',        description: 'Network reconnects - conflicting data found',  highlight: false },
+          { label: 'Fix',          description: 'Quorum writes require majority - one wins',    highlight: false },
         ],
       },
       {
         title: 'Thundering Herd on Service Restart',
         scenario: 'A popular service crashes and restarts. All 50,000 clients detect the reconnect simultaneously and retry at the same millisecond. The service starts up but is immediately overwhelmed by the flood of connections and crashes again.',
-        impact: 'Crash loop — the service cannot stay up long enough to recover. The more clients it has, the faster it crashes after each restart.',
+        impact: 'Crash loop - the service cannot stay up long enough to recover. The more clients it has, the faster it crashes after each restart.',
         resolution: 'Implement exponential backoff with jitter on all client retry logic. Clients wait random(0,1s), then random(0,2s), then random(0,4s). This spreads reconnections across seconds instead of milliseconds.',
         animationSteps: [
           { label: 'Restart',      description: 'Service comes back online after crash',        highlight: false },
@@ -451,7 +451,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
           { label: 'Starts OK',    description: 'Service starts at 200MB baseline',            highlight: false },
           { label: 'Leak grows',   description: 'Each request leaks a small amount of memory', highlight: true  },
           { label: 'RAM full',     description: 'Memory exhausted after 12 hours',             highlight: true  },
-          { label: 'Crash',        description: 'OOM kill — service restarts',                 highlight: false },
+          { label: 'Crash',        description: 'OOM kill - service restarts',                 highlight: false },
           { label: 'Fix',          description: 'Heap profile identifies uncleaned references', highlight: false },
         ],
       },
@@ -469,37 +469,37 @@ const SYSTEM_ARCHITECTURE_MODULES = [
       },
       {
         question: 'What is the difference between REST, gRPC, and WebSockets? When would you use each?',
-        answer: 'REST: HTTP + JSON, simple and universal, use for public APIs and browser-facing endpoints. gRPC: Protobuf over HTTP/2, 5-10x faster, type-safe, use for internal service-to-service calls. WebSockets: persistent bidirectional connection, use for real-time push features like chat, live notifications, and collaborative tools. Most production systems use all three — REST externally, gRPC internally, WebSockets for real-time features.',
+        answer: 'REST: HTTP + JSON, simple and universal, use for public APIs and browser-facing endpoints. gRPC: Protobuf over HTTP/2, 5-10x faster, type-safe, use for internal service-to-service calls. WebSockets: persistent bidirectional connection, use for real-time push features like chat, live notifications, and collaborative tools. Most production systems use all three - REST externally, gRPC internally, WebSockets for real-time features.',
         difficulty: 'medium',
       },
       {
         question: 'Your monolithic application takes 45 minutes to build and deploy. How do you approach breaking it up?',
-        answer: 'Use the Strangler Fig pattern — never rewrite everything at once. Identify the bounded contexts: user, order, payment, inventory. Start with the service that is the most painful or most frequently changed. Extract it behind an API boundary while keeping the monolith running. Migrate traffic gradually using feature flags. Accept that the full transition takes 12-18 months for a large system. The goal is continuous improvement, not a big-bang rewrite.',
+        answer: 'Use the Strangler Fig pattern - never rewrite everything at once. Identify the bounded contexts: user, order, payment, inventory. Start with the service that is the most painful or most frequently changed. Extract it behind an API boundary while keeping the monolith running. Migrate traffic gradually using feature flags. Accept that the full transition takes 12-18 months for a large system. The goal is continuous improvement, not a big-bang rewrite.',
         difficulty: 'medium',
       },
       {
         question: 'What is the CAP theorem? How does it influence the choice between PostgreSQL and Cassandra?',
-        answer: 'CAP: you can only guarantee two of Consistency, Availability, and Partition Tolerance. Since network partitions always happen, the real choice is CP vs AP. PostgreSQL is CP — during a partition it may reject writes to preserve consistency. Cassandra is AP — it stays available and writes succeed, but replicas may diverge temporarily. Choose PostgreSQL for financial data, user accounts, anything where stale reads cause real harm. Choose Cassandra for analytics, activity feeds, time-series data where eventual consistency is acceptable.',
+        answer: 'CAP: you can only guarantee two of Consistency, Availability, and Partition Tolerance. Since network partitions always happen, the real choice is CP vs AP. PostgreSQL is CP - during a partition it may reject writes to preserve consistency. Cassandra is AP - it stays available and writes succeed, but replicas may diverge temporarily. Choose PostgreSQL for financial data, user accounts, anything where stale reads cause real harm. Choose Cassandra for analytics, activity feeds, time-series data where eventual consistency is acceptable.',
         difficulty: 'medium',
       },
       {
         question: 'You depend on 10 microservices each with 99.9% uptime. What is your overall availability?',
-        answer: '99.9% to the power of 10 is approximately 99%. That is 3.6 days of downtime per year from dependencies alone — even if your own service never fails. This is why circuit breakers, timeouts, fallbacks, and graceful degradation are mandatory in microservices. Every additional dependency multiplies your failure risk. Design every external call to have a fallback path.',
+        answer: '99.9% to the power of 10 is approximately 99%. That is 3.6 days of downtime per year from dependencies alone - even if your own service never fails. This is why circuit breakers, timeouts, fallbacks, and graceful degradation are mandatory in microservices. Every additional dependency multiplies your failure risk. Design every external call to have a fallback path.',
         difficulty: 'medium',
       },
       {
         question: 'Explain the SOLID principles. Which do you find most valuable in practice?',
-        answer: 'Single Responsibility: one class, one reason to change. Open/Closed: extend via new code, not by modifying existing code. Liskov Substitution: subclasses must be safely replaceable for their parent. Interface Segregation: small focused interfaces over fat general ones. Dependency Inversion: depend on abstractions not implementations. In practice, Single Responsibility and Dependency Inversion have the most impact — SRP prevents god classes, and DI makes code testable by allowing mocked dependencies.',
+        answer: 'Single Responsibility: one class, one reason to change. Open/Closed: extend via new code, not by modifying existing code. Liskov Substitution: subclasses must be safely replaceable for their parent. Interface Segregation: small focused interfaces over fat general ones. Dependency Inversion: depend on abstractions not implementations. In practice, Single Responsibility and Dependency Inversion have the most impact - SRP prevents god classes, and DI makes code testable by allowing mocked dependencies.',
         difficulty: 'medium',
       },
       {
         question: 'How would you design a system to send 10 million push notifications when a major event happens?',
-        answer: 'You cannot send 10 million notifications synchronously — that would take too long. Use a message queue (Kafka). When the event fires, push 10 million messages to the queue partitioned by user region. Have a fleet of worker processes subscribe and send notifications in parallel. Each worker handles a batch of 1,000 users. With 1,000 workers processing in parallel you can send 10 million in under a minute. The queue also provides retry for failed deliveries.',
+        answer: 'You cannot send 10 million notifications synchronously - that would take too long. Use a message queue (Kafka). When the event fires, push 10 million messages to the queue partitioned by user region. Have a fleet of worker processes subscribe and send notifications in parallel. Each worker handles a batch of 1,000 users. With 1,000 workers processing in parallel you can send 10 million in under a minute. The queue also provides retry for failed deliveries.',
         difficulty: 'hard',
       },
       {
         question: 'When would you choose eventual consistency over strong consistency?',
-        answer: 'Eventual consistency is acceptable when: brief staleness does not harm the user or business (social media likes, view counts, activity feeds), when availability matters more than perfect accuracy (shopping cart availability), or when serving a global audience where strong consistency latency is too high. Strong consistency is required when: financial balances, inventory counts, authentication state, or anything where a stale value causes real harm to the user or business. The decision must be deliberate — never choose eventual consistency by accident.',
+        answer: 'Eventual consistency is acceptable when: brief staleness does not harm the user or business (social media likes, view counts, activity feeds), when availability matters more than perfect accuracy (shopping cart availability), or when serving a global audience where strong consistency latency is too high. Strong consistency is required when: financial balances, inventory counts, authentication state, or anything where a stale value causes real harm to the user or business. The decision must be deliberate - never choose eventual consistency by accident.',
         difficulty: 'medium',
       },
     ],
@@ -525,15 +525,15 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         },
         {
           question: 'You need to send a welcome email when a user signs up. The email service is sometimes slow. What is the best approach?',
-          options: ['Call email service synchronously during signup — block until it responds', 'Push email job to a message queue — signup returns immediately', 'Skip the email if the service is slow', 'Retry the email call up to 5 times synchronously'],
+          options: ['Call email service synchronously during signup - block until it responds', 'Push email job to a message queue - signup returns immediately', 'Skip the email if the service is slow', 'Retry the email call up to 5 times synchronously'],
           correctIndex: 1, scenario: true,
-          explanation: 'Message queue. Signup returns immediately — fast and reliable. The email job sits in the queue and is processed when the email service is ready. This completely decouples the two operations. If the email service is down for an hour, messages accumulate and are processed when it recovers.',
+          explanation: 'Message queue. Signup returns immediately - fast and reliable. The email job sits in the queue and is processed when the email service is ready. This completely decouples the two operations. If the email service is down for an hour, messages accumulate and are processed when it recovers.',
         },
         {
           question: 'In the CAP theorem, which property must every distributed system always guarantee?',
           options: ['Consistency', 'Availability', 'Partition Tolerance', 'Durability'],
           correctIndex: 2, scenario: false,
-          explanation: 'Partition Tolerance is mandatory. Network failures always happen in distributed systems — you cannot choose to ignore them. So the real trade-off is between Consistency and Availability during a partition event.',
+          explanation: 'Partition Tolerance is mandatory. Network failures always happen in distributed systems - you cannot choose to ignore them. So the real trade-off is between Consistency and Availability during a partition event.',
         },
         {
           question: 'You have a REST API that is called 1 million times per second between two internal services. What is a better protocol choice?',
@@ -543,7 +543,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         },
         {
           question: 'A user opens your chat app and a message arrives while they are connected. How does the server deliver it without the client asking?',
-          options: ['The client polls every second via REST', 'WebSocket — server pushes message over persistent connection', 'The server sends an email notification', 'Long polling with 30-second timeout'],
+          options: ['The client polls every second via REST', 'WebSocket - server pushes message over persistent connection', 'The server sends an email notification', 'Long polling with 30-second timeout'],
           correctIndex: 1, scenario: true,
           explanation: 'WebSocket creates a persistent bidirectional connection. Once established, the server can push messages to the client at any time without the client polling. This is essential for real-time chat, live notifications, and collaborative editing.',
         },
@@ -551,7 +551,7 @@ const SYSTEM_ARCHITECTURE_MODULES = [
           question: 'Which SOLID principle is violated when a single class handles user authentication, sends emails, and logs to a database?',
           options: ['Open/Closed Principle', 'Single Responsibility Principle', 'Liskov Substitution Principle', 'Interface Segregation Principle'],
           correctIndex: 1, scenario: false,
-          explanation: 'Single Responsibility Principle. A class should have only one reason to change. Mixing authentication, email sending, and database logging means a change to any one of those three concerns requires modifying this class — and risks breaking the others.',
+          explanation: 'Single Responsibility Principle. A class should have only one reason to change. Mixing authentication, email sending, and database logging means a change to any one of those three concerns requires modifying this class - and risks breaking the others.',
         },
         {
           question: 'During a system design interview you are asked to design a video streaming platform. What should you do FIRST?',
@@ -567,9 +567,9 @@ const SYSTEM_ARCHITECTURE_MODULES = [
         },
         {
           question: 'You are choosing between PostgreSQL and Cassandra for storing user financial transactions. Which do you choose and why?',
-          options: ['Cassandra — it scales better horizontally', 'PostgreSQL — ACID transactions guarantee data integrity', 'Either is fine for financial data', 'Cassandra — it has faster writes'],
+          options: ['Cassandra - it scales better horizontally', 'PostgreSQL - ACID transactions guarantee data integrity', 'Either is fine for financial data', 'Cassandra - it has faster writes'],
           correctIndex: 1, scenario: true,
-          explanation: 'PostgreSQL. Financial transactions require ACID guarantees — atomicity (all or nothing), consistency (valid state always), isolation (concurrent transactions do not interfere), durability (committed data survives crashes). Cassandra is eventually consistent, which is unacceptable for money — a stale balance read could cause real financial harm.',
+          explanation: 'PostgreSQL. Financial transactions require ACID guarantees - atomicity (all or nothing), consistency (valid state always), isolation (concurrent transactions do not interfere), durability (committed data survives crashes). Cassandra is eventually consistent, which is unacceptable for money - a stale balance read could cause real financial harm.',
         },
       ],
     },
