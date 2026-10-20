@@ -110,7 +110,6 @@ const Login = () => {
       <div className="learn-root auth-page">
         <div className="auth-card">
           <div className="auth-card__header">
-          <div className="auth-card__icon auth-card__icon--email" />
             <h1 className="auth-card__title">Verify your email</h1>
             <p className="auth-card__subtitle">
               Enter the 6-digit code sent to <strong>{notVerifiedEmail}</strong>
@@ -163,7 +162,6 @@ const Login = () => {
     <div className="learn-root auth-page">
       <div className="auth-card">
         <div className="auth-card__header">
-          <div className="auth-card__icon auth-card__icon--wave" />
           <h1 className="auth-card__title">Welcome back</h1>
           <p className="auth-card__subtitle">Sign in to your account</p>
         </div>

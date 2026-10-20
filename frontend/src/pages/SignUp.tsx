@@ -108,7 +108,6 @@ const SignUp = () => {
       <div className="auth-page learn-root">
         <div className="auth-card">
           <div className="auth-card__header">
-            <div className="auth-card__icon auth-card__icon--email" />
             <h1 className="auth-card__title">Check your email</h1>
             <p className="auth-card__subtitle">
               We sent a 6-digit code to <strong>{registeredEmail}</strong>
@@ -165,7 +164,6 @@ const SignUp = () => {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-card__header">
-          <div className="auth-card__icon auth-card__icon--rocket" />
           <h1 className="auth-card__title">Create your account</h1>
           <p className="auth-card__subtitle">Start your journey today</p>
         </div>
