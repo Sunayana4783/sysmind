@@ -34,6 +34,28 @@ app.use('/api/learning', learningRoutes);
 app.use('/api/quiz',     quizRoutes);
 app.use('/api/activity', activityRoutes);
 
+app.post('/api/admin/seed', async (req, res) => {
+  if (req.headers['x-seed-secret'] !== 'sysmind_seed_2024_run') return res.status(403).json({ message: 'Forbidden' });
+  try {
+    const Topic = require('./src/models/Topic');
+    const Module = require('./src/models/Module');
+    const SA = require('./src/data/systemArchitectureContent');
+    // Delete old SA modules so renamed topics don't leave stale docs
+    await Module.deleteMany({ topicSlug: 'system-architecture' });
+    await Topic.findOneAndUpdate({ slug: 'system-architecture' },
+      { slug: 'system-architecture', title: 'System Architecture', order: 2, locked: false,
+        description: 'Understand architectural patterns, monolith vs microservices, scalability, distributed systems, and fault tolerance.' },
+      { upsert: true, new: true });
+    const log = [];
+    for (const mod of SA) {
+      await Module.findOneAndUpdate({ topicSlug: 'system-architecture', order: mod.order },
+        { ...mod, topicSlug: 'system-architecture' }, { upsert: true, new: true });
+      log.push(`${mod.order}: ${mod.title}`);
+    }
+    res.json({ ok: true, log });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
