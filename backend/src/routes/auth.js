@@ -196,6 +196,25 @@ router.get('/me', protect, async (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// POST /api/auth/test-email — TEMP: test Brevo directly
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/test-email', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: 'email required' });
+  try {
+    await sendPasswordResetEmail({ to: email, username: 'TestUser', otp: '123456' });
+    res.json({ ok: true, message: 'Email sent successfully' });
+  } catch (err) {
+    console.error('TEST EMAIL ERROR:', err.message, JSON.stringify(err?.response?.data || err?.response?.body || ''));
+    res.status(500).json({
+      ok: false,
+      message: err.message,
+      detail: err?.response?.data || err?.response?.body || null,
+    });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // POST /api/auth/forgot-password
 // Sends a password-reset OTP to the given email
 // ─────────────────────────────────────────────────────────────────────────────
@@ -209,7 +228,6 @@ router.post(
     const { email } = req.body;
     try {
       const user = await User.findOne({ email });
-      // Always return success to avoid leaking whether email is registered
       if (!user || !user.isVerified) {
         return res.json({ message: 'If that email is registered, a reset code has been sent.' });
       }
@@ -217,11 +235,16 @@ router.post(
       const otp = user.generateOTP();
       await user.save();
 
-      sendPasswordResetEmail({ to: email, username: user.username, otp }).catch(e =>
-        console.error('Password reset email error:', e.message)
-      );
+      // Await the email send so errors surface properly
+      try {
+        await sendPasswordResetEmail({ to: email, username: user.username, otp });
+        console.log('Password reset email sent to:', email);
+      } catch (emailErr) {
+        console.error('Password reset email FAILED:', emailErr.message, emailErr?.response?.data || '');
+        // Still return success to avoid leaking info, but log the real error
+      }
 
-      res.json({ message: 'Reset code sent. Check your inbox.' });
+      res.json({ message: 'If that email is registered, a reset code has been sent.' });
     } catch (err) {
       console.error('Forgot password error:', err);
       res.status(500).json({ message: 'Server error. Please try again.' });
