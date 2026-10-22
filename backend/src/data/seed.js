@@ -4,6 +4,7 @@ const Topic = require('../models/Topic');
 const Module = require('../models/Module');
 const CACHING_MODULES = require('./cachingContent');
 const SYSTEM_ARCHITECTURE_MODULES = require('./systemArchitectureContent');
+const SCALABILITY_MODULES = require('./scalabilityContent');
 
 const TOPICS = [
   {
@@ -21,6 +22,14 @@ const TOPICS = [
     order: 2,
     locked: false,
     modules: SYSTEM_ARCHITECTURE_MODULES,
+  },
+  {
+    slug: 'scalability',
+    title: 'Scalability',
+    description: 'Vertical vs horizontal scaling, auto-scaling, capacity planning, bottleneck identification, and handling traffic spikes.',
+    order: 3,
+    locked: false,
+    modules: SCALABILITY_MODULES,
   },
 ];
 

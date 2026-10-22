@@ -1,0 +1,9 @@
+/* Scalability.css - all layout from Caching.css via shared classnames */
+@import './Caching.css';
+
+.sc-page .caching-breadcrumb__current {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

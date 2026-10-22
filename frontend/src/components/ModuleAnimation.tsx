@@ -949,24 +949,392 @@ const SAFaultDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SCALABILITY DIAGRAMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// SC DIAGRAM 1 - Scalability Fundamentals: single server to scaled out
+const TOTAL_SC_FUND = 5;
+const SCFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Single server handles current load comfortably',
+    'User growth causes traffic to increase 10x',
+    'Server CPU hits 90% - requests slow down significantly',
+    'Add more servers behind a load balancer to share load',
+    'Each new server adds proportional capacity - linear scaling',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}     label="Users"         sublabel={activeIdx >= 1 ? 'Growing fast' : 'Stable load'} active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="requests" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}   label="Load Balancer" sublabel="Distributes traffic"  active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 2} label="route" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          <ArchNode icon={<ServerIcon active={activeIdx >= 2} />}  label="Server 1"      sublabel={activeIdx === 2 ? 'CPU 90%' : 'Normal'} active={activeIdx >= 2} danger={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+          <ArchNode icon={<ServerIcon active={activeIdx >= 3} />}  label="Server 2"      sublabel={activeIdx >= 3 ? 'Added' : 'Standby'} active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+          <ArchNode icon={<ServerIcon active={activeIdx >= 4} />}  label="Server 3"      sublabel={activeIdx >= 4 ? 'Added' : 'Standby'} active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+        </div>
+      </div>
+      {activeIdx === 2 && <div className="arch-danger-banner">Single server at 90% CPU - bottleneck reached</div>}
+      {activeIdx >= 3  && <div className="arch-failover-banner">Load distributed - each server at 30% CPU</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SC_FUND}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SC_FUND} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SC DIAGRAM 2 - Vertical vs Horizontal Scaling
+const TOTAL_SC_VVSH = 5;
+const SCVertHorizDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const isHoriz = activeIdx >= 3;
+  const descs = [
+    'Vertical: upgrade existing server with more CPU and RAM',
+    'Vertical scaling hits a ceiling - no machine is infinitely large',
+    'Single server is also a single point of failure',
+    'Horizontal: add more servers, share load across all of them',
+    'Stateless design lets any server handle any request',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={`arch-path${!isHoriz ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--read">VERTICAL (SCALE UP)</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<ServerIcon active={activeIdx === 0} />} label="Small Server" sublabel="2 CPU, 4GB RAM"  active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+            <VertArrow active={activeIdx >= 1} label="upgrade" />
+            <ArchNode icon={<ServerIcon active={activeIdx === 1} />} label="Big Server"   sublabel="64 CPU, 256GB RAM" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+            {activeIdx === 2 && <div className="arch-danger-banner" style={{ marginTop: '0.5rem' }}>Ceiling reached - and single point of failure</div>}
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={`arch-path${isHoriz ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--write">HORIZONTAL (SCALE OUT)</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<NetworkIcon active={activeIdx === 3} />} label="Load Balancer" sublabel="Routes traffic" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+            <VertArrow active={activeIdx >= 4} label="distribute" />
+            <div className="arch-row arch-row--center" style={{ gap: '0.3rem' }}>
+              <ArchNode icon={<ServerIcon active={activeIdx >= 4} />} label="Server 1" sublabel="Stateless" active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+              <ArchNode icon={<ServerIcon active={activeIdx >= 4} />} label="Server 2" sublabel="Stateless" active={activeIdx >= 4} />
+              <ArchNode icon={<ServerIcon active={activeIdx >= 4} />} label="Server 3" sublabel="Stateless" active={activeIdx >= 4} />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SC_VVSH}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SC_VVSH} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SC DIAGRAM 3 - Auto-Scaling
+const TOTAL_SC_AUTO = 5;
+const SCAutoScaleDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Normal load: 2 servers running, CPU at 40%',
+    'Traffic spike detected - CPU crosses 70% threshold',
+    'Auto-scaler triggers and provisions 3 new servers',
+    'Load distributed across 5 servers - CPU back to 40%',
+    'Traffic drops - 3 servers terminated to save cost',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 1} />}     label="Traffic"       sublabel={activeIdx >= 1 ? 'Spike!' : 'Normal'} active={activeIdx >= 1} danger={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 1} label={activeIdx >= 1 ? 'surge' : 'requests'} />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 2} />}   label="Auto-Scaler"   sublabel={activeIdx >= 2 ? 'Triggered' : 'Watching'} active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<ServerIcon active />}  label="Server 1" sublabel="Always on" active />
+        <ArchNode icon={<ServerIcon active />}  label="Server 2" sublabel="Always on" active />
+        <ArchNode icon={<ServerIcon active={activeIdx >= 3} />} label="Server 3" sublabel={activeIdx >= 3 ? 'Auto-added' : 'Standby'} active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+        <ArchNode icon={<ServerIcon active={activeIdx >= 3} />} label="Server 4" sublabel={activeIdx >= 3 ? 'Auto-added' : 'Standby'} active={activeIdx >= 3} />
+        <ArchNode icon={<ServerIcon active={activeIdx >= 3} />} label="Server 5" sublabel={activeIdx >= 3 ? 'Auto-added' : 'Standby'} active={activeIdx >= 3} />
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">CPU at 80% - auto-scaler threshold crossed</div>}
+      {activeIdx >= 3 && activeIdx < 4 && <div className="arch-failover-banner">3 new servers added - load distributed</div>}
+      {activeIdx === 4 && <div className="arch-failover-banner">Traffic dropped - 3 servers terminated, cost saved</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SC_AUTO}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SC_AUTO} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SC DIAGRAM 4 - Stateless vs Stateful
+const TOTAL_SC_STATE = 5;
+const SCStateDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Stateful: user session stored in Server 1 memory only',
+    'Load balancer routes next request to Server 2',
+    'Server 2 has no session - user gets logged out unexpectedly',
+    'Fix: move sessions from memory to shared Redis store',
+    'Any server reads session from Redis - horizontal scaling works',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}      label="User"          sublabel="Makes requests"     active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="request" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}    label="Load Balancer" sublabel="Routes randomly"    active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<ServerIcon active={activeIdx === 0} />}    label="Server 1"      sublabel={activeIdx === 0 ? 'Has session' : 'No session'} active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <ArchNode icon={<ServerIcon active={activeIdx >= 2} />}     label="Server 2"      sublabel={activeIdx === 2 ? 'No session!' : activeIdx >= 4 ? 'Reads Redis' : 'No session'} active={activeIdx >= 2} danger={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <ArchNode icon={<RedisIcon active={activeIdx >= 3} />}      label="Redis"         sublabel={activeIdx >= 3 ? 'Shared sessions' : 'Not used'} active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      {activeIdx === 2 && <div className="arch-danger-banner">Session not found - user logged out!</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Any server reads from Redis - no logout issues</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SC_STATE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SC_STATE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SC DIAGRAM 5 - Capacity Planning
+const TOTAL_SC_CAP = 5;
+const SCCapacityDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Step 1: estimate daily active users and actions per user',
+    'Step 2: calculate average QPS = DAU x actions / 86,400 seconds',
+    'Step 3: apply peak factor (3-5x average) for provisioning',
+    'Step 4: measure how many QPS each server handles at 70% CPU',
+    'Step 5: divide peak QPS by per-server capacity = servers needed',
+  ];
+  const steps = [
+    { label: '10M DAU',     sub: 'x 10 actions/day',  active: activeIdx === 0 },
+    { label: '1,157 QPS',   sub: 'avg (100M / 86400)', active: activeIdx === 1 },
+    { label: '5,000 QPS',   sub: 'peak (4.3x avg)',    active: activeIdx === 2 },
+    { label: '500 QPS',     sub: 'per server at 70%',  active: activeIdx === 3 },
+    { label: '10 servers',  sub: '5000 / 500 = 10',    active: activeIdx === 4 },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-eviction">
+        <div className="arch-eviction__label">Capacity Calculation</div>
+        <div className="arch-eviction__slots">
+          {steps.map((s, i) => (
+            <div
+              key={i}
+              className={`arch-eviction__slot${s.active ? ' arch-eviction__slot--full' : i < activeIdx ? ' arch-eviction__slot--new' : ''}`}
+              onClick={() => setActiveIdx(i)}
+              style={{ cursor: 'pointer', minWidth: 64, height: 64, fontSize: '0.62rem', padding: '0.25rem' }}
+            >
+              <div style={{ fontWeight: 800, fontSize: '0.72rem' }}>{s.label}</div>
+              <div style={{ fontSize: '0.55rem', opacity: 0.8, marginTop: 2 }}>{s.sub}</div>
+              {s.active && <div className="arch-node__pulse" />}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SC_CAP}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SC_CAP} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SC DIAGRAM 6 - Bottleneck Identification
+const TOTAL_SC_BOTTLENECK = 5;
+const SCBottleneckDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Profile a request end-to-end to see where time is spent',
+    'Database query takes 480ms of a 500ms total response time',
+    'Missing index on user_id found in slow query log',
+    'Index added - query drops from 480ms to 8ms',
+    'Redis cache added - 90% of DB calls eliminated entirely',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}     label="Request"    sublabel="500ms total"        active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="trace" />
+        <ArchNode icon={<ServerIcon active={activeIdx === 0} />}   label="App Server" sublabel="20ms app code"      active={activeIdx === 0} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 1} label="query" />
+        <ArchNode icon={<DatabaseIcon active={activeIdx >= 1} />}  label="Database"   sublabel={activeIdx <= 2 ? '480ms - slow!' : activeIdx === 3 ? '8ms - fast' : '8ms'} active={activeIdx >= 1} danger={activeIdx <= 2 && activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<CacheIcon active={activeIdx >= 4} />}     label="Redis Cache" sublabel={activeIdx >= 4 ? '90% cache hit' : 'Not added yet'} active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">DB takes 480ms - clear bottleneck</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">Index added - 480ms dropped to 8ms</div>}
+      {activeIdx === 4 && <div className="arch-failover-banner">Cache cuts DB calls by 90%</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SC_BOTTLENECK}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SC_BOTTLENECK} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SC DIAGRAM 7 - Database Scaling
+const TOTAL_SC_DBSCALE = 5;
+const SCDbScaleDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'All writes go to the single Primary database',
+    'Primary replicates data to read replicas automatically',
+    'Read queries distributed across replicas - 3x read capacity',
+    'Connection pooler sits between app and DB - multiplexes connections',
+    'Shard by user ID if replicas are still not enough',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon active={activeIdx <= 1} />}    label="App Servers"  sublabel="Write + Read"       active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active label="writes" />
+        <ArchNode icon={<DatabaseIcon active={activeIdx <= 2} />}  label="Primary DB"   sublabel="All writes"         active={activeIdx <= 1} danger={activeIdx === 4} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<DatabaseIcon active={activeIdx >= 2} />}  label="Replica 1"    sublabel="Read traffic"       active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 1} label="replicate" reverse />
+        <ArchNode icon={<DatabaseIcon active={activeIdx >= 2} />}  label="Replica 2"    sublabel="Read traffic"       active={activeIdx >= 2} />
+        <ArchNode icon={<LockIcon active={activeIdx === 3} />}     label="PgBouncer"    sublabel="Connection pool"    active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      {activeIdx === 4 && <div className="arch-failover-banner">Sharding: User IDs split across multiple DBs</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SC_DBSCALE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SC_DBSCALE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SC DIAGRAM 8 - Scaling Strategies
+const TOTAL_SC_STRAT = 5;
+const SCStrategyDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Start with the cheapest strategy: add Redis cache in front of DB',
+    'Move slow work to async queue - API response becomes instant',
+    'CDN caches static files at edge - reduces origin load 70%',
+    'Microservices: scale each service independently if needed',
+    'Trade-off: every strategy has a cost - choose consciously',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active />}                        label="User"       sublabel="Needs fast response"  active />
+        <Arrow active label="request" />
+        <ArchNode icon={<ServerIcon active={activeIdx === 0} />}    label="App Server" sublabel="Checks cache first"   active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="queue" />
+        <ArchNode icon={<CacheIcon active={activeIdx >= 1} />}      label="Queue"      sublabel="Async jobs"          active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<NetworkIcon active={activeIdx === 2} />}   label="CDN"        sublabel="Static at edge"       active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 3} label="route" />
+        <ArchNode icon={<ServerIcon active={activeIdx === 3} />}    label="Microservice" sublabel="Scale independently" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="trade-off" />
+        <ArchNode icon={<DatabaseIcon active={activeIdx === 4} />}  label="Decision"   sublabel="Cost vs complexity"   active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SC_STRAT}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SC_STRAT} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SC DIAGRAM 9 - Traffic Spikes
+const TOTAL_SC_SPIKE = 5;
+const SCSpikeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Traffic jumps 50x in 30 seconds - spike arrives',
+    'Rate limiter caps requests per user - prevents abuse',
+    'Remaining requests buffered in queue - no errors returned',
+    'Warm pool servers join in 30 seconds - immediate capacity',
+    'Non-critical features disabled - core system protected',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-stampede">
+        <div className="arch-stampede__users">
+          {['User 1', 'User 2', '...', 'User N'].map((u) => (
+            <div key={u} className={`arch-stampede__user${activeIdx >= 1 ? ' arch-stampede__user--flood' : ''}`}>
+              <UserIcon active={activeIdx >= 1} />
+              <span>{u}</span>
+            </div>
+          ))}
+        </div>
+        <Arrow active={activeIdx >= 1} label={activeIdx >= 1 ? '50x spike!' : 'normal'} />
+        <div className="arch-stampede__center">
+          <ArchNode icon={<LockIcon active={activeIdx >= 1} />}      label="Rate Limiter"  sublabel={activeIdx >= 1 ? 'Caps excess' : 'Idle'} active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+          {activeIdx >= 2 && <><VertArrow active label="overflow" /><ArchNode icon={<CacheIcon active />} label="Queue" sublabel="Absorbs spike" active /></>}
+          {activeIdx >= 3 && <><VertArrow active label="join pool" /><ArchNode icon={<ServerIcon active />} label="Warm Pool" sublabel="Ready in 30s" active /></>}
+        </div>
+      </div>
+      {activeIdx === 0 && <div className="arch-danger-banner">50x traffic spike arriving</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Core system protected - degraded non-critical features</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SC_SPIKE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SC_SPIKE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // DISPATCHER
 // ─────────────────────────────────────────────────────────────────────────────
 const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) => {
   const [activeIdx, setActiveIdx] = useState(0);
 
   const t = (topicTitle || title || '').toLowerCase();
-  const isSA = topic === 'system-architecture';
-  const isCache = topic === 'caching' || (!isSA); // default to caching if no topic given
+  const isSC    = topic === 'scalability';
+  const isSA    = topic === 'system-architecture';
 
+  // ── Scalability diagrams ──────────────────────────────────────────────────
+  const getSCDiagram = (): React.ReactNode => {
+    if (t.includes('fundamentals'))                                         return <SCFundamentalsDiagram  activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('vertical') || t.includes('horizontal'))                 return <SCVertHorizDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('elastic') || t.includes('auto-scal') || t.includes('auto scal')) return <SCAutoScaleDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('stateless') || t.includes('stateful'))                  return <SCStateDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('capacity') || t.includes('traffic estimation'))         return <SCCapacityDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('bottleneck') || t.includes('optimiz') || t.includes('optimis') || t.includes('performance')) return <SCBottleneckDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('database scal') || t.includes('database scaling'))      return <SCDbScaleDiagram       activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('strateg') || t.includes('trade-off') || t.includes('trade off')) return <SCStrategyDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('spike') || t.includes('sudden') || t.includes('traffic spike')) return <SCSpikeDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('failure'))                                               return <SCSpikeDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <SCFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  };
+
+  const getSCTotal = (): number => {
+    if (t.includes('fundamentals'))                                         return TOTAL_SC_FUND;
+    if (t.includes('vertical') || t.includes('horizontal'))                 return TOTAL_SC_VVSH;
+    if (t.includes('elastic') || t.includes('auto-scal') || t.includes('auto scal')) return TOTAL_SC_AUTO;
+    if (t.includes('stateless') || t.includes('stateful'))                  return TOTAL_SC_STATE;
+    if (t.includes('capacity') || t.includes('traffic estimation'))         return TOTAL_SC_CAP;
+    if (t.includes('bottleneck') || t.includes('optimiz') || t.includes('performance')) return TOTAL_SC_BOTTLENECK;
+    if (t.includes('database scal') || t.includes('database scaling'))      return TOTAL_SC_DBSCALE;
+    if (t.includes('strateg') || t.includes('trade-off'))                   return TOTAL_SC_STRAT;
+    if (t.includes('spike') || t.includes('sudden') || t.includes('failure')) return TOTAL_SC_SPIKE;
+    return TOTAL_SC_FUND;
+  };
+
+  // ── System Architecture diagrams ──────────────────────────────────────────
   const getSADiagram = (): React.ReactNode => {
-    if (t.includes('fundamentals'))                           return <SAFundamentalsDiagram  activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('fundamentals'))                                         return <SAFundamentalsDiagram  activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     if (t.includes('architectural pattern') || t.includes('architectural patterns')) return <SAPatternsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     if (t.includes('monolithic') || t.includes('client-server') || t.includes('client server')) return <SAMonolithDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('component') || t.includes('interaction')) return <SACommDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('service communication') || t.includes('rest') || t.includes('grpc') || t.includes('websocket')) return <SACommDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('scalability') || t.includes('load'))      return <SAScaleDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('database'))                               return <SADatabaseDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('distributed'))                            return <SADistributedDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('component') || t.includes('interaction'))               return <SACommDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('service communication') || t.includes('grpc') || t.includes('websocket')) return <SACommDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('scalability') || t.includes('load'))                    return <SAScaleDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('database'))                                              return <SADatabaseDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('distributed'))                                           return <SADistributedDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     if (t.includes('fault') || t.includes('reliability') || t.includes('availability')) return <SAFaultDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     if (t.includes('design principle') || t.includes('solid') || t.includes('modularity')) return <SAPatternsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     if (t.includes('decision') || t.includes('trade-off') || t.includes('trade off')) return <SADatabaseDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
@@ -975,48 +1343,49 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
     return <SAFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
   };
 
-  const getCacheDiagram = (): React.ReactNode => {
-    if (t.includes('basics'))                                 return <CacheBasicsDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('architecture'))                           return <CacheArchDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('aside') || t.includes('cache-aside'))     return <CacheAsideDiagram       activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('read') || t.includes('write') || t.includes('strateg')) return <ReadWriteDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('eviction') || t.includes('lru') || t.includes('lfu') || t.includes('ttl')) return <EvictionDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('invalid'))                                return <InvalidationDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('consisten'))                              return <ConsistencyDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('redis'))                                  return <RedisDiagram            activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('distributed'))                            return <DistributedDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('stampede') || t.includes('penetration') || t.includes('avalanche') || t.includes('failure')) return <StampedeDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    return <CacheBasicsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-  };
-
   const getSATotals = (): number => {
-    if (t.includes('fundamentals'))                           return TOTAL_SA_FUND;
+    if (t.includes('fundamentals'))                                         return TOTAL_SA_FUND;
     if (t.includes('architectural pattern') || t.includes('architectural patterns')) return TOTAL_SA_PATTERNS;
     if (t.includes('monolithic') || t.includes('client-server') || t.includes('client server')) return TOTAL_SA_MONO;
-    if (t.includes('component') || t.includes('interaction') || t.includes('service communication') || t.includes('rest') || t.includes('grpc')) return TOTAL_SA_COMM;
-    if (t.includes('scalability') || t.includes('load'))      return TOTAL_SA_SCALE;
-    if (t.includes('database'))                               return TOTAL_SA_DB;
-    if (t.includes('distributed'))                            return TOTAL_SA_DIST;
+    if (t.includes('component') || t.includes('interaction') || t.includes('service communication') || t.includes('grpc')) return TOTAL_SA_COMM;
+    if (t.includes('scalability') || t.includes('load'))                    return TOTAL_SA_SCALE;
+    if (t.includes('database'))                                              return TOTAL_SA_DB;
+    if (t.includes('distributed'))                                           return TOTAL_SA_DIST;
     if (t.includes('fault') || t.includes('reliability') || t.includes('availability') || t.includes('failure')) return TOTAL_SA_FAULT;
     if (t.includes('design principle') || t.includes('decision') || t.includes('hld') || t.includes('diagram')) return TOTAL_SA_PATTERNS;
     return TOTAL_SA_FUND;
   };
 
+  // ── Caching diagrams ──────────────────────────────────────────────────────
+  const getCacheDiagram = (): React.ReactNode => {
+    if (t.includes('basics'))                                                return <CacheBasicsDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('architecture'))                                          return <CacheArchDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('aside') || t.includes('cache-aside'))                    return <CacheAsideDiagram       activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('read') || t.includes('write') || t.includes('strateg')) return <ReadWriteDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('eviction') || t.includes('lru') || t.includes('lfu') || t.includes('ttl')) return <EvictionDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('invalid'))                                               return <InvalidationDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('consisten'))                                             return <ConsistencyDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('redis'))                                                 return <RedisDiagram            activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('distributed'))                                           return <DistributedDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('stampede') || t.includes('penetration') || t.includes('avalanche') || t.includes('failure')) return <StampedeDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <CacheBasicsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  };
+
   const getCacheTotals = (): number => {
-    if (t.includes('basics'))                                 return TOTAL_BASICS;
-    if (t.includes('architecture'))                           return TOTAL_ARCH;
-    if (t.includes('aside') || t.includes('cache-aside'))     return TOTAL_ASIDE;
+    if (t.includes('basics'))                                                return TOTAL_BASICS;
+    if (t.includes('architecture'))                                          return TOTAL_ARCH;
+    if (t.includes('aside') || t.includes('cache-aside'))                    return TOTAL_ASIDE;
     if (t.includes('read') || t.includes('write') || t.includes('strateg')) return TOTAL_RW;
     if (t.includes('eviction') || t.includes('lru') || t.includes('lfu') || t.includes('ttl')) return TOTAL_EVICT;
-    if (t.includes('invalid'))                                return TOTAL_INVAL;
-    if (t.includes('consisten'))                              return TOTAL_CONSIST;
-    if (t.includes('redis'))                                  return TOTAL_REDIS;
-    if (t.includes('distributed'))                            return TOTAL_DIST;
+    if (t.includes('invalid'))                                               return TOTAL_INVAL;
+    if (t.includes('consisten'))                                             return TOTAL_CONSIST;
+    if (t.includes('redis'))                                                 return TOTAL_REDIS;
+    if (t.includes('distributed'))                                           return TOTAL_DIST;
     if (t.includes('stampede') || t.includes('penetration') || t.includes('avalanche') || t.includes('failure')) return TOTAL_STAMP;
     return TOTAL_BASICS;
   };
 
-  const total = isSA ? getSATotals() : getCacheTotals();
+  const total = isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
 
   useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle, topic]);
 
@@ -1028,7 +1397,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
 
   return (
     <div className="module-animation" aria-label="Architecture diagram">
-      {isSA ? getSADiagram() : getCacheDiagram()}
+      {isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
     </div>
   );
 };
