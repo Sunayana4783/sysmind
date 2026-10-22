@@ -34,23 +34,6 @@ app.use('/api/learning', learningRoutes);
 app.use('/api/quiz',     quizRoutes);
 app.use('/api/activity', activityRoutes);
 
-// TEMP: fix unverified accounts
-app.post('/api/admin/fix-users', async (req, res) => {
-  if (req.headers['x-seed-secret'] !== 'sysmind_seed_2024_run') return res.status(403).json({ message: 'Forbidden' });
-  const User = require('./src/models/User');
-  const emails = ['24r21a05hh@mlrit.ac.in', 'sunayanakatukam4@gmail.com'];
-  const log = [];
-  for (const email of emails) {
-    const u = await User.findOneAndUpdate(
-      { email },
-      { isVerified: true, otp: null, otpExpiry: null, otpAttempts: 0 },
-      { new: true }
-    );
-    log.push(u ? `Fixed: ${u.email}` : `Not found: ${email}`);
-  }
-  res.json({ ok: true, log });
-});
-
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
