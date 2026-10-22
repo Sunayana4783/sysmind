@@ -3,7 +3,7 @@ const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
-const { sendOTPEmail } = require('../services/email');
+const { sendOTPEmail, sendPasswordResetEmail } = require('../services/email');
 
 const router = express.Router();
 
@@ -194,5 +194,134 @@ router.post(
 router.get('/me', protect, async (req, res) => {
   res.json({ user: req.user });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/auth/forgot-password
+// Sends a password-reset OTP to the given email
+// ─────────────────────────────────────────────────────────────────────────────
+router.post(
+  '/forgot-password',
+  [body('email').isEmail().normalizeEmail().withMessage('Valid email required')],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ message: errors.array()[0].msg });
+
+    const { email } = req.body;
+    try {
+      const user = await User.findOne({ email });
+      // Always return success to avoid leaking whether email is registered
+      if (!user || !user.isVerified) {
+        return res.json({ message: 'If that email is registered, a reset code has been sent.' });
+      }
+
+      const otp = user.generateOTP();
+      await user.save();
+
+      sendPasswordResetEmail({ to: email, username: user.username, otp }).catch(e =>
+        console.error('Password reset email error:', e.message)
+      );
+
+      res.json({ message: 'Reset code sent. Check your inbox.' });
+    } catch (err) {
+      console.error('Forgot password error:', err);
+      res.status(500).json({ message: 'Server error. Please try again.' });
+    }
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/auth/verify-reset-otp
+// Verifies the OTP without changing the password yet
+// Returns a short-lived resetToken the client uses in the next step
+// ─────────────────────────────────────────────────────────────────────────────
+router.post(
+  '/verify-reset-otp',
+  [
+    body('email').isEmail().normalizeEmail().withMessage('Valid email required'),
+    body('otp').isLength({ min: 6, max: 6 }).withMessage('OTP must be 6 digits'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ message: errors.array()[0].msg });
+
+    const { email, otp } = req.body;
+    try {
+      const user = await User.findOne({ email });
+      if (!user) return res.status(404).json({ message: 'No account found with this email.' });
+
+      const result = user.verifyOTP(otp);
+      if (!result.valid) {
+        await user.save();
+        const messages = {
+          expired:      'Reset code has expired. Please request a new one.',
+          max_attempts: 'Too many incorrect attempts. Please request a new code.',
+          wrong_otp:    `Incorrect code. ${result.attemptsLeft} attempt${result.attemptsLeft !== 1 ? 's' : ''} remaining.`,
+          no_otp:       'No reset code found. Please request a new one.',
+        };
+        return res.status(400).json({ message: messages[result.reason] || 'Invalid code.', reason: result.reason });
+      }
+
+      // OTP is valid — issue a short-lived JWT reset token (5 min)
+      // We do NOT clear the OTP yet, so it cannot be reused — we mark it used via a flag
+      const resetToken = jwt.sign(
+        { id: user._id, purpose: 'password_reset' },
+        process.env.JWT_SECRET,
+        { expiresIn: '5m' }
+      );
+
+      // Clear OTP now to prevent replay
+      user.clearOTP();
+      await user.save();
+
+      res.json({ message: 'Code verified. You can now set a new password.', resetToken });
+    } catch (err) {
+      console.error('Verify reset OTP error:', err);
+      res.status(500).json({ message: 'Server error. Please try again.' });
+    }
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/auth/reset-password
+// Sets a new password using the resetToken from verify-reset-otp
+// ─────────────────────────────────────────────────────────────────────────────
+router.post(
+  '/reset-password',
+  [
+    body('resetToken').notEmpty().withMessage('Reset token required'),
+    body('newPassword').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ message: errors.array()[0].msg });
+
+    const { resetToken, newPassword } = req.body;
+    try {
+      // Verify the reset token
+      let payload;
+      try {
+        payload = jwt.verify(resetToken, process.env.JWT_SECRET);
+      } catch {
+        return res.status(401).json({ message: 'Reset session expired. Please start over.' });
+      }
+
+      if (payload.purpose !== 'password_reset') {
+        return res.status(401).json({ message: 'Invalid reset token.' });
+      }
+
+      const user = await User.findById(payload.id).select('+password');
+      if (!user) return res.status(404).json({ message: 'User not found.' });
+
+      // Set new password — pre-save hook will hash it
+      user.password = newPassword;
+      await user.save();
+
+      res.json({ message: 'Password reset successfully. You can now sign in.' });
+    } catch (err) {
+      console.error('Reset password error:', err);
+      res.status(500).json({ message: 'Server error. Please try again.' });
+    }
+  }
+);
 
 module.exports = router;

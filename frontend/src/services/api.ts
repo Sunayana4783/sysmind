@@ -28,11 +28,14 @@ export interface LoginData  { email: string; password: string; }
 export interface AuthUser   { _id: string; username: string; email: string; createdAt: string; }
 
 export const authAPI = {
-  signup:       (data: SignupData) => api.post<{ message: string; email: string }>('/auth/signup', data),
-  verifyOTP:    (email: string, otp: string) => api.post<{ message: string }>('/auth/verify-otp', { email, otp }),
-  resendOTP:    (email: string) => api.post<{ message: string }>('/auth/resend-otp', { email }),
-  login:        (data: LoginData) => api.post<{ message: string; token: string; user: AuthUser }>('/auth/login', data),
-  getMe:        () => api.get<{ user: AuthUser }>('/auth/me'),
+  signup:           (data: SignupData) => api.post<{ message: string; email: string }>('/auth/signup', data),
+  verifyOTP:        (email: string, otp: string) => api.post<{ message: string }>('/auth/verify-otp', { email, otp }),
+  resendOTP:        (email: string) => api.post<{ message: string }>('/auth/resend-otp', { email }),
+  login:            (data: LoginData) => api.post<{ message: string; token: string; user: AuthUser }>('/auth/login', data),
+  getMe:            () => api.get<{ user: AuthUser }>('/auth/me'),
+  forgotPassword:   (email: string) => api.post<{ message: string }>('/auth/forgot-password', { email }),
+  verifyResetOtp:   (email: string, otp: string) => api.post<{ message: string; resetToken: string }>('/auth/verify-reset-otp', { email, otp }),
+  resetPassword:    (resetToken: string, newPassword: string) => api.post<{ message: string }>('/auth/reset-password', { resetToken, newPassword }),
 };
 
 // ── Learning types ────────────────────────────────────────────────────────────
