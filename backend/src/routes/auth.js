@@ -196,25 +196,6 @@ router.get('/me', protect, async (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// POST /api/auth/test-email — TEMP: test Brevo directly
-// ─────────────────────────────────────────────────────────────────────────────
-router.post('/test-email', async (req, res) => {
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ message: 'email required' });
-  try {
-    await sendPasswordResetEmail({ to: email, username: 'TestUser', otp: '123456' });
-    res.json({ ok: true, message: 'Email sent successfully' });
-  } catch (err) {
-    console.error('TEST EMAIL ERROR:', err.message, JSON.stringify(err?.response?.data || err?.response?.body || ''));
-    res.status(500).json({
-      ok: false,
-      message: err.message,
-      detail: err?.response?.data || err?.response?.body || null,
-    });
-  }
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
 // POST /api/auth/forgot-password
 // Sends a password-reset OTP to the given email
 // ─────────────────────────────────────────────────────────────────────────────
