@@ -209,6 +209,7 @@ router.post(
     const { email } = req.body;
     try {
       const user = await User.findOne({ email });
+      console.log(`[forgot-password] email=${email} found=${!!user} verified=${user?.isVerified}`);
       if (!user || !user.isVerified) {
         return res.json({ message: 'If that email is registered, a reset code has been sent.' });
       }
