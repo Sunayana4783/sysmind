@@ -34,27 +34,6 @@ app.use('/api/learning', learningRoutes);
 app.use('/api/quiz',     quizRoutes);
 app.use('/api/activity', activityRoutes);
 
-app.post('/api/admin/seed', async (req, res) => {
-  if (req.headers['x-seed-secret'] !== 'sysmind_seed_2024_run') return res.status(403).json({ message: 'Forbidden' });
-  try {
-    const Topic = require('./src/models/Topic');
-    const Module = require('./src/models/Module');
-    const SC = require('./src/data/scalabilityContent');
-    await Module.deleteMany({ topicSlug: 'scalability' });
-    await Topic.findOneAndUpdate({ slug: 'scalability' },
-      { slug: 'scalability', title: 'Scalability', order: 3, locked: false,
-        description: 'Vertical vs horizontal scaling, auto-scaling, capacity planning, bottleneck identification, and handling traffic spikes.' },
-      { upsert: true, new: true });
-    const log = [];
-    for (const mod of SC) {
-      await Module.findOneAndUpdate({ topicSlug: 'scalability', order: mod.order },
-        { ...mod, topicSlug: 'scalability' }, { upsert: true, new: true });
-      log.push(`${mod.order}: ${mod.title}`);
-    }
-    res.json({ ok: true, log });
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
