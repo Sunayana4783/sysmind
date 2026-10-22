@@ -213,26 +213,16 @@ router.post(
       if (!user) {
         return res.json({ message: 'If that email is registered, a reset code has been sent.' });
       }
-      if (!user.isVerified) {
-        // Account exists but not verified — send verification OTP instead
-        const otp = user.generateOTP();
-        await user.save();
-        sendOTPEmail({ to: email, username: user.username, otp }).catch(e =>
-          console.error('Unverified reset email error:', e.message)
-        );
-        return res.json({ message: 'If that email is registered, a reset code has been sent.' });
-      }
-
+      // Generate OTP and send reset email regardless of verification status
+      // After a successful reset, the account will be marked verified
       const otp = user.generateOTP();
       await user.save();
 
-      // Await the email send so errors surface properly
       try {
         await sendPasswordResetEmail({ to: email, username: user.username, otp });
         console.log('Password reset email sent to:', email);
       } catch (emailErr) {
         console.error('Password reset email FAILED:', emailErr.message, emailErr?.response?.data || '');
-        // Still return success to avoid leaking info, but log the real error
       }
 
       res.json({ message: 'If that email is registered, a reset code has been sent.' });
@@ -327,7 +317,10 @@ router.post(
       if (!user) return res.status(404).json({ message: 'User not found.' });
 
       // Set new password — pre-save hook will hash it
+      // Also mark as verified in case the account was previously unverified
       user.password = newPassword;
+      user.isVerified = true;
+      user.clearOTP();
       await user.save();
 
       res.json({ message: 'Password reset successfully. You can now sign in.' });
