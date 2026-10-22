@@ -210,7 +210,16 @@ router.post(
     try {
       const user = await User.findOne({ email });
       console.log(`[forgot-password] email=${email} found=${!!user} verified=${user?.isVerified}`);
-      if (!user || !user.isVerified) {
+      if (!user) {
+        return res.json({ message: 'If that email is registered, a reset code has been sent.' });
+      }
+      if (!user.isVerified) {
+        // Account exists but not verified — send verification OTP instead
+        const otp = user.generateOTP();
+        await user.save();
+        sendOTPEmail({ to: email, username: user.username, otp }).catch(e =>
+          console.error('Unverified reset email error:', e.message)
+        );
         return res.json({ message: 'If that email is registered, a reset code has been sent.' });
       }
 
