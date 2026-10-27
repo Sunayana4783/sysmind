@@ -34,6 +34,27 @@ app.use('/api/learning', learningRoutes);
 app.use('/api/quiz',     quizRoutes);
 app.use('/api/activity', activityRoutes);
 
+app.post('/api/admin/seed', async (req, res) => {
+  if (req.headers['x-seed-secret'] !== 'sysmind_seed_2024_run') return res.status(403).json({ message: 'Forbidden' });
+  try {
+    const Topic  = require('./src/models/Topic');
+    const Module = require('./src/models/Module');
+    const LB     = require('./src/data/loadBalancingContent');
+    // Hard delete ALL load-balancing modules then re-insert clean
+    await Module.deleteMany({ topicSlug: 'load-balancing' });
+    await Topic.findOneAndUpdate({ slug: 'load-balancing' },
+      { slug: 'load-balancing', title: 'Load Balancing', order: 4, locked: false,
+        description: 'Load balancing algorithms, Layer 4 vs Layer 7, consistent hashing, health checks, sticky sessions, and high availability.' },
+      { upsert: true, new: true });
+    const log = [];
+    for (const mod of LB) {
+      const created = await Module.create({ ...mod, topicSlug: 'load-balancing' });
+      log.push(created.order + ': ' + created.title);
+    }
+    res.json({ ok: true, count: log.length, log });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
