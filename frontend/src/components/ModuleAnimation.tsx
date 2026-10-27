@@ -1288,14 +1288,427 @@ const SCSpikeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// LOAD BALANCING DIAGRAMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// LB DIAGRAM 1 - Fundamentals
+const TOTAL_LB_FUND = 5;
+const LBFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Thousands of clients send requests to a single load balancer IP',
+    'Load balancer is the single entry point - one IP for all clients',
+    'Requests distributed across Server 1, 2, and 3',
+    'No single server gets overwhelmed - load shared evenly',
+    'If one server fails, load balancer routes around it automatically',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {(['Client 1','Client 2','Client 3'] as string[]).map(c => (
+            <ArchNode key={c} icon={<UserIcon active={activeIdx === 0} />} label={c} sublabel="Sends request" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+          ))}
+        </div>
+        <Arrow active={activeIdx >= 1} label="all traffic" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />} label="Load Balancer" sublabel="Single entry point" active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="distribute" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {(['Server 1','Server 2','Server 3'] as string[]).map((s, i) => (
+            <ArchNode key={s} icon={<ServerIcon active={activeIdx >= 2} />} label={s} sublabel="Handles share" active={activeIdx >= 2} onClick={() => setActiveIdx(2 + i)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx >= 4 && <div className="arch-failover-banner">Load evenly distributed - no server overwhelmed</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_LB_FUND}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_LB_FUND} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// LB DIAGRAM 2 - Layer 4 vs Layer 7
+const TOTAL_LB_TYPES = 5;
+const LBTypesDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const isL7 = activeIdx >= 3;
+  const descs = [
+    'Client sends HTTP request to load balancer',
+    'Layer 4: sees only IP and port - cannot read HTTP content',
+    'Layer 4 routes blindly by network info - fast but no path routing',
+    'Layer 7: reads URL, headers, cookies - intelligent routing',
+    'Layer 7: /api to API servers, /images to media servers',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={`arch-path${!isL7 ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--read">LAYER 4 (TCP)</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<NetworkIcon active={activeIdx === 1} />} label="L4 Balancer" sublabel="Sees IP + port only" active={activeIdx <= 2} onClick={() => setActiveIdx(1)} />
+            <VertArrow active={activeIdx >= 2} label="route by IP" />
+            <ArchNode icon={<ServerIcon active={activeIdx === 2} />} label="Any Server" sublabel="Blind routing" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={`arch-path${isL7 ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--write">LAYER 7 (HTTP)</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<NetworkIcon active={activeIdx >= 3} />} label="L7 Balancer" sublabel="Reads URL + headers" active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+            <VertArrow active={activeIdx >= 4} label="path routing" />
+            <div style={{ display: 'flex', gap: '0.3rem' }}>
+              <ArchNode icon={<ServerIcon active={activeIdx >= 4} />} label="/api" sublabel="API servers" active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+              <ArchNode icon={<CacheIcon active={activeIdx >= 4} />} label="/images" sublabel="Media servers" active={activeIdx >= 4} />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_LB_TYPES}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_LB_TYPES} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// LB DIAGRAM 3 - Algorithms overview
+const TOTAL_LB_ALGO = 5;
+const LBAlgoDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Request arrives - which algorithm picks the server?',
+    'Round Robin: rotate through servers in order - simple, stateless',
+    'Least Connections: pick server with fewest active connections now',
+    'IP Hash: same client IP always hits same server',
+    'Weighted: more powerful servers get proportionally more traffic',
+  ];
+  const algos = [
+    { label: 'Round Robin', sub: 'Rotate in order' },
+    { label: 'Least Conn',  sub: 'Fewest active now' },
+    { label: 'IP Hash',     sub: 'Same IP = same server' },
+    { label: 'Weighted',    sub: 'By server capacity' },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />} label="Request" sublabel="Arrives at LB" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="algorithm decides" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {algos.map((a, i) => (
+            <ArchNode key={a.label} icon={<ServerIcon active={activeIdx === i + 1} />} label={a.label} sublabel={a.sub} active={activeIdx === i + 1} onClick={() => setActiveIdx(i + 1)} />
+          ))}
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_LB_ALGO}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_LB_ALGO} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// LB DIAGRAM 4 - Round Robin
+const TOTAL_LB_RR = 5;
+const LBRoundRobinDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Request 1 goes to Server A (position 1 in rotation)',
+    'Request 2 goes to Server B (position 2)',
+    'Request 3 goes to Server C (position 3)',
+    'Request 4 wraps back to Server A',
+    'Weighted: Server A (weight 3) gets 3x more than Server B (weight 1)',
+  ];
+  const servers = ['A', 'B', 'C'];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<NetworkIcon active />} label="Load Balancer" sublabel="Round Robin pointer" active />
+        <Arrow active label={'req ' + (activeIdx + 1)} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {servers.map((s, i) => (
+            <ArchNode key={s} icon={<ServerIcon active={activeIdx % 3 === i || (activeIdx === 4 && i === 0)} />}
+              label={'Server ' + s}
+              sublabel={activeIdx === 4 ? (i === 0 ? 'weight 3' : 'weight 1') : 'position ' + (i + 1)}
+              active={activeIdx % 3 === i || (activeIdx === 4 && i === 0)}
+              onClick={() => setActiveIdx(i)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx === 4 && <div className="arch-failover-banner">Server A gets 3/5 = 60% of traffic (Weighted)</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_LB_RR}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_LB_RR} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// LB DIAGRAM 5 - Least Connections
+const TOTAL_LB_LC = 5;
+const LBLeastConnDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const conns = [[5,2,8],[5,2,8],[5,3,8],[5,3,8],[5,3,8]];
+  const descs = [
+    'Current state: A=5, B=2, C=8 active connections',
+    'New request arrives - check all servers connection counts',
+    'Server B has fewest (2) - route request there',
+    'Server B count rises to 3 - still least busy',
+    'Next request: A=5, B=3, C=8 - B chosen again',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 1} />} label="New Request" sublabel="Waiting to route" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="route to B" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {(['A','B','C'] as string[]).map((s, i) => (
+            <ArchNode key={s} icon={<ServerIcon active={activeIdx >= 2 && i === 1} />}
+              label={'Server ' + s}
+              sublabel={conns[activeIdx][i] + ' connections'}
+              active={activeIdx >= 2 && i === 1}
+              danger={i === 2}
+              onClick={() => setActiveIdx(i + 1)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx >= 2 && <div className="arch-failover-banner">Server B chosen - fewest active connections</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_LB_LC}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_LB_LC} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// LB DIAGRAM 6 - Consistent Hashing
+const TOTAL_LB_HASH = 5;
+const LBHashDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Servers placed at positions on a 0 to 2^32 hash ring',
+    'Request key is hashed to a ring position',
+    'Route to first server clockwise from the key position',
+    'Adding a server: only 1/N keys remap - minimal disruption',
+    'Virtual nodes: each server gets many positions for even spread',
+  ];
+  const nodes = ['Node 1 (0-5460)','Node 2 (5461-10922)','Node 3 (10923-16383)'];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-cluster">
+        <div className="arch-cluster__client">
+          <ArchNode icon={<UserIcon active={activeIdx === 1} />} label="Key hashed" sublabel={activeIdx >= 1 ? 'hash(key) = 7638' : 'request'} active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        </div>
+        <Arrow active={activeIdx >= 2} label="clockwise" />
+        <div className="arch-cluster__nodes">
+          {nodes.map((n, i) => (
+            <ArchNode key={i}
+              icon={<CacheIcon active={activeIdx === 2 && i === 1} />}
+              label={'Node ' + (i + 1)}
+              sublabel={activeIdx >= 3 && i === 1 ? 'only 1/3 keys move' : n}
+              active={activeIdx === 2 && i === 1}
+              onClick={() => setActiveIdx(2)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx === 3 && <div className="arch-failover-banner">New node added: only 1/N keys remapped</div>}
+      {activeIdx === 4 && <div className="arch-failover-banner">Virtual nodes: 150 positions per server - even distribution</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_LB_HASH}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_LB_HASH} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// LB DIAGRAM 7 - Health Checks and Failover
+const TOTAL_LB_HEALTH = 5;
+const LBHealthDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Load balancer pings each server every 5 seconds',
+    'Server 2 stops responding to health check pings',
+    'After 3 failures Server 2 marked unhealthy - removed from pool',
+    'All traffic reroutes to Server 1 and Server 3 automatically',
+    'Server 2 recovers, passes checks again - rejoins pool',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />} label="Load Balancer" sublabel="Health pinging" active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 3} label="reroute" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <ArchNode icon={<ServerIcon active={activeIdx >= 3} />} label="Server 1" sublabel="Healthy" active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+          <ArchNode icon={<ServerIcon active={activeIdx === 1} />} label="Server 2"
+            sublabel={activeIdx === 1 ? 'No response!' : activeIdx >= 2 && activeIdx <= 3 ? 'REMOVED' : activeIdx >= 4 ? 'Recovering' : 'Healthy'}
+            active={activeIdx === 1} danger={activeIdx >= 1 && activeIdx <= 3} onClick={() => setActiveIdx(1)} />
+          <ArchNode icon={<ServerIcon active={activeIdx >= 3} />} label="Server 3" sublabel="Healthy" active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+        </div>
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">Server 2 not responding to health checks</div>}
+      {activeIdx === 2 && <div className="arch-danger-banner">Server 2 marked unhealthy - removed from rotation</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">Server 2 recovered - rejoining pool</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_LB_HEALTH}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_LB_HEALTH} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// LB DIAGRAM 8 - Sticky Sessions
+const TOTAL_LB_STICKY = 5;
+const LBStickyDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'User first request hits Server A - LB inserts sticky cookie',
+    'Cookie AWSALB=server-a stored in browser',
+    'All subsequent requests routed to Server A via cookie',
+    'Server A crashes - sticky session lost - user logged out',
+    'Better fix: sessions in Redis - any server handles any user',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx <= 2} />} label="User" sublabel={activeIdx >= 1 ? 'Has AWSALB cookie' : 'First request'} active={activeIdx <= 2} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label={activeIdx >= 2 ? 'cookie->A' : 'first req'} />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />} label="Load Balancer" sublabel={activeIdx >= 1 ? 'Reads cookie' : 'No cookie yet'} active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 1} label="pin to A" />
+        <ArchNode icon={<ServerIcon active={activeIdx >= 1 && activeIdx <= 2} />}
+          label="Server A"
+          sublabel={activeIdx === 3 ? 'CRASHED' : 'Pinned session'}
+          active={activeIdx >= 1 && activeIdx <= 2} danger={activeIdx === 3}
+          onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<RedisIcon active={activeIdx === 4} />} label="Redis" sublabel={activeIdx === 4 ? 'Shared sessions - better!' : 'Better option'} active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 3 && <div className="arch-danger-banner">Server A crashed - session lost - user logged out!</div>}
+      {activeIdx === 4 && <div className="arch-failover-banner">Redis sessions: any server handles any user</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_LB_STICKY}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_LB_STICKY} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// LB DIAGRAM 9 - High Availability Active-Passive
+const TOTAL_LB_HA = 5;
+const LBHADiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Active LB handles all traffic - passive LB on standby',
+    'Both share a Virtual IP address (VIP)',
+    'Active LB fails - passive detects via heartbeat',
+    'Passive takes over VIP within seconds - zero downtime',
+    'Multi-region: DNS routes to healthy region if DC fails',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active />} label="Clients" sublabel="Send to VIP" active />
+        <Arrow active label="VIP traffic" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <ArchNode icon={<NetworkIcon active={activeIdx <= 1} />}
+            label="Active LB"
+            sublabel={activeIdx >= 2 ? 'FAILED' : 'Handles all traffic'}
+            active={activeIdx <= 1} danger={activeIdx >= 2 && activeIdx <= 3}
+            onClick={() => setActiveIdx(1)} />
+          <ArchNode icon={<NetworkIcon active={activeIdx >= 3} />}
+            label="Passive LB"
+            sublabel={activeIdx >= 3 ? 'Now ACTIVE - took VIP' : 'Standby'}
+            active={activeIdx >= 3}
+            onClick={() => setActiveIdx(3)} />
+        </div>
+        <Arrow active label="to servers" />
+        <ArchNode icon={<ServerIcon active />} label="App Servers" sublabel="Always healthy" active />
+      </div>
+      {activeIdx === 2 && <div className="arch-danger-banner">Active LB failed - passive detecting via heartbeat</div>}
+      {activeIdx >= 3 && <div className="arch-failover-banner">Passive took over VIP - zero downtime for users</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_LB_HA}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_LB_HA} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// LB DIAGRAM 10 - Practice: SSL + Rate Limiting + Drain
+const TOTAL_LB_PRACTICE = 5;
+const LBPracticeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'HTTPS request arrives at load balancer from client',
+    'SSL terminates at LB - backend servers receive plain HTTP',
+    'Rate limiter rejects excess requests before hitting app servers',
+    'Connection draining: server removed gracefully - in-flight requests complete',
+    'LB collects metrics: latency, error rates, connection counts per server',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />} label="Client" sublabel="HTTPS request" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="HTTPS" />
+        <ArchNode icon={<LockIcon active={activeIdx >= 1} />} label="Load Balancer"
+          sublabel={activeIdx === 1 ? 'SSL terminates' : activeIdx === 2 ? 'Rate limiter' : activeIdx === 3 ? 'Drain mode' : 'Monitoring'}
+          active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 1 && activeIdx !== 2} label="HTTP" />
+        <ArchNode icon={<ServerIcon active={activeIdx >= 1 && activeIdx !== 2 && activeIdx !== 3} />}
+          label="App Servers"
+          sublabel={activeIdx === 3 ? 'Draining...' : 'No SSL overhead'}
+          active={activeIdx >= 1 && activeIdx !== 2 && activeIdx !== 3}
+          danger={activeIdx === 3}
+          onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-failover-banner">SSL terminates at LB - saves backend CPU</div>}
+      {activeIdx === 2 && <div className="arch-danger-banner">Rate limit exceeded - request rejected at edge</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">Connection draining: existing requests complete before shutdown</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_LB_PRACTICE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_LB_PRACTICE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // DISPATCHER
 // ─────────────────────────────────────────────────────────────────────────────
 const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) => {
   const [activeIdx, setActiveIdx] = useState(0);
 
   const t = (topicTitle || title || '').toLowerCase();
+  const isLB    = topic === 'load-balancing';
   const isSC    = topic === 'scalability';
   const isSA    = topic === 'system-architecture';
+
+  // ── Load Balancing diagrams ───────────────────────────────────────────────
+  const getLBDiagram = (): React.ReactNode => {
+    if (t.includes('fundamentals'))                                                   return <LBFundamentalsDiagram  activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('types') || t.includes('layer 4') || t.includes('layer 7'))       return <LBTypesDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('round-robin') || t.includes('round robin') || t.includes('weighted round')) return <LBRoundRobinDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('least connections') || t.includes('least conn'))                  return <LBLeastConnDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('ip hash') || t.includes('consistent hash'))                       return <LBHashDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('health') || t.includes('failover'))                               return <LBHealthDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('sticky') || t.includes('session persistence'))                    return <LBStickyDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('high availability') || t.includes('redundancy'))                  return <LBHADiagram            activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('algorithms') || t.includes('load balancing algorithm'))           return <LBAlgoDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <LBPracticeDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  };
+
+  const getLBTotal = (): number => {
+    if (t.includes('fundamentals'))                                                   return TOTAL_LB_FUND;
+    if (t.includes('types') || t.includes('layer 4') || t.includes('layer 7'))       return TOTAL_LB_TYPES;
+    if (t.includes('round-robin') || t.includes('round robin') || t.includes('weighted round')) return TOTAL_LB_RR;
+    if (t.includes('least connections') || t.includes('least conn'))                  return TOTAL_LB_LC;
+    if (t.includes('ip hash') || t.includes('consistent hash'))                       return TOTAL_LB_HASH;
+    if (t.includes('health') || t.includes('failover'))                               return TOTAL_LB_HEALTH;
+    if (t.includes('sticky') || t.includes('session persistence'))                    return TOTAL_LB_STICKY;
+    if (t.includes('high availability') || t.includes('redundancy'))                  return TOTAL_LB_HA;
+    if (t.includes('algorithms'))                                                      return TOTAL_LB_ALGO;
+    return TOTAL_LB_PRACTICE;
+  };
 
   // ── Scalability diagrams ──────────────────────────────────────────────────
   const getSCDiagram = (): React.ReactNode => {
@@ -1385,7 +1798,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
     return TOTAL_BASICS;
   };
 
-  const total = isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
+  const total = isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
 
   useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle, topic]);
 
@@ -1397,7 +1810,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
 
   return (
     <div className="module-animation" aria-label="Architecture diagram">
-      {isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
+      {isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
     </div>
   );
 };

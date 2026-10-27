@@ -5,6 +5,7 @@ const Module = require('../models/Module');
 const CACHING_MODULES = require('./cachingContent');
 const SYSTEM_ARCHITECTURE_MODULES = require('./systemArchitectureContent');
 const SCALABILITY_MODULES = require('./scalabilityContent');
+const LOAD_BALANCING_MODULES = require('./loadBalancingContent');
 
 const TOPICS = [
   {
@@ -30,6 +31,14 @@ const TOPICS = [
     order: 3,
     locked: false,
     modules: SCALABILITY_MODULES,
+  },
+  {
+    slug: 'load-balancing',
+    title: 'Load Balancing',
+    description: 'Load balancing algorithms, Layer 4 vs Layer 7, consistent hashing, health checks, sticky sessions, and high availability.',
+    order: 4,
+    locked: false,
+    modules: LOAD_BALANCING_MODULES,
   },
 ];
 

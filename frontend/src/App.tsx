@@ -13,6 +13,7 @@ import HLD       from './pages/HLD';
 import Caching          from './pages/Caching';
 import SystemArchitecture from './pages/SystemArchitecture';
 import Scalability      from './pages/Scalability';
+import LoadBalancing    from './pages/LoadBalancing';
 import Profile   from './pages/Profile';
 import AuthNav   from './components/AuthNav';
 
@@ -66,6 +67,7 @@ const AppRoutes = () => {
         <Route path="/learning/hld/caching"             element={<ProtectedRoute><Caching /></ProtectedRoute>} />
         <Route path="/learning/hld/system-architecture" element={<ProtectedRoute><SystemArchitecture /></ProtectedRoute>} />
         <Route path="/learning/hld/scalability"         element={<ProtectedRoute><Scalability /></ProtectedRoute>} />
+        <Route path="/learning/hld/load-balancing"      element={<ProtectedRoute><LoadBalancing /></ProtectedRoute>} />
         <Route path="/profile"            element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
         <Route path="*" element={<Navigate to="/signup" replace />} />
