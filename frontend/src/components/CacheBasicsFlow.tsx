@@ -88,8 +88,6 @@ interface FlowNodeData {
   active?: boolean;
   hit?: boolean;
   miss?: boolean;
-  nodeId?: string;
-  onNodeClick?: (id: string) => void;
   [key: string]: unknown;
 }
 
@@ -100,10 +98,6 @@ const FlowNode = ({ data }: { data: FlowNodeData }) => {
     ? `0 0 0 3px ${data.miss ? 'rgba(220,38,38,0.2)' : data.hit ? 'rgba(34,197,94,0.2)' : 'rgba(124,92,252,0.2)'}, 0 8px 24px rgba(124,92,252,0.15)`
     : '0 2px 8px rgba(0,0,0,0.06)';
 
-  const handleClick = () => {
-    if (data.onNodeClick && data.nodeId) data.onNodeClick(data.nodeId as string);
-  };
-
   return (
     <>
       <Handle type="target" position={Position.Left}   style={{ opacity: 0 }} />
@@ -113,22 +107,12 @@ const FlowNode = ({ data }: { data: FlowNodeData }) => {
       <div
         className={`flow-node${data.active ? ' flow-node--active' : ''}`}
         style={{ background: bg, border: `2px solid ${borderColor}`, boxShadow: shadow, cursor: 'pointer' }}
-        onClick={handleClick}
-        role="button"
-        tabIndex={0}
-        onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleClick()}
-        aria-label={`Go to step: ${data.label}`}
       >
         <div className="flow-node__icon">{data.icon}</div>
         <div className="flow-node__label" style={{ color: data.active ? borderColor : C.text }}>{data.label}</div>
-        {data.sublabel && (
-          <div className="flow-node__sublabel">{data.sublabel}</div>
-        )}
+        {data.sublabel && <div className="flow-node__sublabel">{data.sublabel}</div>}
         {data.active && <div className="flow-node__pulse" style={{ background: borderColor }} />}
-        {/* Tap hint ring on inactive nodes */}
-        {!data.active && (
-          <div className="flow-node__tap-hint" />
-        )}
+        {!data.active && <div className="flow-node__tap-hint" />}
       </div>
     </>
   );
@@ -197,34 +181,28 @@ const getPositions = () => {
 };
 
 // ── Build nodes ───────────────────────────────────────────────────────────────
-function buildNodes(step: typeof STEPS[0], onNodeClick: (id: string) => void): Node[] {
+function buildNodes(step: typeof STEPS[0]): Node[] {
   const isActive = (id: string) => step.activeNodes.includes(id);
   const pos = getPositions();
   return [
     {
       id: 'user', type: 'flowNode', position: pos.user,
-      data: { label: 'User', sublabel: 'Browser / App', icon: UserSVG(isActive('user')),
-              active: isActive('user'), nodeId: 'user', onNodeClick },
+      data: { label: 'User', sublabel: 'Browser / App', icon: UserSVG(isActive('user')), active: isActive('user') },
     },
     {
       id: 'server', type: 'flowNode', position: pos.server,
-      data: { label: step.serverLabel || 'App Server', sublabel: 'Business logic',
-              icon: ServerSVG(isActive('server')), active: isActive('server'),
-              nodeId: 'server', onNodeClick },
+      data: { label: step.serverLabel || 'App Server', sublabel: 'Business logic', icon: ServerSVG(isActive('server')), active: isActive('server') },
     },
     {
       id: 'cache', type: 'flowNode', position: pos.cache,
       data: { label: 'Cache',
               sublabel: step.cacheHit ? 'HIT - <1ms' : step.cacheMiss ? 'MISS' : 'Redis',
               icon: CacheSVG(isActive('cache'), step.cacheHit, step.cacheMiss),
-              active: isActive('cache'), hit: !!step.cacheHit, miss: !!step.cacheMiss,
-              nodeId: 'cache', onNodeClick },
+              active: isActive('cache'), hit: !!step.cacheHit, miss: !!step.cacheMiss },
     },
     {
       id: 'db', type: 'flowNode', position: pos.db,
-      data: { label: 'Database', sublabel: 'Source of truth',
-              icon: DatabaseSVG(isActive('db')), active: isActive('db'),
-              nodeId: 'db', onNodeClick },
+      data: { label: 'Database', sublabel: 'Source of truth', icon: DatabaseSVG(isActive('db')), active: isActive('db') },
     },
   ];
 }
@@ -266,20 +244,20 @@ const CacheBasicsFlow: React.FC = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [paused, setPaused]     = useState(false);
 
-  // When user clicks a node, jump to the mapped step and pause auto-play
-  const handleNodeClick = useCallback((nodeId: string) => {
-    const target = STEPS[stepIdx].clickNodeStep[nodeId as keyof typeof STEPS[0]['clickNodeStep']];
+  // React Flow's onNodeClick — receives the node object, id is node.id
+  const handleNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
+    const target = STEPS[stepIdx].clickNodeStep[node.id as keyof typeof STEPS[0]['clickNodeStep']];
     if (target !== undefined) {
       setStepIdx(target);
       setPaused(true);
     }
   }, [stepIdx]);
 
-  // Rebuild graph whenever step or handler changes
+  // Rebuild graph whenever step changes
   useEffect(() => {
-    setNodes(buildNodes(STEPS[stepIdx], handleNodeClick));
+    setNodes(buildNodes(STEPS[stepIdx]));
     setEdges(buildEdges(STEPS[stepIdx]));
-  }, [stepIdx, handleNodeClick]);
+  }, [stepIdx]);
 
   // Auto-play (resumes after 6s of inactivity)
   useEffect(() => {
@@ -297,10 +275,8 @@ const CacheBasicsFlow: React.FC = () => {
 
   return (
     <div className="cbf-wrapper">
-      {/* ── Tap hint ──────────────────────────────────────────────────────── */}
       <div className="cbf-tap-hint">Tap any node to jump to that step</div>
 
-      {/* ── Flow graph ────────────────────────────────────────────────────── */}
       <div className="cbf-graph">
         <ReactFlow
           nodes={nodes}
@@ -308,6 +284,7 @@ const CacheBasicsFlow: React.FC = () => {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           nodeTypes={nodeTypes}
+          onNodeClick={handleNodeClick}
           fitView
           fitViewOptions={{ padding: 0.28 }}
           panOnDrag={false}
@@ -327,7 +304,6 @@ const CacheBasicsFlow: React.FC = () => {
         </ReactFlow>
       </div>
 
-      {/* ── Step info ─────────────────────────────────────────────────────── */}
       <div className="cbf-info">
         <span className="cbf-info__pill">{stepIdx + 1} / {STEPS.length}</span>
         <div className="cbf-info__content">
@@ -336,7 +312,6 @@ const CacheBasicsFlow: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Nav ───────────────────────────────────────────────────────────── */}
       <div className="cbf-nav">
         <button className="cbf-nav__btn" onClick={() => goTo(stepIdx - 1)} disabled={stepIdx === 0}>
           &#8592; Prev
