@@ -13,7 +13,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import './CacheBasicsFlow.css';
 
-// ── Color tokens (match SysMind light theme) ──────────────────────────────────
+// ── Color tokens ──────────────────────────────────────────────────────────────
 const C = {
   primary:   '#7C5CFC',
   primaryBg: '#EEE9FF',
@@ -29,7 +29,7 @@ const C = {
 };
 
 // ── Step definitions ──────────────────────────────────────────────────────────
-// Each step declares which node IDs are "active" and which edge IDs are "animated"
+// clickNodeStep: maps node id -> which step index clicking it jumps to
 const STEPS = [
   {
     label: 'Request',
@@ -38,6 +38,7 @@ const STEPS = [
     animatedEdges: ['user-server'],
     edgeColor: { 'user-server': C.primary },
     serverLabel: 'App Server',
+    clickNodeStep: { user: 0, server: 0, cache: 1, db: 3 },
   },
   {
     label: 'Check Cache',
@@ -46,6 +47,7 @@ const STEPS = [
     animatedEdges: ['server-cache'],
     edgeColor: { 'server-cache': C.primary },
     serverLabel: 'App Server',
+    clickNodeStep: { user: 0, server: 1, cache: 2, db: 3 },
   },
   {
     label: 'Cache Hit',
@@ -55,6 +57,7 @@ const STEPS = [
     edgeColor: { 'cache-server': C.green, 'server-user': C.green },
     serverLabel: 'App Server',
     cacheHit: true,
+    clickNodeStep: { user: 0, server: 2, cache: 2, db: 3 },
   },
   {
     label: 'Cache Miss',
@@ -64,14 +67,16 @@ const STEPS = [
     edgeColor: { 'server-db': C.red },
     serverLabel: 'App Server',
     cacheMiss: true,
+    clickNodeStep: { user: 0, server: 3, cache: 1, db: 4 },
   },
   {
     label: 'Store & Return',
-    description: 'Save result in cache for next time, return to user',
+    description: 'Save result in cache for next time, then return to user',
     activeNodes: ['db', 'cache', 'server', 'user'],
     animatedEdges: ['db-server', 'server-cache', 'server-user'],
     edgeColor: { 'db-server': C.green, 'server-cache': C.primary, 'server-user': C.green },
     serverLabel: 'Stores in cache',
+    clickNodeStep: { user: 4, server: 4, cache: 4, db: 4 },
   },
 ];
 
@@ -83,15 +88,21 @@ interface FlowNodeData {
   active?: boolean;
   hit?: boolean;
   miss?: boolean;
+  nodeId?: string;
+  onNodeClick?: (id: string) => void;
   [key: string]: unknown;
 }
 
 const FlowNode = ({ data }: { data: FlowNodeData }) => {
   const borderColor = data.miss ? C.red : data.hit ? C.green : data.active ? C.primary : C.border;
-  const bg = data.miss ? C.redBg : data.hit ? C.greenBg : data.active ? C.primaryBg : C.card;
-  const shadow = data.active
+  const bg          = data.miss ? C.redBg : data.hit ? C.greenBg : data.active ? C.primaryBg : C.card;
+  const shadow      = data.active
     ? `0 0 0 3px ${data.miss ? 'rgba(220,38,38,0.2)' : data.hit ? 'rgba(34,197,94,0.2)' : 'rgba(124,92,252,0.2)'}, 0 8px 24px rgba(124,92,252,0.15)`
     : '0 2px 8px rgba(0,0,0,0.06)';
+
+  const handleClick = () => {
+    if (data.onNodeClick && data.nodeId) data.onNodeClick(data.nodeId as string);
+  };
 
   return (
     <>
@@ -101,14 +112,23 @@ const FlowNode = ({ data }: { data: FlowNodeData }) => {
       <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
       <div
         className={`flow-node${data.active ? ' flow-node--active' : ''}`}
-        style={{ background: bg, border: `2px solid ${borderColor}`, boxShadow: shadow }}
+        style={{ background: bg, border: `2px solid ${borderColor}`, boxShadow: shadow, cursor: 'pointer' }}
+        onClick={handleClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleClick()}
+        aria-label={`Go to step: ${data.label}`}
       >
         <div className="flow-node__icon">{data.icon}</div>
         <div className="flow-node__label" style={{ color: data.active ? borderColor : C.text }}>{data.label}</div>
         {data.sublabel && (
-          <div className="flow-node__sublabel" style={{ color: C.textSec }}>{data.sublabel}</div>
+          <div className="flow-node__sublabel">{data.sublabel}</div>
         )}
         {data.active && <div className="flow-node__pulse" style={{ background: borderColor }} />}
+        {/* Tap hint ring on inactive nodes */}
+        {!data.active && (
+          <div className="flow-node__tap-hint" />
+        )}
       </div>
     </>
   );
@@ -118,14 +138,14 @@ const nodeTypes = { flowNode: FlowNode };
 
 // ── SVG Icons ─────────────────────────────────────────────────────────────────
 const UserSVG = (active: boolean) => (
-  <svg width="32" height="38" viewBox="0 0 44 52" fill="none">
+  <svg width="28" height="34" viewBox="0 0 44 52" fill="none">
     <circle cx="22" cy="14" r="10" fill={active ? C.primary : C.primaryBg} stroke={active ? C.primary : '#C4B5FD'} strokeWidth="2"/>
     <path d="M4 46c0-9.941 8.059-18 18-18s18 8.059 18 18" fill={active ? C.primaryBg : '#F5F3FF'} stroke={active ? C.primary : '#C4B5FD'} strokeWidth="2" strokeLinecap="round"/>
   </svg>
 );
 
 const ServerSVG = (active: boolean) => (
-  <svg width="36" height="36" viewBox="0 0 48 48" fill="none">
+  <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
     <rect x="4" y="8"  width="40" height="10" rx="3" fill={active ? C.primary : C.primaryBg} stroke={active ? C.primary : '#C4B5FD'} strokeWidth="1.5"/>
     <rect x="4" y="22" width="40" height="10" rx="3" fill={active ? C.primaryBg : '#F5F3FF'} stroke={active ? C.primary : '#C4B5FD'} strokeWidth="1.5"/>
     <rect x="4" y="36" width="40" height="10" rx="3" fill={active ? C.primaryBg : '#F5F3FF'} stroke={active ? C.primary : '#C4B5FD'} strokeWidth="1.5"/>
@@ -137,7 +157,7 @@ const CacheSVG = (active: boolean, hit?: boolean, miss?: boolean) => {
   const color = miss ? C.red : hit ? C.green : active ? C.primary : '#C4B5FD';
   const bg    = miss ? C.redBg : hit ? C.greenBg : active ? C.primaryBg : '#F9F8FF';
   return (
-    <svg width="36" height="40" viewBox="0 0 48 52" fill="none">
+    <svg width="32" height="36" viewBox="0 0 48 52" fill="none">
       <ellipse cx="24" cy="10" rx="20" ry="7" fill={active ? color : bg} stroke={color} strokeWidth="2"/>
       <rect x="4" y="10" width="40" height="28" fill={bg} stroke={color} strokeWidth="2"/>
       <ellipse cx="24" cy="38" rx="20" ry="7" fill={bg} stroke={color} strokeWidth="2"/>
@@ -147,69 +167,71 @@ const CacheSVG = (active: boolean, hit?: boolean, miss?: boolean) => {
 };
 
 const DatabaseSVG = (active: boolean) => (
-  <svg width="36" height="40" viewBox="0 0 44 52" fill="none">
+  <svg width="32" height="36" viewBox="0 0 44 52" fill="none">
     <ellipse cx="22" cy="10" rx="18" ry="6" fill={active ? '#22c55e' : '#dcfce7'} stroke={active ? '#16a34a' : '#86efac'} strokeWidth="2"/>
     <rect x="4" y="10" width="36" height="28" fill={active ? '#f0fdf4' : '#f9fffe'} stroke={active ? '#16a34a' : '#86efac'} strokeWidth="2"/>
     <ellipse cx="22" cy="38" rx="18" ry="6" fill={active ? '#dcfce7' : '#f0fff4'} stroke={active ? '#16a34a' : '#86efac'} strokeWidth="2"/>
   </svg>
 );
 
-// ── Build nodes from step ─────────────────────────────────────────────────────
-function buildNodes(step: typeof STEPS[0]): Node[] {
+// ── Node positions — responsive ───────────────────────────────────────────────
+// We use a compact layout that works on both mobile and desktop
+// Desktop: horizontal with cache top-right, db bottom-right
+// We keep it simple: left->right flow with cache/db stacked on right
+const getPositions = () => {
+  const mobile = typeof window !== 'undefined' && window.innerWidth < 600;
+  if (mobile) {
+    return {
+      user:   { x: 10,  y: 80  },
+      server: { x: 145, y: 80  },
+      cache:  { x: 280, y: 10  },
+      db:     { x: 280, y: 155 },
+    };
+  }
+  return {
+    user:   { x: 30,  y: 110 },
+    server: { x: 210, y: 110 },
+    cache:  { x: 410, y: 30  },
+    db:     { x: 410, y: 190 },
+  };
+};
+
+// ── Build nodes ───────────────────────────────────────────────────────────────
+function buildNodes(step: typeof STEPS[0], onNodeClick: (id: string) => void): Node[] {
   const isActive = (id: string) => step.activeNodes.includes(id);
+  const pos = getPositions();
   return [
     {
-      id: 'user',
-      type: 'flowNode',
-      position: { x: 20, y: 100 },
-      data: {
-        label: 'User',
-        sublabel: 'Browser / App',
-        icon: UserSVG(isActive('user')),
-        active: isActive('user'),
-      },
+      id: 'user', type: 'flowNode', position: pos.user,
+      data: { label: 'User', sublabel: 'Browser / App', icon: UserSVG(isActive('user')),
+              active: isActive('user'), nodeId: 'user', onNodeClick },
     },
     {
-      id: 'server',
-      type: 'flowNode',
-      position: { x: 200, y: 100 },
-      data: {
-        label: step.serverLabel || 'App Server',
-        sublabel: 'Business logic',
-        icon: ServerSVG(isActive('server')),
-        active: isActive('server'),
-      },
+      id: 'server', type: 'flowNode', position: pos.server,
+      data: { label: step.serverLabel || 'App Server', sublabel: 'Business logic',
+              icon: ServerSVG(isActive('server')), active: isActive('server'),
+              nodeId: 'server', onNodeClick },
     },
     {
-      id: 'cache',
-      type: 'flowNode',
-      position: { x: 380, y: 20 },
-      data: {
-        label: 'Cache',
-        sublabel: step.cacheHit ? 'HIT - <1ms' : step.cacheMiss ? 'MISS' : 'Redis / Memcached',
-        icon: CacheSVG(isActive('cache'), step.cacheHit, step.cacheMiss),
-        active: isActive('cache'),
-        hit:  !!step.cacheHit,
-        miss: !!step.cacheMiss,
-      },
+      id: 'cache', type: 'flowNode', position: pos.cache,
+      data: { label: 'Cache',
+              sublabel: step.cacheHit ? 'HIT - <1ms' : step.cacheMiss ? 'MISS' : 'Redis',
+              icon: CacheSVG(isActive('cache'), step.cacheHit, step.cacheMiss),
+              active: isActive('cache'), hit: !!step.cacheHit, miss: !!step.cacheMiss,
+              nodeId: 'cache', onNodeClick },
     },
     {
-      id: 'db',
-      type: 'flowNode',
-      position: { x: 380, y: 180 },
-      data: {
-        label: 'Database',
-        sublabel: 'Source of truth',
-        icon: DatabaseSVG(isActive('db')),
-        active: isActive('db'),
-      },
+      id: 'db', type: 'flowNode', position: pos.db,
+      data: { label: 'Database', sublabel: 'Source of truth',
+              icon: DatabaseSVG(isActive('db')), active: isActive('db'),
+              nodeId: 'db', onNodeClick },
     },
   ];
 }
 
-// ── Build edges from step ─────────────────────────────────────────────────────
+// ── Build edges ───────────────────────────────────────────────────────────────
 function buildEdges(step: typeof STEPS[0]): Edge[] {
-  const allEdgeDefs = [
+  const defs = [
     { id: 'user-server',  source: 'user',   target: 'server', label: 'request'  },
     { id: 'server-user',  source: 'server', target: 'user',   label: 'response' },
     { id: 'server-cache', source: 'server', target: 'cache',  label: 'lookup'   },
@@ -217,41 +239,20 @@ function buildEdges(step: typeof STEPS[0]): Edge[] {
     { id: 'server-db',    source: 'server', target: 'db',     label: 'query'    },
     { id: 'db-server',    source: 'db',     target: 'server', label: 'data'     },
   ];
-
-  return allEdgeDefs.map(def => {
-    const isAnimated = step.animatedEdges.includes(def.id);
+  return defs.map(def => {
+    const on    = step.animatedEdges.includes(def.id);
     const color = step.edgeColor?.[def.id] ?? C.border;
     return {
-      id: def.id,
-      source: def.source,
-      target: def.target,
-      label: isAnimated ? def.label : '',
-      animated: isAnimated,
-      style: {
-        stroke: isAnimated ? color : C.border,
-        strokeWidth: isAnimated ? 2.5 : 1.5,
-        opacity: isAnimated ? 1 : 0.35,
-      },
-      labelStyle: {
-        fontSize: 10,
-        fontWeight: 700,
-        fill: color,
-      },
-      labelBgStyle: {
-        fill: C.bg,
-        fillOpacity: 0.9,
-        rx: 4,
-      },
-      markerEnd: isAnimated ? {
+      id: def.id, source: def.source, target: def.target,
+      label: on ? def.label : '',
+      animated: on,
+      style: { stroke: on ? color : C.border, strokeWidth: on ? 2.5 : 1.5, opacity: on ? 1 : 0.3 },
+      labelStyle: { fontSize: 10, fontWeight: 700, fill: color },
+      labelBgStyle: { fill: C.bg, fillOpacity: 0.9, rx: 4 },
+      markerEnd: {
         type: MarkerType.ArrowClosed,
-        color,
-        width: 16,
-        height: 16,
-      } : {
-        type: MarkerType.ArrowClosed,
-        color: C.border,
-        width: 12,
-        height: 12,
+        color: on ? color : C.border,
+        width: on ? 16 : 12, height: on ? 16 : 12,
       },
       type: 'smoothstep',
     };
@@ -259,35 +260,47 @@ function buildEdges(step: typeof STEPS[0]): Edge[] {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-interface Props {
-  /** If true, show the React Flow version; if false or omitted, fall back to old animation */
-  active?: boolean;
-}
+const CacheBasicsFlow: React.FC = () => {
+  const [stepIdx, setStepIdx]   = useState(0);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [paused, setPaused]     = useState(false);
 
-const CacheBasicsFlow: React.FC<Props> = () => {
-  const [stepIdx, setStepIdx] = useState(0);
-  const [nodes, setNodes, onNodesChange] = useNodesState(buildNodes(STEPS[0]));
-  const [edges, setEdges, onEdgesChange] = useEdgesState(buildEdges(STEPS[0]));
-
-  // Auto-play
-  useEffect(() => {
-    const iv = setInterval(() => setStepIdx(i => (i + 1) % STEPS.length), 2800);
-    return () => clearInterval(iv);
-  }, []);
-
-  // Rebuild graph on step change
-  useEffect(() => {
-    setNodes(buildNodes(STEPS[stepIdx]));
-    setEdges(buildEdges(STEPS[stepIdx]));
+  // When user clicks a node, jump to the mapped step and pause auto-play
+  const handleNodeClick = useCallback((nodeId: string) => {
+    const target = STEPS[stepIdx].clickNodeStep[nodeId as keyof typeof STEPS[0]['clickNodeStep']];
+    if (target !== undefined) {
+      setStepIdx(target);
+      setPaused(true);
+    }
   }, [stepIdx]);
 
-  const goTo = useCallback((i: number) => setStepIdx(i), []);
+  // Rebuild graph whenever step or handler changes
+  useEffect(() => {
+    setNodes(buildNodes(STEPS[stepIdx], handleNodeClick));
+    setEdges(buildEdges(STEPS[stepIdx]));
+  }, [stepIdx, handleNodeClick]);
+
+  // Auto-play (resumes after 6s of inactivity)
+  useEffect(() => {
+    if (paused) {
+      const t = setTimeout(() => setPaused(false), 6000);
+      return () => clearTimeout(t);
+    }
+    const iv = setInterval(() => setStepIdx(i => (i + 1) % STEPS.length), 2800);
+    return () => clearInterval(iv);
+  }, [paused]);
+
+  const goTo = (i: number) => { setStepIdx(i); setPaused(true); };
 
   const step = STEPS[stepIdx];
 
   return (
     <div className="cbf-wrapper">
-      {/* ── Flow graph ────────────────────────────────────────────────── */}
+      {/* ── Tap hint ──────────────────────────────────────────────────────── */}
+      <div className="cbf-tap-hint">Tap any node to jump to that step</div>
+
+      {/* ── Flow graph ────────────────────────────────────────────────────── */}
       <div className="cbf-graph">
         <ReactFlow
           nodes={nodes}
@@ -296,7 +309,7 @@ const CacheBasicsFlow: React.FC<Props> = () => {
           onEdgesChange={onEdgesChange}
           nodeTypes={nodeTypes}
           fitView
-          fitViewOptions={{ padding: 0.35 }}
+          fitViewOptions={{ padding: 0.28 }}
           panOnDrag={false}
           panOnScroll={false}
           zoomOnScroll={false}
@@ -306,7 +319,7 @@ const CacheBasicsFlow: React.FC<Props> = () => {
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}
-          minZoom={1}
+          minZoom={0.5}
           maxZoom={1}
           proOptions={{ hideAttribution: true }}
         >
@@ -314,7 +327,7 @@ const CacheBasicsFlow: React.FC<Props> = () => {
         </ReactFlow>
       </div>
 
-      {/* ── Step info bar ─────────────────────────────────────────────── */}
+      {/* ── Step info ─────────────────────────────────────────────────────── */}
       <div className="cbf-info">
         <span className="cbf-info__pill">{stepIdx + 1} / {STEPS.length}</span>
         <div className="cbf-info__content">
@@ -323,22 +336,19 @@ const CacheBasicsFlow: React.FC<Props> = () => {
         </div>
       </div>
 
-      {/* ── Prev / dots / next ────────────────────────────────────────── */}
+      {/* ── Nav ───────────────────────────────────────────────────────────── */}
       <div className="cbf-nav">
-        <button className="cbf-nav__btn" onClick={() => goTo(stepIdx - 1)} disabled={stepIdx === 0} aria-label="Previous">
+        <button className="cbf-nav__btn" onClick={() => goTo(stepIdx - 1)} disabled={stepIdx === 0}>
           &#8592; Prev
         </button>
         <div className="cbf-nav__dots">
           {STEPS.map((_, i) => (
-            <button
-              key={i}
+            <button key={i}
               className={`cbf-nav__dot${i === stepIdx ? ' cbf-nav__dot--active' : ''}`}
-              onClick={() => goTo(i)}
-              aria-label={`Step ${i + 1}`}
-            />
+              onClick={() => goTo(i)} aria-label={`Step ${i + 1}`} />
           ))}
         </div>
-        <button className="cbf-nav__btn" onClick={() => goTo(stepIdx + 1)} disabled={stepIdx === STEPS.length - 1} aria-label="Next">
+        <button className="cbf-nav__btn" onClick={() => goTo(stepIdx + 1)} disabled={stepIdx === STEPS.length - 1}>
           Next &#8594;
         </button>
       </div>
