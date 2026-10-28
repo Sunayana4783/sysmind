@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LearningNav from '../components/LearningNav';
 import ModuleAnimation from '../components/ModuleAnimation';
+import CacheBasicsFlow from '../components/CacheBasicsFlow';
 import { learningAPI, quizAPI, activityAPI, type LearningModule, type QuizData, type QuizResult } from '../services/api';
 import '../styles/learning-theme.css';
 import './Caching.css';
@@ -32,8 +34,17 @@ const ContentModule = ({ mod, completed, onComplete, completing, onNext, isLast 
 
       {c.animationSteps?.length > 0 && (
         <div className="mod-block">
-          <h3 className="mod-section-title">How it works</h3>
-          <ModuleAnimation steps={c.animationSteps} topicTitle={mod.title} topic="caching" />
+          <div className="mod-anim-header">
+            <h3 className="mod-section-title">How it works</h3>
+            {mod.title === 'Cache Basics' && (
+              <span className="mod-anim-badge">React Flow</span>
+            )}
+          </div>
+          {mod.title === 'Cache Basics' ? (
+            <CacheBasicsFlow />
+          ) : (
+            <ModuleAnimation steps={c.animationSteps} topicTitle={mod.title} topic="caching" />
+          )}
         </div>
       )}
 

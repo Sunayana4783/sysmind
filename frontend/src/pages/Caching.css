@@ -477,3 +477,23 @@
 }
 .qr-item--correct .qr-item__status { background: #dcfce7; color: #166534; }
 .qr-item--wrong   .qr-item__status { background: #fee2e2; color: #dc2626; }
+
+/* ── Animation header row ────────────────────────────────────────────────── */
+.mod-anim-header {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 0.875rem;
+}
+.mod-anim-header .mod-section-title { margin-bottom: 0; }
+
+.mod-anim-badge {
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #7C5CFC;
+  color: #fff;
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 8px rgba(124,92,252,0.3);
+}
