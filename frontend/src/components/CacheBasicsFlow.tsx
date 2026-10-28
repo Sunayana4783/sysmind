@@ -298,11 +298,16 @@ const CacheBasicsFlow: React.FC<Props> = () => {
           fitView
           fitViewOptions={{ padding: 0.35 }}
           panOnDrag={false}
+          panOnScroll={false}
           zoomOnScroll={false}
           zoomOnPinch={false}
+          zoomOnDoubleClick={false}
+          preventScrolling={false}
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}
+          minZoom={1}
+          maxZoom={1}
           proOptions={{ hideAttribution: true }}
         >
           <Background color={C.border} gap={20} size={1} />
