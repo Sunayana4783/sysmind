@@ -1288,6 +1288,387 @@ const SCSpikeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// DATABASE DESIGN DIAGRAMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// DB DIAGRAM 1 - Fundamentals: entities + schema
+const TOTAL_DB_FUND = 5;
+const DBFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Identify entities: User, Order, Product - things your app tracks',
+    'Add attributes to each entity: User has name, email, password',
+    'Define relationships: User places many Orders',
+    'Translate to schema: tables with columns and foreign keys',
+    'Optimise: add indexes based on your query patterns',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}     label="User Entity"    sublabel="name, email"      active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 2} label="places" />
+        <ArchNode icon={<ServerIcon active={activeIdx === 2} />}   label="Order Entity"   sublabel="date, total"      active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 2} label="contains" />
+        <ArchNode icon={<CacheIcon active={activeIdx === 2} />}    label="Product Entity" sublabel="name, price"      active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<DatabaseIcon active={activeIdx >= 3} />}  label="Schema"         sublabel="Tables + FK"      active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="add" />
+        <ArchNode icon={<LockIcon active={activeIdx >= 4} />}      label="Indexes"        sublabel="Query patterns"   active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DB_FUND}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DB_FUND} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DB DIAGRAM 2 - SQL vs NoSQL
+const TOTAL_DB_SQLNOSQL = 5;
+const DBSqlNoSqlDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const isNoSQL = activeIdx >= 3;
+  const descs = [
+    'SQL: fixed schema tables with rows and columns',
+    'SQL: tables linked by foreign keys, queried with JOIN',
+    'SQL: ACID transactions guarantee consistency',
+    'NoSQL: flexible JSON documents, no fixed schema',
+    'NoSQL: scales horizontally, eventual consistency',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={`arch-path${!isNoSQL ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--read">SQL (PostgreSQL)</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<DatabaseIcon active={activeIdx === 0} />} label="Users Table" sublabel="id, name, email" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+            <VertArrow active={activeIdx >= 1} label="JOIN" />
+            <ArchNode icon={<DatabaseIcon active={activeIdx === 1} />} label="Orders Table" sublabel="id, user_id FK" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+            {activeIdx === 2 && <div className="arch-failover-banner" style={{ marginTop: '0.5rem' }}>ACID: atomic, consistent, isolated, durable</div>}
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={`arch-path${isNoSQL ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--write">NoSQL (MongoDB)</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<CacheIcon active={activeIdx === 3} />} label="User Doc" sublabel='{name, orders:[]}' active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+            <VertArrow active={activeIdx >= 4} label="shard" />
+            <div className="arch-row arch-row--center" style={{ gap: '0.3rem' }}>
+              {['Node 1','Node 2','Node 3'].map(n => (
+                <ArchNode key={n} icon={<ServerIcon active={activeIdx >= 4} />} label={n} sublabel="subset" active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DB_SQLNOSQL}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DB_SQLNOSQL} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DB DIAGRAM 3 - Data Modeling (ER diagram style)
+const TOTAL_DB_MODEL = 5;
+const DBModelDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Entities: User, Order, Product - draw the boxes first',
+    'One-to-many: User(1) places Orders(many) - FK user_id in Orders',
+    'Many-to-many: Orders contain Products via order_items junction table',
+    'Data types: id BIGINT, email VARCHAR(255), price DECIMAL(10,2)',
+    'Constraints: NOT NULL, UNIQUE on email, FOREIGN KEY enforced',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx >= 0} />}       label="User"        sublabel="PK: id"            active={activeIdx >= 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="1:many" />
+        <ArchNode icon={<ServerIcon active={activeIdx >= 1} />}     label="Order"       sublabel="FK: user_id"       active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="via" />
+        <ArchNode icon={<LockIcon active={activeIdx >= 2} />}       label="order_items" sublabel="junction table"    active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 2} label="refs" />
+        <ArchNode icon={<CacheIcon active={activeIdx >= 2} />}      label="Product"     sublabel="PK: id"            active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<DatabaseIcon active={activeIdx >= 3} />}   label="Data Types"  sublabel="BIGINT, VARCHAR"   active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="plus" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 4} />}    label="Constraints" sublabel="NOT NULL, UNIQUE"  active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DB_MODEL}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DB_MODEL} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DB DIAGRAM 4 - Normalization
+const TOTAL_DB_NORM = 5;
+const DBNormDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Unnormalised: address duplicated in every order row',
+    'Extract address into separate Customers table',
+    '3NF achieved: each fact stored exactly once',
+    'Query requires JOIN - slightly slower read',
+    'Denormalise: cache customer_name in orders for hot read path',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={`arch-path${activeIdx <= 2 ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--read">NORMALISED (3NF)</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<UserIcon active={activeIdx >= 1} />}       label="Customers" sublabel="id, name, address"  active={activeIdx >= 1} onClick={() => setActiveIdx(1)} danger={activeIdx === 0} />
+            <VertArrow active={activeIdx >= 1} label="FK" />
+            <ArchNode icon={<DatabaseIcon active={activeIdx >= 1} />}   label="Orders"    sublabel="id, customer_id FK" active={activeIdx >= 1} onClick={() => setActiveIdx(2)} />
+            {activeIdx === 0 && <div className="arch-danger-banner" style={{ marginTop: '0.5rem' }}>address duplicated in every row!</div>}
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={`arch-path${activeIdx >= 3 ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--write">DENORMALISED</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<DatabaseIcon active={activeIdx >= 4} />}   label="Orders"    sublabel="+ customer_name col" active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+            {activeIdx >= 4 && <div className="arch-failover-banner" style={{ marginTop: '0.5rem' }}>No JOIN needed - read path faster</div>}
+            {activeIdx === 3 && <ArchNode icon={<ServerIcon active />} label="JOIN needed" sublabel="3-table join" active />}
+          </div>
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DB_NORM}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DB_NORM} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DB DIAGRAM 5 - Indexing
+const TOTAL_DB_INDEX = 5;
+const DBIndexDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'No index: find user by email scans ALL 10M rows - O(n)',
+    'Full table scan: reads every row one by one - slow!',
+    'Add index: CREATE INDEX idx_email ON users(email)',
+    'B-tree lookup: jump to matching row in O(log n)',
+    'Same query: 200ms drops to under 1ms with index',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon active={activeIdx === 0} />}  label="Query"        sublabel="WHERE email=x"    active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label={activeIdx <= 1 ? 'full scan' : 'index lookup'} />
+        <ArchNode icon={<DatabaseIcon active={activeIdx >= 1} />} label="Users Table"  sublabel="10M rows"         active={activeIdx >= 1} danger={activeIdx <= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 3} label="O(log n)" />
+        <ArchNode icon={<LockIcon active={activeIdx >= 2} />}     label="B-tree Index" sublabel="idx_email"        active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      {activeIdx <= 1 && <div className="arch-danger-banner">Full scan: reads all 10M rows - 200ms!</div>}
+      {activeIdx >= 3 && <div className="arch-failover-banner">Index: jumps directly to row - under 1ms</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DB_INDEX}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DB_INDEX} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DB DIAGRAM 6 - Replication
+const TOTAL_DB_REPL = 5;
+const DBReplicationDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'All writes go exclusively to the Primary database',
+    'Primary records every change in the Write-Ahead Log (WAL)',
+    'Replicas read the WAL and apply the same changes',
+    'Read queries distributed across replicas - 3x read capacity',
+    'Primary fails: replica promoted automatically in under 30 seconds',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon active={activeIdx <= 2} />}    label="App Server"   sublabel="Routes writes/reads"  active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active label="writes" />
+        <ArchNode icon={<DatabaseIcon active={activeIdx <= 2} />}  label="Primary DB"   sublabel="All writes here"      active={activeIdx <= 2} danger={activeIdx === 4} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        {['Replica 1','Replica 2'].map((r, i) => (
+          <ArchNode key={r} icon={<DatabaseIcon active={activeIdx >= 3 || (activeIdx === 4 && i === 0)} />}
+            label={activeIdx === 4 && i === 0 ? 'New Primary' : r}
+            sublabel={activeIdx >= 3 ? 'Read traffic' : 'Syncing'}
+            active={activeIdx >= 2}
+            onClick={() => setActiveIdx(3)} />
+        ))}
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}   label="WAL Log"      sublabel="Change stream"        active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+      </div>
+      {activeIdx === 4 && <div className="arch-failover-banner">Primary failed - Replica 1 promoted automatically</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DB_REPL}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DB_REPL} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DB DIAGRAM 7 - Sharding
+const TOTAL_DB_SHARD = 5;
+const DBShardDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Single DB: 500GB data, write throughput maxed out',
+    'Define shard key: user_id determines which shard',
+    'Shard 1: user IDs 1 to 10M - independent DB server',
+    'Shard 2: user IDs 10M to 20M - another DB server',
+    'App hashes user_id to find correct shard, routes there',
+  ];
+  const shards = [
+    { label: 'Shard 1', sub: 'IDs 1-10M',    active: activeIdx === 2 },
+    { label: 'Shard 2', sub: 'IDs 10M-20M',  active: activeIdx === 3 },
+    { label: 'Shard 3', sub: 'IDs 20M+',     active: activeIdx >= 4  },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon active />}                      label="App"          sublabel="Routes by shard key"  active />
+        <Arrow active={activeIdx >= 1} label="hash(user_id)" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}    label="Shard Router" sublabel="Picks shard"          active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="route" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {shards.map((s, i) => (
+            <ArchNode key={s.label} icon={<DatabaseIcon active={s.active} />} label={s.label} sublabel={s.sub} active={s.active} onClick={() => setActiveIdx(i + 2)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx === 0 && <div className="arch-danger-banner">Single DB at capacity - writes bottlenecked</div>}
+      {activeIdx >= 2  && <div className="arch-failover-banner">Each shard is independent - scales linearly</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DB_SHARD}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DB_SHARD} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DB DIAGRAM 8 - ACID Transactions
+const TOTAL_DB_ACID = 5;
+const DBACIDDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'BEGIN TRANSACTION: start an atomic unit of work',
+    'Debit Account A: UPDATE balance = balance - 100',
+    'Credit Account B: UPDATE balance = balance + 100',
+    'COMMIT: both changes persist together - atomic success',
+    'On error: ROLLBACK reverts all changes - nothing persists',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<LockIcon active={activeIdx === 0} />}      label="BEGIN TX"     sublabel="Atomic unit"          active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="step 1" />
+        <ArchNode icon={<DatabaseIcon active={activeIdx === 1} />}  label="Debit A"      sublabel="balance - 100"        active={activeIdx === 1} danger={activeIdx === 4} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="step 2" />
+        <ArchNode icon={<DatabaseIcon active={activeIdx === 2} />}  label="Credit B"     sublabel="balance + 100"        active={activeIdx === 2} danger={activeIdx === 4} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<NetworkIcon active={activeIdx === 3} />}   label="COMMIT"       sublabel="Both persist"         active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <ArchNode icon={<WarningIcon active={activeIdx === 4} />}   label="ROLLBACK"     sublabel="Error: undo all"      active={activeIdx === 4} danger={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 3 && <div className="arch-failover-banner">COMMIT: Atomicity + Durability guaranteed</div>}
+      {activeIdx === 4 && <div className="arch-danger-banner">ROLLBACK: all changes reverted - no half-state</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DB_ACID}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DB_ACID} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DB DIAGRAM 9 - CAP Theorem
+const TOTAL_DB_CAP = 5;
+const DBCAPDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Write balance to Node 1 - both nodes should reflect this',
+    'Network partition: Node 1 and Node 2 cannot communicate',
+    'CP choice: Node 2 refuses reads to avoid stale data',
+    'AP choice: Node 2 serves old balance - stays available',
+    'Partition heals: nodes sync and converge eventually',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}     label="Write"        sublabel="balance = 500"        active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 0} label="update" />
+        <ArchNode icon={<DatabaseIcon active={activeIdx <= 1} />}  label="Node 1"       sublabel="balance = 500"        active={activeIdx <= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx === 1} label="partition!" />
+        <ArchNode icon={<DatabaseIcon active={activeIdx >= 2} />}  label="Node 2"
+          sublabel={activeIdx === 2 ? 'REFUSED' : activeIdx === 3 ? 'balance=400 (stale)' : activeIdx >= 4 ? 'synced' : 'balance=400'}
+          active={activeIdx >= 2} danger={activeIdx === 1} onClick={() => setActiveIdx(activeIdx >= 3 ? 4 : 2)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">Network partition: nodes cannot communicate</div>}
+      {activeIdx === 2 && <div className="arch-danger-banner">CP: Node 2 refuses reads - prefers consistency</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">AP: Node 2 serves stale data - prefers availability</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Partition healed: nodes sync - eventual consistency</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DB_CAP}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DB_CAP} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DB DIAGRAM 10 - Practice: migrations + monitoring
+const TOTAL_DB_PRACTICE = 5;
+const DBPracticeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Migration: versioned script changes schema safely',
+    'Add nullable column first - instant, no table lock',
+    'Backfill existing rows in small batches with sleep',
+    'Add NOT NULL constraint after all rows have a value',
+    'Monitor: slow query log, replication lag, disk usage',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-col arch-col--center">
+        {[
+          { label: 'Migration Script', sub: 'Versioned, reversible', idx: 0 },
+          { label: 'Add Nullable Col', sub: 'ALTER: instant op',      idx: 1 },
+          { label: 'Backfill Batches', sub: '10K rows + sleep',       idx: 2 },
+          { label: 'Add Constraint',   sub: 'NOT NULL applied',       idx: 3 },
+          { label: 'Monitor',          sub: 'Slow log + lag',         idx: 4 },
+        ].map((step, i) => (
+          <React.Fragment key={step.label}>
+            <div className={`arch-layer${activeIdx === i ? ' arch-layer--active' : ''}`} onClick={() => setActiveIdx(i)}>
+              <div className="arch-layer__icon">
+                {i === 0 && <ServerIcon   active={activeIdx === i} />}
+                {i === 1 && <DatabaseIcon active={activeIdx === i} />}
+                {i === 2 && <CacheIcon    active={activeIdx === i} />}
+                {i === 3 && <LockIcon     active={activeIdx === i} />}
+                {i === 4 && <NetworkIcon  active={activeIdx === i} />}
+              </div>
+              <div className="arch-layer__info">
+                <span className="arch-layer__label">{step.label}</span>
+                <span className="arch-layer__sub">{step.sub}</span>
+              </div>
+              <div className="arch-layer__latency">{i + 1}</div>
+            </div>
+            {i < 4 && <VertArrow active={activeIdx > i} />}
+          </React.Fragment>
+        ))}
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DB_PRACTICE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DB_PRACTICE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // LOAD BALANCING DIAGRAMS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1682,6 +2063,34 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
   const isLB    = topic === 'load-balancing';
   const isSC    = topic === 'scalability';
   const isSA    = topic === 'system-architecture';
+  const isDB    = topic === 'database-design';
+
+  // ── Database Design diagrams ──────────────────────────────────────────────
+  const getDBDiagram = (): React.ReactNode => {
+    if (t.includes('fundamentals'))                                                   return <DBFundamentalsDiagram  activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('sql vs') || t.includes('nosql'))                                  return <DBSqlNoSqlDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('data model') || t.includes('schema design') || t.includes('modeling')) return <DBModelDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('normali') || t.includes('denormali'))                             return <DBNormDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('index') || t.includes('query optim'))                             return <DBIndexDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('replication'))                                                    return <DBReplicationDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('shard') || t.includes('partition'))                               return <DBShardDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('transaction') || t.includes('acid'))                              return <DBACIDDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('consistency') || t.includes('cap'))                               return <DBCAPDiagram           activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <DBPracticeDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  };
+
+  const getDBTotal = (): number => {
+    if (t.includes('fundamentals'))                                                   return TOTAL_DB_FUND;
+    if (t.includes('sql vs') || t.includes('nosql'))                                  return TOTAL_DB_SQLNOSQL;
+    if (t.includes('data model') || t.includes('schema') || t.includes('modeling'))  return TOTAL_DB_MODEL;
+    if (t.includes('normali') || t.includes('denormali'))                             return TOTAL_DB_NORM;
+    if (t.includes('index') || t.includes('query optim'))                             return TOTAL_DB_INDEX;
+    if (t.includes('replication'))                                                    return TOTAL_DB_REPL;
+    if (t.includes('shard') || t.includes('partition'))                               return TOTAL_DB_SHARD;
+    if (t.includes('transaction') || t.includes('acid'))                              return TOTAL_DB_ACID;
+    if (t.includes('consistency') || t.includes('cap'))                               return TOTAL_DB_CAP;
+    return TOTAL_DB_PRACTICE;
+  };
 
   // ── Load Balancing diagrams ───────────────────────────────────────────────
   const getLBDiagram = (): React.ReactNode => {
@@ -1798,7 +2207,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
     return TOTAL_BASICS;
   };
 
-  const total = isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
+  const total = isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
 
   useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle, topic]);
 
@@ -1810,7 +2219,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
 
   return (
     <div className="module-animation" aria-label="Architecture diagram">
-      {isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
+      {isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
     </div>
   );
 };
