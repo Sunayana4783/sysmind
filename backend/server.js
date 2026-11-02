@@ -34,26 +34,6 @@ app.use('/api/learning', learningRoutes);
 app.use('/api/quiz',     quizRoutes);
 app.use('/api/activity', activityRoutes);
 
-app.post('/api/admin/seed', async (req, res) => {
-  if (req.headers['x-seed-secret'] !== 'sysmind_seed_2024_run') return res.status(403).json({ message: 'Forbidden' });
-  try {
-    const Topic  = require('./src/models/Topic');
-    const Module = require('./src/models/Module');
-    const DB     = require('./src/data/databaseDesignContent');
-    await Module.deleteMany({ topicSlug: 'database-design' });
-    await Topic.findOneAndUpdate({ slug: 'database-design' },
-      { slug: 'database-design', title: 'Database Design', order: 5, locked: false,
-        description: 'SQL vs NoSQL, data modeling, normalization, indexing, replication, sharding, ACID transactions, and CAP theorem.' },
-      { upsert: true, new: true });
-    const log = [];
-    for (const mod of DB) {
-      await Module.create({ ...mod, topicSlug: 'database-design' });
-      log.push(mod.order + ': ' + mod.title);
-    }
-    res.json({ ok: true, count: log.length, log });
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
