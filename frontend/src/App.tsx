@@ -15,6 +15,7 @@ import SystemArchitecture from './pages/SystemArchitecture';
 import Scalability      from './pages/Scalability';
 import LoadBalancing    from './pages/LoadBalancing';
 import DatabaseDesign   from './pages/DatabaseDesign';
+import Microservices    from './pages/Microservices';
 import Profile   from './pages/Profile';
 import AuthNav   from './components/AuthNav';
 
@@ -70,6 +71,7 @@ const AppRoutes = () => {
         <Route path="/learning/hld/scalability"         element={<ProtectedRoute><Scalability /></ProtectedRoute>} />
         <Route path="/learning/hld/load-balancing"      element={<ProtectedRoute><LoadBalancing /></ProtectedRoute>} />
         <Route path="/learning/hld/database-design"     element={<ProtectedRoute><DatabaseDesign /></ProtectedRoute>} />
+        <Route path="/learning/hld/microservices"       element={<ProtectedRoute><Microservices /></ProtectedRoute>} />
         <Route path="/profile"            element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
         <Route path="*" element={<Navigate to="/signup" replace />} />

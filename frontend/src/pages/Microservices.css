@@ -1,0 +1,9 @@
+/* Microservices.css */
+@import './Caching.css';
+
+.ms-page .caching-breadcrumb__current {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

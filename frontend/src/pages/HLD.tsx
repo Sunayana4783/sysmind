@@ -17,7 +17,7 @@ const HLD_TOPICS: HLDTopic[] = [
   { id: 'scalability', title: 'Scalability', locked: false, route: '/learning/hld/scalability', description: 'Horizontal vs vertical scaling, capacity planning.' },
   { id: 'load-balancing', title: 'Load Balancing', locked: false, route: '/learning/hld/load-balancing', description: 'Round-robin, least connections, consistent hashing.' },
   { id: 'database-design', title: 'Database Design', locked: false, route: '/learning/hld/database-design', description: 'SQL vs NoSQL, sharding, replication, CAP theorem.' },
-  { id: 'microservices', title: 'Microservices', locked: true, description: 'Service decomposition, inter-service communication.' },
+  { id: 'microservices', title: 'Microservices', locked: false, route: '/learning/hld/microservices', description: 'Service decomposition, inter-service communication.' },
   { id: 'caching', title: 'Caching', locked: false, route: '/learning/hld/caching', description: 'Cache strategies, Redis, distributed caching, eviction policies.' },
   { id: 'api-gateway', title: 'API Gateway', locked: true, description: 'Rate limiting, auth, routing, and aggregation.' },
   { id: 'message-queues', title: 'Message Queues', locked: true, description: 'Kafka, RabbitMQ, async processing, event-driven design.' },

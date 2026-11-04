@@ -7,6 +7,7 @@ const SYSTEM_ARCHITECTURE_MODULES = require('./systemArchitectureContent');
 const SCALABILITY_MODULES      = require('./scalabilityContent');
 const LOAD_BALANCING_MODULES   = require('./loadBalancingContent');
 const DATABASE_DESIGN_MODULES  = require('./databaseDesignContent');
+const MICROSERVICES_MODULES    = require('./microservicesContent');
 
 const TOPICS = [
   { slug: 'caching',             title: 'Caching',             order: 1, locked: false, description: 'Master caching fundamentals, eviction policies, Redis, and distributed caching patterns.',                                                              modules: CACHING_MODULES },
@@ -14,6 +15,7 @@ const TOPICS = [
   { slug: 'scalability',         title: 'Scalability',         order: 3, locked: false, description: 'Vertical vs horizontal scaling, auto-scaling, capacity planning, bottleneck identification, and handling traffic spikes.',                            modules: SCALABILITY_MODULES },
   { slug: 'load-balancing',      title: 'Load Balancing',      order: 4, locked: false, description: 'Load balancing algorithms, Layer 4 vs Layer 7, consistent hashing, health checks, sticky sessions, and high availability.',                         modules: LOAD_BALANCING_MODULES },
   { slug: 'database-design',     title: 'Database Design',     order: 5, locked: false, description: 'SQL vs NoSQL, data modeling, normalization, indexing, replication, sharding, ACID transactions, and CAP theorem.',                                    modules: DATABASE_DESIGN_MODULES },
+  { slug: 'microservices',       title: 'Microservices',       order: 6, locked: false, description: 'Service decomposition, inter-service communication, service discovery, data management, containerization, resilience, and observability.',            modules: MICROSERVICES_MODULES },
 ];
 
 const seed = async () => {

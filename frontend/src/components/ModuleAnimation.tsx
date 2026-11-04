@@ -1288,6 +1288,392 @@ const SCSpikeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// MICROSERVICES DIAGRAMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// MS DIAGRAM 1 - Fundamentals: monolith splits into services
+const TOTAL_MS_FUND = 5;
+const MSFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Monolith: one codebase handles users, orders, payments, search',
+    'Extract service boundaries based on business capabilities',
+    'User Service: owns user data and auth - deploys independently',
+    'Order Service: owns order data - scales independently',
+    'Each service has its own database - no sharing',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon active={activeIdx === 0} />}    label="Monolith"       sublabel="All-in-one"        active={activeIdx === 0} danger={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="extract" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <ArchNode icon={<UserIcon    active={activeIdx === 2} />} label="User Service"   sublabel="Auth + profiles"   active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+          <ArchNode icon={<CacheIcon   active={activeIdx === 3} />} label="Order Service"  sublabel="Orders + status"   active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+          <ArchNode icon={<LockIcon    active={activeIdx === 4} />} label="Pay Service"    sublabel="Billing + cards"   active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+        </div>
+        <Arrow active={activeIdx >= 2} label="own DB" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <ArchNode icon={<DatabaseIcon active={activeIdx === 2} />} label="Users DB"      sublabel="PostgreSQL"        active={activeIdx === 2} />
+          <ArchNode icon={<DatabaseIcon active={activeIdx === 3} />} label="Orders DB"     sublabel="MySQL"             active={activeIdx === 3} />
+          <ArchNode icon={<DatabaseIcon active={activeIdx === 4} />} label="Pay DB"        sublabel="PostgreSQL"        active={activeIdx === 4} />
+        </div>
+      </div>
+      {activeIdx === 0 && <div className="arch-danger-banner">Monolith: one deploy for all - any bug takes down everything</div>}
+      {activeIdx >= 2  && <div className="arch-failover-banner">Independent deploy and scale per service</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MS_FUND}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MS_FUND} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MS DIAGRAM 2 - Monolith vs Microservices
+const TOTAL_MS_MONO = 5;
+const MSMonoDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const isMS = activeIdx >= 3;
+  const descs = [
+    'Monolith: all features in one codebase and one deploy',
+    'Monolith pain: 30+ engineers, 40min build, one crash = all down',
+    'Strangler Fig: extract one service at a time - never big-bang rewrite',
+    'Microservices: teams deploy independently, scale independently',
+    'Tradeoff: distributed complexity vs deployment independence',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={`arch-path${!isMS ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--read">MONOLITH</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<ServerIcon active={activeIdx === 0} />} label="One App" sublabel="All features" active={activeIdx === 0} danger={activeIdx === 1} onClick={() => setActiveIdx(0)} />
+            <VertArrow active={activeIdx >= 1} label="grows" />
+            <ArchNode icon={<DatabaseIcon active={activeIdx === 1} />} label="One DB" sublabel="Shared data" active={activeIdx === 1} danger={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+            {activeIdx === 1 && <div className="arch-danger-banner" style={{ marginTop: '0.5rem' }}>40min build - one bug = full outage</div>}
+            {activeIdx === 2 && <div className="arch-failover-banner" style={{ marginTop: '0.5rem' }}>Strangler Fig: extract one at a time</div>}
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={`arch-path${isMS ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--write">MICROSERVICES</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<NetworkIcon active={activeIdx === 3} />} label="API Gateway" sublabel="Single entry" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+            <VertArrow active={activeIdx >= 4} label="routes" />
+            <div className="arch-row arch-row--center" style={{ gap: '0.25rem' }}>
+              {['Users','Orders','Pay'].map(s => (
+                <ArchNode key={s} icon={<ServerIcon active={activeIdx >= 4} />} label={s} sublabel="Service" active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MS_MONO}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MS_MONO} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MS DIAGRAM 3 - Architecture Components
+const TOTAL_MS_ARCH = 5;
+const MSArchDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'All client requests enter through the API Gateway',
+    'Gateway handles auth, rate limiting, routing to correct service',
+    'Service Registry: dynamic address book - services register on start',
+    'Message Broker: async events decouple services completely',
+    'Observability: trace ID follows request across all 20+ services',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />} label="Client"      sublabel="One URL"         active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="request" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />} label="API Gateway"  sublabel="Auth + Route"    active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="lookup" />
+        <ArchNode icon={<LockIcon    active={activeIdx === 2} />} label="Registry"    sublabel="Consul/Eureka"   active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<CacheIcon   active={activeIdx === 3} />} label="Msg Broker"  sublabel="Kafka/RabbitMQ"  active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 3} label="events" />
+        <ArchNode icon={<ServerIcon  active={activeIdx === 3} />} label="Subscribers" sublabel="Email, Analytics" active={activeIdx === 3} />
+        <Arrow active={activeIdx >= 4} label="trace" />
+        <ArchNode icon={<NetworkIcon active={activeIdx === 4} />} label="Jaeger"      sublabel="Distributed trace" active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MS_ARCH}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MS_ARCH} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MS DIAGRAM 4 - Service Decomposition
+const TOTAL_MS_DECOMP = 5;
+const MSDecompDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Analyse the business domain - what are the core capabilities?',
+    'Identify bounded contexts: clear business boundaries',
+    'One microservice per bounded context - owned by one team',
+    'Two-pizza rule: team small enough to be fed by two pizzas (5-8)',
+    'Validate: a feature should touch at most 1-2 services',
+  ];
+  const services = [
+    { label: 'User', sub: 'auth, profiles' },
+    { label: 'Order', sub: 'cart, orders' },
+    { label: 'Payment', sub: 'billing, cards' },
+    { label: 'Notify', sub: 'email, SMS' },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon active={activeIdx === 0} />}   label="Business Domain" sublabel="Ride-hailing" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="decompose" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {services.map((s, i) => (
+            <ArchNode key={s.label} icon={<CacheIcon active={activeIdx >= 2} />}
+              label={s.label + ' Service'} sublabel={s.sub}
+              active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx === 1 && <div className="arch-failover-banner">Bounded contexts: User, Order, Payment, Notification</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">Each team: 5-8 engineers, fully own their service</div>}
+      {activeIdx === 4 && <div className="arch-failover-banner">Good sign: each feature touches 1-2 services max</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MS_DECOMP}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MS_DECOMP} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MS DIAGRAM 5 - Inter-Service Communication
+const TOTAL_MS_COMM = 5;
+const MSCommDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Synchronous REST: Service A calls B and waits for response',
+    'gRPC: binary protocol - 10x faster for internal service calls',
+    'Async event: Order placed - publish to Kafka topic',
+    'Fan-out: Email, Inventory, Analytics all react independently',
+    'Decoupled: services do not need to know each other exists',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx <= 1} />}  label="Service A"    sublabel="Caller"         active={activeIdx <= 1} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 0 && activeIdx <= 1} label={activeIdx === 1 ? 'gRPC' : 'REST'} />
+        <ArchNode icon={<ServerIcon  active={activeIdx <= 1} />}  label="Service B"    sublabel="Responds"       active={activeIdx <= 1} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<ServerIcon  active={activeIdx === 2} />} label="Order Service" sublabel="Places order"  active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 2} label="publish" />
+        <ArchNode icon={<CacheIcon   active={activeIdx >= 2} />}  label="Kafka"         sublabel="order.placed"  active={activeIdx >= 2} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 3} label="consume" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          {['Email','Inventory','Analytics'].map(s => (
+            <ArchNode key={s} icon={<NetworkIcon active={activeIdx >= 3} />} label={s} sublabel="subscriber" active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+          ))}
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MS_COMM}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MS_COMM} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MS DIAGRAM 6 - Service Discovery
+const TOTAL_MS_DISC = 5;
+const MSDiscoveryDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Service starts: registers its IP and port with the registry',
+    'Registry health-checks every instance every 5 seconds',
+    'Service A needs to call Service B - queries registry',
+    'Registry returns current healthy IP:port of B',
+    'Service A calls B using discovered address - dynamic, not hardcoded',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx === 0} />}  label="Service B"    sublabel="New instance"  active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 0} label="register" />
+        <ArchNode icon={<LockIcon    active={activeIdx >= 0} />}   label="Registry"     sublabel="Consul/K8s DNS" active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="lookup" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 2} />}   label="Service A"    sublabel="Needs to call B" active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 3} />}   label="IP:Port"      sublabel="Current address" active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="call" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 4} />}   label="Service B"    sublabel="Handles request" active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-failover-banner">Health check every 5s - unhealthy instances removed</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MS_DISC}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MS_DISC} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MS DIAGRAM 7 - Data Management (Saga)
+const TOTAL_MS_DATA = 5;
+const MSDataDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Database per service: no cross-service database sharing',
+    'Saga step 1: Order Service creates order (local transaction)',
+    'Saga step 2: Payment Service charges card (local transaction)',
+    'Inventory fails: compensating TX - refund card, cancel order',
+    'Each step is local - ACID within service, eventual across services',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon   active={activeIdx >= 1} />}  label="Order Svc"    sublabel="Own DB"         active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 1} label="step 1" />
+        <ArchNode icon={<LockIcon     active={activeIdx >= 2} />}  label="Pay Svc"      sublabel="Own DB"         active={activeIdx === 2} danger={activeIdx === 3} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 2} label="step 2" />
+        <ArchNode icon={<CacheIcon    active={activeIdx >= 2} />}  label="Inventory Svc" sublabel="Own DB"        active={activeIdx >= 2} danger={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      {activeIdx === 0 && <div className="arch-danger-banner">Rule: NO cross-service database access ever</div>}
+      {activeIdx === 3 && <div className="arch-danger-banner">Inventory fails: compensate - refund card + cancel order</div>}
+      {activeIdx === 4 && <div className="arch-failover-banner">Eventual consistency across services via Saga</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MS_DATA}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MS_DATA} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MS DIAGRAM 8 - Deployment / Kubernetes
+const TOTAL_MS_DEPLOY = 5;
+const MSDeployDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Dockerfile: package service + runtime + dependencies as image',
+    'CI pipeline: code push triggers build, test, push to registry',
+    'Kubernetes pulls image and runs containers in the cluster',
+    'Rolling deploy: new pods start before old pods stop - zero downtime',
+    'Canary: 5% traffic to new version, monitor, then roll to 100%',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-col arch-col--center">
+        {[
+          { label: 'Dockerfile',    sub: 'Image definition',     idx: 0 },
+          { label: 'CI Build',      sub: 'Test + push to ECR',   idx: 1 },
+          { label: 'K8s Deploy',    sub: 'Pull image, run pods', idx: 2 },
+          { label: 'Rolling',       sub: 'New pods first',       idx: 3 },
+          { label: 'Canary',        sub: '5% then 100%',         idx: 4 },
+        ].map((step, i) => (
+          <React.Fragment key={step.label}>
+            <div className={`arch-layer${activeIdx === i ? ' arch-layer--active' : ''}`} onClick={() => setActiveIdx(i)}>
+              <div className="arch-layer__icon">
+                {i === 0 && <ServerIcon   active={activeIdx === i} />}
+                {i === 1 && <NetworkIcon  active={activeIdx === i} />}
+                {i === 2 && <CacheIcon    active={activeIdx === i} />}
+                {i === 3 && <ServerIcon   active={activeIdx === i} />}
+                {i === 4 && <LockIcon     active={activeIdx === i} />}
+              </div>
+              <div className="arch-layer__info">
+                <span className="arch-layer__label">{step.label}</span>
+                <span className="arch-layer__sub">{step.sub}</span>
+              </div>
+              <div className="arch-layer__latency">{i + 1}</div>
+            </div>
+            {i < 4 && <VertArrow active={activeIdx > i} />}
+          </React.Fragment>
+        ))}
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MS_DEPLOY}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MS_DEPLOY} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MS DIAGRAM 9 - Resilience: Circuit Breaker
+const TOTAL_MS_RESIL = 5;
+const MSResilDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Service B becomes slow - taking 30s per request',
+    'Service A threads all consumed waiting for B - no capacity left',
+    'Circuit breaker trips open after 5 failures in 10 seconds',
+    'A returns fallback response immediately - no call to B',
+    'After 30s cooldown B tested - if healthy, circuit closes',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active />}                    label="Clients"      sublabel="Incoming requests" active />
+        <Arrow active label="requests" />
+        <ArchNode icon={<ServerIcon  active={activeIdx <= 2} />}   label="Service A"    sublabel={activeIdx === 1 ? 'Threads full!' : 'Calling B'} active={activeIdx <= 2} danger={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx <= 1} label={activeIdx >= 2 ? 'blocked' : 'calls'} />
+        <ArchNode icon={<ServerIcon  active={activeIdx === 0} />}  label="Service B"    sublabel={activeIdx === 0 ? 'Slowing...' : 'SLOW 30s'} active={activeIdx === 0} danger={activeIdx >= 0 && activeIdx <= 2} onClick={() => setActiveIdx(0)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<LockIcon    active={activeIdx >= 2} />}   label="Circuit Breaker" sublabel={activeIdx >= 2 ? 'OPEN' : 'Closed'} active={activeIdx >= 2} danger={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 3} label="fallback" />
+        <ArchNode icon={<CacheIcon   active={activeIdx >= 3} />}   label="Fallback"     sublabel="Cached/default"  active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">All threads waiting for B - no capacity for other requests</div>}
+      {activeIdx === 2 && <div className="arch-danger-banner">Circuit OPEN: fail fast - no calls to B</div>}
+      {activeIdx >= 3 && <div className="arch-failover-banner">Fallback served immediately - users see degraded not broken</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MS_RESIL}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MS_RESIL} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MS DIAGRAM 10 - Observability: Distributed Tracing
+const TOTAL_MS_OBS = 5;
+const MSObsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Request enters API Gateway - unique Trace ID assigned',
+    'Every service logs its processing time with same Trace ID',
+    'Payment Service takes 4s - error returned',
+    'Jaeger collects all spans and shows complete waterfall',
+    'Alert fires: error rate >1% - on-call engineer paged',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<NetworkIcon active={activeIdx === 0} />}  label="API Gateway"  sublabel="trace-id: abc123" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="propagate" />
+        <ArchNode icon={<ServerIcon  active={activeIdx === 1} />}  label="Order Svc"    sublabel="10ms - OK"        active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="call" />
+        <ArchNode icon={<LockIcon    active={activeIdx >= 2} />}   label="Payment Svc"  sublabel={activeIdx >= 2 ? '4s - ERROR!' : '...'} active={activeIdx >= 2} danger={activeIdx >= 2 && activeIdx <= 3} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<CacheIcon   active={activeIdx === 3} />}  label="Jaeger"       sublabel="Trace waterfall"  active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="alert" />
+        <ArchNode icon={<UserIcon    active={activeIdx === 4} />}  label="On-Call"      sublabel="Paged: >1% error" active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 2 && <div className="arch-danger-banner">Payment Service failing - 4s latency spike</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">Jaeger: found root cause in 10 seconds via trace ID</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MS_OBS}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MS_OBS} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // DATABASE DESIGN DIAGRAMS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -2064,6 +2450,35 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
   const isSC    = topic === 'scalability';
   const isSA    = topic === 'system-architecture';
   const isDB    = topic === 'database-design';
+  const isMS    = topic === 'microservices';
+
+  // -- Microservices diagrams --
+  const getMSDiagram = (): React.ReactNode => {
+    if (t.includes('fundamentals'))                                          return <MSFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('monolithic') || t.includes('monolith vs'))              return <MSMonoDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('architecture components') || t.includes('components'))  return <MSArchDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('decomp') || t.includes('bounded'))                      return <MSDecompDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('inter-service comm') || t.includes('communication'))    return <MSCommDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('discovery') || t.includes('registration'))              return <MSDiscoveryDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('data management') || t.includes('saga'))                return <MSDataDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('deploy') || t.includes('container'))                    return <MSDeployDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('resil') || t.includes('fault'))                         return <MSResilDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('observ') || t.includes('tracing') || t.includes('failure')) return <MSObsDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <MSFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  };
+
+  const getMSTotal = (): number => {
+    if (t.includes('fundamentals'))                                          return TOTAL_MS_FUND;
+    if (t.includes('monolithic') || t.includes('monolith vs'))              return TOTAL_MS_MONO;
+    if (t.includes('architecture components') || t.includes('components'))  return TOTAL_MS_ARCH;
+    if (t.includes('decomp') || t.includes('bounded'))                      return TOTAL_MS_DECOMP;
+    if (t.includes('inter-service comm') || t.includes('communication'))    return TOTAL_MS_COMM;
+    if (t.includes('discovery') || t.includes('registration'))              return TOTAL_MS_DISC;
+    if (t.includes('data management') || t.includes('saga'))                return TOTAL_MS_DATA;
+    if (t.includes('deploy') || t.includes('container'))                    return TOTAL_MS_DEPLOY;
+    if (t.includes('resil') || t.includes('fault') || t.includes('observ') || t.includes('tracing') || t.includes('failure')) return TOTAL_MS_RESIL;
+    return TOTAL_MS_FUND;
+  };
 
   // ── Database Design diagrams ──────────────────────────────────────────────
   const getDBDiagram = (): React.ReactNode => {
@@ -2207,7 +2622,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
     return TOTAL_BASICS;
   };
 
-  const total = isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
+  const total = isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
 
   useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle, topic]);
 
@@ -2219,7 +2634,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
 
   return (
     <div className="module-animation" aria-label="Architecture diagram">
-      {isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
+      {isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
     </div>
   );
 };
