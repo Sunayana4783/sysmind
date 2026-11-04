@@ -34,6 +34,26 @@ app.use('/api/learning', learningRoutes);
 app.use('/api/quiz',     quizRoutes);
 app.use('/api/activity', activityRoutes);
 
+app.post('/api/admin/seed', async (req, res) => {
+  if (req.headers['x-seed-secret'] !== 'sysmind_seed_2024_run') return res.status(403).json({ message: 'Forbidden' });
+  try {
+    const Topic  = require('./src/models/Topic');
+    const Module = require('./src/models/Module');
+    const MS     = require('./src/data/microservicesContent');
+    await Module.deleteMany({ topicSlug: 'microservices' });
+    await Topic.findOneAndUpdate({ slug: 'microservices' },
+      { slug: 'microservices', title: 'Microservices', order: 6, locked: false,
+        description: 'Service decomposition, inter-service communication, service discovery, data management, containerization, resilience, and observability.' },
+      { upsert: true, new: true });
+    const log = [];
+    for (const mod of MS) {
+      await Module.create({ ...mod, topicSlug: 'microservices' });
+      log.push(mod.order + ': ' + mod.title);
+    }
+    res.json({ ok: true, count: log.length, log });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
