@@ -34,26 +34,6 @@ app.use('/api/learning', learningRoutes);
 app.use('/api/quiz',     quizRoutes);
 app.use('/api/activity', activityRoutes);
 
-app.post('/api/admin/seed', async (req, res) => {
-  if (req.headers['x-seed-secret'] !== 'sysmind_seed_2024_run') return res.status(403).json({ message: 'Forbidden' });
-  try {
-    const Topic  = require('./src/models/Topic');
-    const Module = require('./src/models/Module');
-    const DS     = require('./src/data/distributedSystemsContent');
-    await Module.deleteMany({ topicSlug: 'distributed-systems' });
-    await Topic.findOneAndUpdate({ slug: 'distributed-systems' },
-      { slug: 'distributed-systems', title: 'Distributed Systems', order: 10, locked: false,
-        description: 'Fundamentals, consensus (Raft/Paxos), distributed transactions, consistency models, CAP theorem, and fault tolerance.' },
-      { upsert: true, new: true });
-    const log = [];
-    for (const mod of DS) {
-      await Module.create({ ...mod, topicSlug: 'distributed-systems' });
-      log.push(mod.order + ': ' + mod.title);
-    }
-    res.json({ ok: true, count: log.length, log });
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
