@@ -1288,6 +1288,355 @@ const SCSpikeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// MESSAGE QUEUES DIAGRAMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// MQ DIAGRAM 1 - Fundamentals: producer -> queue -> consumer
+const TOTAL_MQ_FUND = 5;
+const MQFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Producer sends message to the queue and returns immediately',
+    'Message stored safely in the queue - producer is not blocked',
+    'Queue buffers messages even if consumer is slow or offline',
+    'Consumer picks up and processes message when ready',
+    'Producer and consumer are fully decoupled - never directly connected',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon active={activeIdx === 0} />}  label="Producer"   sublabel="Sends + returns fast" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="publish" />
+        <ArchNode icon={<CacheIcon  active={activeIdx >= 1} />}   label="Queue"      sublabel="Buffers messages"     active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 3} label="consume" />
+        <ArchNode icon={<ServerIcon active={activeIdx >= 3} />}   label="Consumer"   sublabel="Processes when ready" active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      {activeIdx === 2 && <div className="arch-failover-banner">Queue holds messages safely - consumer can be offline</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Decoupled: producer never waits for consumer</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MQ_FUND}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MQ_FUND} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MQ DIAGRAM 2 - Architecture: broker + queue + topic
+const TOTAL_MQ_ARCH = 5;
+const MQArchDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Producer sends message to the broker server',
+    'Broker stores message in a queue or topic on disk (persistent)',
+    'Queue: one consumer gets each message (point-to-point)',
+    'Topic: all subscribers get a copy (pub/sub fan-out)',
+    'Broker routes messages to correct consumer(s)',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx === 0} />}  label="Producer"  sublabel="Publishes messages"   active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="send" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}   label="Broker"    sublabel="Kafka/RabbitMQ/SQS"   active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="store" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <ArchNode icon={<CacheIcon  active={activeIdx === 2} />} label="Queue"     sublabel="P2P: one consumer"    active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+          <ArchNode icon={<CacheIcon  active={activeIdx === 3} />} label="Topic"     sublabel="Pub/Sub: all subs"    active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        </div>
+      </div>
+      {activeIdx >= 4 && <div className="arch-failover-banner">Broker routes to correct consumer(s) based on queue or topic</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MQ_ARCH}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MQ_ARCH} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MQ DIAGRAM 3 - Producers and Consumers (competing consumers)
+const TOTAL_MQ_PRODCONS = 5;
+const MQProdConsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Producer publishes 100 messages to the queue',
+    'Consumer 1 claims and processes messages 1-33',
+    'Consumer 2 claims and processes messages 34-66 in parallel',
+    'Consumer 3 claims and processes messages 67-100 in parallel',
+    'All 3 consumers work simultaneously - 3x throughput',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon active={activeIdx === 0} />}   label="Producer"    sublabel="100 messages"      active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="publish" />
+        <ArchNode icon={<CacheIcon  active={activeIdx >= 1} />}    label="Queue"       sublabel="Waiting messages"  active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="compete" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {[['Consumer 1','msgs 1-33'],['Consumer 2','msgs 34-66'],['Consumer 3','msgs 67-100']].map(([c,s],i) => (
+            <ArchNode key={c} icon={<ServerIcon active={activeIdx >= i+2} />} label={c} sublabel={s} active={activeIdx >= i+2} onClick={() => setActiveIdx(i+2)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx >= 4 && <div className="arch-failover-banner">3 consumers in parallel - add more to scale throughput</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MQ_PRODCONS}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MQ_PRODCONS} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MQ DIAGRAM 4 - Point-to-Point
+const TOTAL_MQ_P2P = 5;
+const MQP2PDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    '5 messages waiting in the queue',
+    'Consumer A claims message 1 - locked from all other consumers',
+    'Consumer B simultaneously claims message 2',
+    'Consumer A acks message 1 - broker deletes it permanently',
+    'Consumer A immediately claims message 3 - work continues',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<CacheIcon  active={activeIdx >= 0} />}    label="Queue"       sublabel="5 messages"        active={activeIdx >= 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="claim" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <ArchNode icon={<ServerIcon active={activeIdx >= 1} />}  label="Consumer A"  sublabel={activeIdx >= 3 ? 'Acked - deleted' : 'Processing msg 1'} active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+          <ArchNode icon={<ServerIcon active={activeIdx >= 2} />}  label="Consumer B"  sublabel="Processing msg 2"  active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+        </div>
+      </div>
+      {activeIdx === 3 && <div className="arch-failover-banner">Ack sent - message 1 permanently deleted from queue</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Consumer A picks up message 3 immediately</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MQ_P2P}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MQ_P2P} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MQ DIAGRAM 5 - Pub/Sub
+const TOTAL_MQ_PUBSUB = 5;
+const MQPubSubDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Producer publishes "order.placed" event to a topic',
+    'Broker fans out - every subscriber gets their own copy',
+    'Email Service: sends order confirmation to customer',
+    'Inventory Service: reserves stock for the order',
+    'Analytics Service: updates real-time order metrics',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx === 0} />}  label="Order Svc"   sublabel="order.placed event"  active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="publish" />
+        <ArchNode icon={<CacheIcon   active={activeIdx >= 1} />}   label="Topic"       sublabel="order.placed"        active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="fan-out" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {[['Email Svc','Send confirmation'],['Inventory Svc','Reserve stock'],['Analytics Svc','Update metrics']].map(([s,sub],i) => (
+            <ArchNode key={s} icon={<ServerIcon active={activeIdx >= i+2} />} label={s} sublabel={sub} active={activeIdx >= i+2} onClick={() => setActiveIdx(i+2)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx >= 2 && <div className="arch-failover-banner">All subscribers react in parallel - Order Svc never knew they existed</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MQ_PUBSUB}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MQ_PUBSUB} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MQ DIAGRAM 6 - Delivery Guarantees
+const TOTAL_MQ_DELIVERY = 5;
+const MQDeliveryDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const isAtLeast = activeIdx >= 2;
+  const descs = [
+    'At-most-once: fire and forget - may lose but never duplicate',
+    'At-most-once: broker delivers, no ack required - fast but lossy',
+    'At-least-once: consumer must ack - never lose but may duplicate',
+    'Consumer crashes before ack: broker re-delivers the message',
+    'Idempotent consumer: check message ID to skip duplicates safely',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={`arch-path${!isAtLeast ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--read">AT-MOST-ONCE</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<ServerIcon  active={activeIdx === 0} />} label="Producer"  sublabel="No ack wait"       active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+            <VertArrow active={activeIdx >= 1} label="deliver" />
+            <ArchNode icon={<ServerIcon  active={activeIdx === 1} />} label="Consumer"  sublabel="No ack needed"     active={activeIdx === 1} danger={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+            {activeIdx === 1 && <div className="arch-danger-banner" style={{ marginTop: '0.5rem' }}>May lose messages - no ack</div>}
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={`arch-path${isAtLeast ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--write">AT-LEAST-ONCE</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<ServerIcon  active={activeIdx >= 2} />} label="Consumer"  sublabel="Must ack"           active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+            <VertArrow active={activeIdx >= 3} label="crash!" />
+            <ArchNode icon={<ServerIcon  active={activeIdx >= 3} />} label="Re-deliver" sublabel="Broker re-sends"  active={activeIdx === 3} danger={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+            <VertArrow active={activeIdx >= 4} label="check ID" />
+            <ArchNode icon={<LockIcon    active={activeIdx >= 4} />} label="Idempotent" sublabel="Skip if processed" active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+          </div>
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MQ_DELIVERY}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MQ_DELIVERY} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MQ DIAGRAM 7 - Message Ordering (Kafka partitions)
+const TOTAL_MQ_ORDER = 5;
+const MQOrderDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Messages published with user_id as the partition key',
+    'hash(user_id) routes same user always to same partition',
+    'Partition 1: all messages for user 123 - strict order guaranteed',
+    'Partition 2: all messages for user 456 - processed in parallel',
+    'Ordered per user AND parallel across users - best of both',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx === 0} />}  label="Producer"    sublabel="key=user_id"        active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="hash(key)" />
+        <ArchNode icon={<NetworkIcon active={activeIdx === 1} />}  label="Kafka"       sublabel="Partition router"   active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="route" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <ArchNode icon={<CacheIcon  active={activeIdx === 2} />} label="Partition 1" sublabel="user 123 - ordered" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+          <ArchNode icon={<CacheIcon  active={activeIdx === 3} />} label="Partition 2" sublabel="user 456 - parallel" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        </div>
+      </div>
+      {activeIdx >= 4 && <div className="arch-failover-banner">Ordered within user, parallel across users</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MQ_ORDER}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MQ_ORDER} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MQ DIAGRAM 8 - Acks, Retries and DLQ
+const TOTAL_MQ_DLQ = 5;
+const MQDLQDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Consumer picks up message - locked from other consumers',
+    'Processing fails - consumer sends nack or crashes',
+    'Broker re-delivers with exponential backoff: 1s, 2s, 4s...',
+    'Max retries (3) reached - message moved to Dead Letter Queue',
+    'DLQ alert fires - engineer investigates poison message',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<CacheIcon   active={activeIdx >= 0} />}   label="Queue"       sublabel="Messages waiting"   active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 0} label="claim" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 0} />}   label="Consumer"    sublabel={activeIdx === 1 ? 'FAILS!' : 'Processing'} active={activeIdx >= 0} danger={activeIdx >= 1 && activeIdx <= 3} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<NetworkIcon active={activeIdx === 2} />}  label="Retry x3"    sublabel="Exp. backoff"       active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 3} label="give up" />
+        <ArchNode icon={<WarningIcon active={activeIdx >= 3} />}   label="DLQ"         sublabel="Dead letter queue"  active={activeIdx >= 3} danger={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="alert" />
+        <ArchNode icon={<UserIcon    active={activeIdx >= 4} />}   label="Engineer"    sublabel="Investigates"       active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">Consumer failed - nack sent to broker</div>}
+      {activeIdx === 3 && <div className="arch-danger-banner">Max retries reached - poison message sent to DLQ</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MQ_DLQ}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MQ_DLQ} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MQ DIAGRAM 9 - Brokers comparison
+const TOTAL_MQ_BROKERS = 5;
+const MQBrokersDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Three major brokers - each optimised for different use cases',
+    'RabbitMQ: flexible routing via exchanges, low latency, complex topologies',
+    'Kafka: distributed log, millions/sec, multiple consumer groups, replay',
+    'SQS: fully managed AWS, zero ops, unlimited scale, tight AWS integration',
+    'Choose based on: routing needs vs throughput vs operational overhead',
+  ];
+  const brokers = [
+    { label: 'RabbitMQ',  sub: 'Routing + low latency', idx: 1 },
+    { label: 'Kafka',     sub: 'Streaming + replay',     idx: 2 },
+    { label: 'Amazon SQS', sub: 'Managed + zero ops',   idx: 3 },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon active={activeIdx === 0} />}   label="Your needs"  sublabel="Which broker?"      active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="choose" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {brokers.map(b => (
+            <ArchNode key={b.label} icon={<NetworkIcon active={activeIdx === b.idx} />} label={b.label} sublabel={b.sub} active={activeIdx === b.idx} onClick={() => setActiveIdx(b.idx)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx === 1 && <div className="arch-failover-banner">RabbitMQ: complex routing, task queues, low latency</div>}
+      {activeIdx === 2 && <div className="arch-failover-banner">Kafka: event streaming, multiple consumers, replay history</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">SQS: AWS-native, zero management, auto-scales infinitely</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Match broker strengths to your actual requirements</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MQ_BROKERS}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MQ_BROKERS} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// MQ DIAGRAM 10 - Practice: backpressure + monitoring
+const TOTAL_MQ_PRACTICE = 5;
+const MQPracticeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Normal: producer and consumer in balance, queue depth stable',
+    'Backpressure: producer 10K/s, consumer 2K/s - queue grows fast',
+    'Alert: queue depth exceeds threshold - scale up consumers',
+    'DLQ growing: poison messages detected - engineer investigates',
+    'Schema registry: validates compatibility before publish allowed',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx === 1} />}  label="Producer"    sublabel={activeIdx === 1 ? '10K/sec!' : 'Normal rate'} active={activeIdx <= 1} danger={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active label="publish" />
+        <ArchNode icon={<CacheIcon   active={activeIdx >= 1} />}   label="Queue"       sublabel={activeIdx >= 1 ? 'GROWING!' : 'Stable depth'} active={activeIdx >= 1} danger={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="consume" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 2} />}   label="Consumers"   sublabel={activeIdx >= 2 ? 'Scaled up!' : '2K/sec'} active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<WarningIcon active={activeIdx === 3} />}  label="DLQ"         sublabel="Poison messages"    active={activeIdx === 3} danger={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="validate" />
+        <ArchNode icon={<LockIcon    active={activeIdx >= 4} />}   label="Schema Reg"  sublabel="Compatibility check" active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">Queue growing 8K/sec - backpressure detected!</div>}
+      {activeIdx === 3 && <div className="arch-danger-banner">DLQ growing - investigate poison messages immediately</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Schema registry: reject breaking changes before they reach queue</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_MQ_PRACTICE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_MQ_PRACTICE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // API GATEWAY DIAGRAMS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -2807,6 +3156,35 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
   const isDB    = topic === 'database-design';
   const isMS    = topic === 'microservices';
   const isAG    = topic === 'api-gateway';
+  const isMQ    = topic === 'message-queues';
+
+  // -- Message Queues diagrams --
+  const getMQDiagram = (): React.ReactNode => {
+    if (t.includes('fundamentals'))                                          return <MQFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('architecture') || t.includes('component'))               return <MQArchDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('producer') || t.includes('consumer'))                    return <MQProdConsDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('point-to-point') || t.includes('point to point'))        return <MQP2PDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('publish') || t.includes('pub/sub') || t.includes('pub-sub')) return <MQPubSubDiagram  activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('delivery') || t.includes('at-most') || t.includes('at-least') || t.includes('exactly')) return <MQDeliveryDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('ordering') || t.includes('prioriti'))                    return <MQOrderDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('acknowledgement') || t.includes('retry') || t.includes('dead letter') || t.includes('dlq')) return <MQDLQDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('broker') || t.includes('rabbitmq') || t.includes('kafka') || t.includes('sqs')) return <MQBrokersDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('failure') || t.includes('practice'))                     return <MQPracticeDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <MQFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  };
+
+  const getMQTotal = (): number => {
+    if (t.includes('fundamentals'))                                          return TOTAL_MQ_FUND;
+    if (t.includes('architecture') || t.includes('component'))               return TOTAL_MQ_ARCH;
+    if (t.includes('producer') || t.includes('consumer'))                    return TOTAL_MQ_PRODCONS;
+    if (t.includes('point-to-point') || t.includes('point to point'))        return TOTAL_MQ_P2P;
+    if (t.includes('publish') || t.includes('pub/sub') || t.includes('pub-sub')) return TOTAL_MQ_PUBSUB;
+    if (t.includes('delivery') || t.includes('at-most') || t.includes('at-least') || t.includes('exactly')) return TOTAL_MQ_DELIVERY;
+    if (t.includes('ordering') || t.includes('prioriti'))                    return TOTAL_MQ_ORDER;
+    if (t.includes('acknowledgement') || t.includes('retry') || t.includes('dead letter') || t.includes('dlq')) return TOTAL_MQ_DLQ;
+    if (t.includes('broker') || t.includes('rabbitmq') || t.includes('kafka') || t.includes('sqs')) return TOTAL_MQ_BROKERS;
+    return TOTAL_MQ_PRACTICE;
+  };
 
   // -- API Gateway diagrams --
   const getAGDiagram = (): React.ReactNode => {
@@ -3006,7 +3384,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
     return TOTAL_BASICS;
   };
 
-  const total = isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
+  const total = isMQ ? getMQTotal() : isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
 
   useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle, topic]);
 
@@ -3018,7 +3396,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
 
   return (
     <div className="module-animation" aria-label="Architecture diagram">
-      {isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
+      {isMQ ? getMQDiagram() : isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
     </div>
   );
 };

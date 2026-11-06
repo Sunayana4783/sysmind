@@ -20,7 +20,7 @@ const HLD_TOPICS: HLDTopic[] = [
   { id: 'microservices', title: 'Microservices', locked: false, route: '/learning/hld/microservices', description: 'Service decomposition, inter-service communication.' },
   { id: 'caching', title: 'Caching', locked: false, route: '/learning/hld/caching', description: 'Cache strategies, Redis, distributed caching, eviction policies.' },
   { id: 'api-gateway', title: 'API Gateway', locked: false, route: '/learning/hld/api-gateway', description: 'Rate limiting, auth, routing, and aggregation.' },
-  { id: 'message-queues', title: 'Message Queues', locked: true, description: 'Kafka, RabbitMQ, async processing, event-driven design.' },
+  { id: 'message-queues', title: 'Message Queues', locked: false, route: '/learning/hld/message-queues', description: 'Kafka, RabbitMQ, async processing, event-driven design.' },
   { id: 'cdn', title: 'CDN', locked: true, description: 'Content delivery networks, edge caching, geo-distribution.' },
   { id: 'distributed-systems', title: 'Distributed Systems', locked: true, description: 'Consensus, fault tolerance, distributed transactions.' },
 ];
