@@ -34,26 +34,6 @@ app.use('/api/learning', learningRoutes);
 app.use('/api/quiz',     quizRoutes);
 app.use('/api/activity', activityRoutes);
 
-app.post('/api/admin/seed', async (req, res) => {
-  if (req.headers['x-seed-secret'] !== 'sysmind_seed_2024_run') return res.status(403).json({ message: 'Forbidden' });
-  try {
-    const Topic  = require('./src/models/Topic');
-    const Module = require('./src/models/Module');
-    const C      = require('./src/data/cdnContent');
-    await Module.deleteMany({ topicSlug: 'cdn' });
-    await Topic.findOneAndUpdate({ slug: 'cdn' },
-      { slug: 'cdn', title: 'CDN', order: 9, locked: false,
-        description: 'CDN fundamentals, edge servers, PoPs, origin caching, push vs pull, static vs dynamic, cache invalidation, and CDN security.' },
-      { upsert: true, new: true });
-    const log = [];
-    for (const mod of C) {
-      await Module.create({ ...mod, topicSlug: 'cdn' });
-      log.push(mod.order + ': ' + mod.title);
-    }
-    res.json({ ok: true, count: log.length, log });
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
