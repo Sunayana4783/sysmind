@@ -1288,6 +1288,360 @@ const SCSpikeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// DISTRIBUTED SYSTEMS DIAGRAMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// DS DIAGRAM 1 - Fundamentals: single node vs distributed + partial failure
+const TOTAL_DS_FUND = 5;
+const DSFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Single node: simple but limited by one machine\'s capacity',
+    'Add nodes: more capacity and availability - new problems appear',
+    'Network call between nodes: can fail, be lost, or timeout',
+    'Partial failure: Node B crashes while A and C continue working',
+    'Handle gracefully: retry, fallback, or fail with clear error',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx <= 1} />}  label="Node A"      sublabel="Still running"      active={activeIdx <= 1} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 2} label="RPC call" />
+        <ArchNode icon={<ServerIcon  active={activeIdx === 1} />} label="Node B"      sublabel={activeIdx >= 3 ? 'CRASHED' : 'Running'} active={activeIdx === 1} danger={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 1} label="sync" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 1} />}  label="Node C"      sublabel="Still running"      active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+      </div>
+      {activeIdx === 2 && <div className="arch-danger-banner">Network call can fail, timeout, or be lost - ambiguous!</div>}
+      {activeIdx === 3 && <div className="arch-danger-banner">Partial failure: B crashed, A and C still serve traffic</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Retry with backoff, circuit break, or fallback response</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DS_FUND}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DS_FUND} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DS DIAGRAM 2 - Architecture: leader, followers, coordinator
+const TOTAL_DS_ARCH = 5;
+const DSArchDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Leader node accepts all writes and coordinates replication',
+    'Writes replicated to follower nodes for durability',
+    'Reads distributed across followers for scalability',
+    'Coordination service (etcd/ZooKeeper) manages leader election',
+    'Sharding: data partitioned across multiple independent groups',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<NetworkIcon active={activeIdx === 3} />} label="etcd/ZooKeeper" sublabel="Leader election" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 0} label="elects" />
+        <ArchNode icon={<ServerIcon  active={activeIdx <= 2} />}  label="Leader"       sublabel="Accepts writes"     active={activeIdx <= 1} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="replicate" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {['Follower 1','Follower 2'].map(f => (
+            <ArchNode key={f} icon={<ServerIcon active={activeIdx >= 1} />} label={f} sublabel={activeIdx >= 2 ? 'Serves reads' : 'Syncing'} active={activeIdx >= 1} onClick={() => setActiveIdx(2)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx >= 4 && <div className="arch-failover-banner">Sharding: each partition group is independent</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DS_ARCH}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DS_ARCH} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DS DIAGRAM 3 - Communication: RPC timeout + retry + heartbeat
+const TOTAL_DS_COMM = 5;
+const DSCommDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Node A makes RPC call to Node B over the network',
+    'No response after 500ms timeout - what happened to B?',
+    'Ambiguity: B crashed? Network lost it? B is slow?',
+    'Retry with idempotency key - safe to repeat the operation',
+    'Heartbeat: B pings every 5s - silence = B is assumed down',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx === 0} />} label="Node A"      sublabel="Makes RPC call"     active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 0} label={activeIdx >= 1 ? 'timeout!' : 'RPC call'} />
+        <ArchNode icon={<ServerIcon  active={activeIdx === 0} />} label="Node B"      sublabel={activeIdx >= 1 ? '???' : 'Responding'} active={activeIdx === 0} danger={activeIdx >= 1 && activeIdx <= 2} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<LockIcon    active={activeIdx === 3} />} label="Idempotent"  sublabel="Safe retry key"     active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="heartbeat" />
+        <ArchNode icon={<NetworkIcon active={activeIdx === 4} />} label="Heartbeat"   sublabel="5s ping - detect fail" active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">500ms timeout - no response from B!</div>}
+      {activeIdx === 2 && <div className="arch-danger-banner">Cannot distinguish: crash vs partition vs slow</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">Retry with idempotency key - processing twice is safe</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DS_COMM}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DS_COMM} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DS DIAGRAM 4 - Clocks and Ordering
+const TOTAL_DS_CLOCKS = 5;
+const DSClocksDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Physical clocks drift: A=10:00:00.030, B=10:00:00.010 (B is behind)',
+    'Event on B at 10:00:00.020 appears to predate A\'s at 10:00:00.030',
+    'But B\'s event may have happened AFTER A\'s - timestamps wrong',
+    'Lamport clock: logical counter, increment on send/receive',
+    'Vector clock: per-node counters - detect truly concurrent events',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx <= 2} />} label="Node A"      sublabel={activeIdx <= 2 ? 'Clock: .030' : 'Lamport: 3'} active={activeIdx <= 2} danger={activeIdx === 1 || activeIdx === 2} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 3} label="Lamport msg" />
+        <ArchNode icon={<ServerIcon  active={activeIdx <= 2} />} label="Node B"      sublabel={activeIdx <= 2 ? 'Clock: .010 (drifted)' : 'Lamport: 4'} active={activeIdx <= 2} danger={activeIdx === 1 || activeIdx === 2} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<CacheIcon   active={activeIdx === 3} />} label="Lamport"    sublabel="max(local,recv)+1"   active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="richer" />
+        <ArchNode icon={<NetworkIcon active={activeIdx === 4} />} label="Vector"     sublabel="[A:3, B:2, C:1]"     active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 2 && <div className="arch-danger-banner">Timestamp order wrong - clock drift flipped causality</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">Lamport: causal ordering without wall clocks</div>}
+      {activeIdx === 4 && <div className="arch-failover-banner">Vector clock: can detect concurrent (unrelated) events</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DS_CLOCKS}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DS_CLOCKS} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DS DIAGRAM 5 - Consistency Models
+const TOTAL_DS_CONSIST = 5;
+const DSConsistDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Client writes value to Node A',
+    'Strong consistency: any node returns new value immediately',
+    'Eventual consistency: replicas may briefly return old value',
+    'Causal consistency: your own writes always visible to you',
+    'Eventually all replicas converge to the same value',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />} label="Write"       sublabel="value=100"          active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active label="to" />
+        <ArchNode icon={<ServerIcon  active />}                   label="Node A"      sublabel="value=100 (latest)" active />
+        <Arrow active={activeIdx >= 1} label="replicate" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <ArchNode icon={<ServerIcon active={activeIdx >= 1} />} label="Node B"      sublabel={activeIdx === 2 ? 'Still 99 (stale)' : activeIdx >= 1 ? 'value=100' : 'value=99'} active={activeIdx >= 1} danger={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+          <ArchNode icon={<ServerIcon active={activeIdx >= 4} />} label="Node C"      sublabel={activeIdx >= 4 ? 'value=100 (synced)' : 'Syncing...'} active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+        </div>
+      </div>
+      {activeIdx === 1 && <div className="arch-failover-banner">Strong: quorum read - always returns 100</div>}
+      {activeIdx === 2 && <div className="arch-danger-banner">Eventual: B returns stale 99 briefly</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">Causal: writer always sees own write (100)</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">Convergence: all replicas eventually agree on 100</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DS_CONSIST}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DS_CONSIST} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DS DIAGRAM 6 - Raft Consensus
+const TOTAL_DS_RAFT = 5;
+const DSRaftDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Election: nodes vote, winner becomes leader for current term',
+    'Client write: leader appends entry to its log',
+    'Replicate: leader sends log entry to all followers in parallel',
+    'Quorum: majority (3/5) acknowledge - entry committed',
+    'Leader fails: remaining 4 nodes elect new leader automatically',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 1} />} label="Client"      sublabel="Write request"      active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 1} label="write" />
+        <ArchNode icon={<LockIcon    active={activeIdx <= 3} />}  label="Leader"      sublabel={activeIdx >= 4 ? 'FAILED' : `Term ${activeIdx + 1}`} active={activeIdx <= 3} danger={activeIdx === 4} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="replicate" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {['F1','F2','F3','F4'].map((f, i) => (
+            <ArchNode key={f} icon={<ServerIcon active={activeIdx >= 2} />}
+              label={'Follower ' + (i + 1)}
+              sublabel={activeIdx >= 3 ? (i < 2 ? 'Acked' : 'Acking') : 'Waiting'}
+              active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx === 3 && <div className="arch-failover-banner">Quorum (3/5) acked - entry committed safely</div>}
+      {activeIdx === 4 && <div className="arch-danger-banner">Leader failed - followers elect new leader</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DS_RAFT}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DS_RAFT} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DS DIAGRAM 7 - Distributed Transactions: 2PC vs Saga
+const TOTAL_DS_TX = 5;
+const DSTxDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const is2PC = activeIdx <= 2;
+  const descs = [
+    '2PC Phase 1: coordinator asks all participants "can you commit?"',
+    '2PC Phase 2: all say yes - coordinator sends commit to all',
+    '2PC problem: coordinator crashes - participants stuck holding locks',
+    'Saga step 1: Order Service creates order (local transaction)',
+    'Saga fails: compensating TX runs - refund card, cancel order',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={`arch-path${is2PC ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--read">2-PHASE COMMIT</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<NetworkIcon active={activeIdx === 0} />} label="Coordinator" sublabel="Phase 1: prepare?" active={activeIdx === 0} danger={activeIdx === 2} onClick={() => setActiveIdx(0)} />
+            <VertArrow active={activeIdx >= 1} label="yes/no" />
+            <ArchNode icon={<ServerIcon  active={activeIdx === 1} />} label="Participants" sublabel={activeIdx === 2 ? 'STUCK waiting' : 'Lock + ready'} active={activeIdx === 1} danger={activeIdx === 2} onClick={() => setActiveIdx(1)} />
+            {activeIdx === 2 && <div className="arch-danger-banner" style={{ marginTop: '0.5rem' }}>Coordinator crashed - participants hold locks forever!</div>}
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={`arch-path${!is2PC ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--write">SAGA PATTERN</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<CacheIcon   active={activeIdx === 3} />} label="Step 1: Order" sublabel="Local TX - created" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+            <VertArrow active={activeIdx >= 4} label="fail" />
+            <ArchNode icon={<WarningIcon active={activeIdx === 4} />} label="Compensate"   sublabel="Refund + cancel"     active={activeIdx === 4} danger={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+          </div>
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DS_TX}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DS_TX} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DS DIAGRAM 8 - Fault Tolerance and Replication
+const TOTAL_DS_FAULT = 5;
+const DSFaultDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Write to primary: synchronous - wait for quorum ack before confirming',
+    'Primary replicates to 2 followers across different availability zones',
+    'Primary crashes: system detects via missed heartbeats',
+    'Leader election: follower with most up-to-date log becomes primary',
+    'Re-replicate: new primary adds replica to restore 3x replication',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />}  label="Client"      sublabel="Write"              active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active label="write" />
+        <ArchNode icon={<ServerIcon  active={activeIdx <= 1} />}   label="Primary"     sublabel={activeIdx >= 2 ? 'CRASHED' : 'AZ-1'} active={activeIdx <= 1} danger={activeIdx >= 2 && activeIdx <= 3} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 1} label="sync rep" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <ArchNode icon={<ServerIcon  active={activeIdx >= 1} />} label="Replica 1"   sublabel={activeIdx >= 3 ? 'NEW PRIMARY' : 'AZ-2'} active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+          <ArchNode icon={<ServerIcon  active={activeIdx >= 1} />} label="Replica 2"   sublabel="AZ-3"               active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        </div>
+      </div>
+      {activeIdx === 2 && <div className="arch-danger-banner">Primary crashed - missed heartbeats detected</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">Replica 1 elected new primary in seconds</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">New replica added - 3x replication restored</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DS_FAULT}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DS_FAULT} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DS DIAGRAM 9 - CAP Theorem during partition
+const TOTAL_DS_CAP = 5;
+const DSCAPDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Network partition splits cluster: Node A and Node B cannot talk',
+    'CP choice: Node B refuses requests - avoids serving stale data',
+    'AP choice: Node B serves requests with potentially stale data',
+    'Partition heals: nodes sync and converge',
+    'CP: banking. AP: social feeds. Choose based on your use case.',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />}  label="Write"       sublabel="balance=500"        active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active label="to" />
+        <ArchNode icon={<ServerIcon  active={activeIdx <= 2} />}   label="Node A"      sublabel="balance=500"        active={activeIdx <= 2} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx === 0} label="PARTITION!" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 1} />}   label="Node B"
+          sublabel={activeIdx === 1 ? 'REFUSED (CP)' : activeIdx === 2 ? 'balance=400 (AP)' : activeIdx >= 3 ? 'synced=500' : 'balance=400'}
+          active={activeIdx >= 1} danger={activeIdx === 1 || activeIdx === 2}
+          onClick={() => setActiveIdx(activeIdx >= 3 ? 3 : 2)} />
+      </div>
+      {activeIdx === 0 && <div className="arch-danger-banner">Network partition: A and B cannot communicate</div>}
+      {activeIdx === 1 && <div className="arch-danger-banner">CP: Node B refuses - prefers consistency over availability</div>}
+      {activeIdx === 2 && <div className="arch-failover-banner">AP: Node B serves stale data - prefers availability</div>}
+      {activeIdx >= 3 && <div className="arch-failover-banner">Partition healed: nodes sync to same value</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DS_CAP}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DS_CAP} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// DS DIAGRAM 10 - Observability: distributed tracing
+const TOTAL_DS_OBS = 5;
+const DSObsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Request enters system: unique trace ID assigned at entry',
+    'Every service logs with same trace ID',
+    'Payment service throws error at step 4 of the call chain',
+    'Jaeger shows full waterfall: found failure in seconds',
+    'Prometheus alert fires: error rate >1% - on-call paged',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<NetworkIcon active={activeIdx === 0} />}  label="Entry"       sublabel="trace-id:abc123"     active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="propagate" />
+        <ArchNode icon={<ServerIcon  active={activeIdx === 1} />}  label="Order Svc"   sublabel="10ms - OK"          active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="call" />
+        <ArchNode icon={<LockIcon    active={activeIdx >= 2} />}   label="Payment Svc" sublabel={activeIdx >= 2 ? '4s - ERROR' : '...'} active={activeIdx >= 2} danger={activeIdx >= 2 && activeIdx <= 3} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<CacheIcon   active={activeIdx === 3} />}  label="Jaeger"      sublabel="Full trace waterfall" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="alert" />
+        <ArchNode icon={<UserIcon    active={activeIdx === 4} />}  label="On-Call"     sublabel="Error >1% - paged"   active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 2 && <div className="arch-danger-banner">Payment Service: 4s latency spike + error</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">Trace view: root cause found in 10 seconds</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_DS_OBS}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_DS_OBS} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // CDN DIAGRAMS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -3525,6 +3879,35 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
   const isAG    = topic === 'api-gateway';
   const isMQ    = topic === 'message-queues';
   const isCDN   = topic === 'cdn';
+  const isDS    = topic === 'distributed-systems';
+
+  // -- Distributed Systems diagrams --
+  const getDSDiagram = (): React.ReactNode => {
+    if (t.includes('fundamentals'))                                          return <DSFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('architecture') || t.includes('component'))               return <DSArchDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('communication') || t.includes('nodes'))                  return <DSCommDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('time') || t.includes('clock') || t.includes('ordering')) return <DSClocksDiagram       activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('consistency model') || t.includes('eventual') || t.includes('strong')) return <DSConsistDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('consensus') || t.includes('raft') || t.includes('paxos')) return <DSRaftDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('transaction') || t.includes('2pc') || t.includes('saga')) return <DSTxDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('fault') || t.includes('replication'))                    return <DSFaultDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('cap') || t.includes('partition tolerance'))               return <DSCAPDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('observability') || t.includes('failure'))                 return <DSObsDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <DSFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  };
+
+  const getDSTotal = (): number => {
+    if (t.includes('fundamentals'))                                          return TOTAL_DS_FUND;
+    if (t.includes('architecture') || t.includes('component'))               return TOTAL_DS_ARCH;
+    if (t.includes('communication') || t.includes('nodes'))                  return TOTAL_DS_COMM;
+    if (t.includes('time') || t.includes('clock') || t.includes('ordering')) return TOTAL_DS_CLOCKS;
+    if (t.includes('consistency model') || t.includes('eventual') || t.includes('strong')) return TOTAL_DS_CONSIST;
+    if (t.includes('consensus') || t.includes('raft') || t.includes('paxos')) return TOTAL_DS_RAFT;
+    if (t.includes('transaction') || t.includes('2pc') || t.includes('saga')) return TOTAL_DS_TX;
+    if (t.includes('fault') || t.includes('replication'))                    return TOTAL_DS_FAULT;
+    if (t.includes('cap') || t.includes('partition tolerance'))               return TOTAL_DS_CAP;
+    return TOTAL_DS_OBS;
+  };
 
   // -- CDN diagrams --
   const getCDNDiagram = (): React.ReactNode => {
@@ -3780,7 +4163,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
     return TOTAL_BASICS;
   };
 
-  const total = isCDN ? getCDNTotal() : isMQ ? getMQTotal() : isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
+  const total = isDS ? getDSTotal() : isCDN ? getCDNTotal() : isMQ ? getMQTotal() : isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
 
   useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle, topic]);
 
@@ -3792,7 +4175,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
 
   return (
     <div className="module-animation" aria-label="Architecture diagram">
-      {isCDN ? getCDNDiagram() : isMQ ? getMQDiagram() : isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
+      {isDS ? getDSDiagram() : isCDN ? getCDNDiagram() : isMQ ? getMQDiagram() : isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
     </div>
   );
 };

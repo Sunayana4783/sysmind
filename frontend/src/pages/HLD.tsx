@@ -22,7 +22,7 @@ const HLD_TOPICS: HLDTopic[] = [
   { id: 'api-gateway', title: 'API Gateway', locked: false, route: '/learning/hld/api-gateway', description: 'Rate limiting, auth, routing, and aggregation.' },
   { id: 'message-queues', title: 'Message Queues', locked: false, route: '/learning/hld/message-queues', description: 'Kafka, RabbitMQ, async processing, event-driven design.' },
   { id: 'cdn', title: 'CDN', locked: false, route: '/learning/hld/cdn', description: 'Content delivery networks, edge caching, geo-distribution.' },
-  { id: 'distributed-systems', title: 'Distributed Systems', locked: true, description: 'Consensus, fault tolerance, distributed transactions.' },
+  { id: 'distributed-systems', title: 'Distributed Systems', locked: false, route: '/learning/hld/distributed-systems', description: 'Consensus, fault tolerance, distributed transactions.' },
 ];
 
 const HLD = () => {

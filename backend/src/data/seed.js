@@ -11,6 +11,7 @@ const MICROSERVICES_MODULES    = require('./microservicesContent');
 const API_GATEWAY_MODULES      = require('./apiGatewayContent');
 const MESSAGE_QUEUES_MODULES   = require('./messageQueuesContent');
 const CDN_MODULES              = require('./cdnContent');
+const DISTRIBUTED_SYSTEMS_MODULES = require('./distributedSystemsContent');
 
 const TOPICS = [
   { slug: 'caching',             title: 'Caching',             order: 1, locked: false, description: 'Master caching fundamentals, eviction policies, Redis, and distributed caching patterns.',                                                                modules: CACHING_MODULES },
@@ -22,6 +23,8 @@ const TOPICS = [
   { slug: 'api-gateway',         title: 'API Gateway',         order: 7, locked: false, description: 'API Gateway fundamentals, routing, authentication, rate limiting, transformation, aggregation, security, and monitoring.',                              modules: API_GATEWAY_MODULES },
   { slug: 'message-queues',      title: 'Message Queues',      order: 8, locked: false, description: 'Message queue fundamentals, producers and consumers, delivery guarantees, ordering, DLQs, RabbitMQ, Kafka, and SQS.',                                  modules: MESSAGE_QUEUES_MODULES },
   { slug: 'cdn',                 title: 'CDN',                 order: 9, locked: false, description: 'CDN fundamentals, edge servers, PoPs, origin caching, push vs pull, static vs dynamic content, cache invalidation, and CDN security.',                 modules: CDN_MODULES },
+
+  { slug: 'distributed-systems',  title: 'Distributed Systems',  order: 10, locked: false, description: 'Fundamentals, consensus (Raft/Paxos), distributed transactions, consistency models, CAP theorem, and fault tolerance.',                                     modules: DISTRIBUTED_SYSTEMS_MODULES },
 ];
 
 const seed = async () => {
