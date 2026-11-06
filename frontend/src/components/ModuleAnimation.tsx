@@ -1288,6 +1288,361 @@ const SCSpikeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// API GATEWAY DIAGRAMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// AG DIAGRAM 1 - Fundamentals: clients to gateway to services
+const TOTAL_AG_FUND = 5;
+const AGFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'All clients (mobile, web, third-party) send requests to one URL',
+    'API Gateway is the single entry point - clients never call services directly',
+    'Gateway authenticates the request and checks rate limits',
+    'Gateway routes to the correct backend microservice',
+    'Response flows back through gateway to client',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {['Mobile','Web','Partner'].map(c => (
+            <ArchNode key={c} icon={<UserIcon active={activeIdx === 0} />} label={c} sublabel="client" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+          ))}
+        </div>
+        <Arrow active={activeIdx >= 1} label="one URL" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />} label="API Gateway" sublabel="Single entry point" active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 3} label="route" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {['User Svc','Order Svc','Pay Svc'].map(s => (
+            <ArchNode key={s} icon={<ServerIcon active={activeIdx >= 3} />} label={s} sublabel="backend" active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx >= 4 && <div className="arch-failover-banner">One entry point - backends can change freely without breaking clients</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_AG_FUND}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_AG_FUND} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// AG DIAGRAM 2 - Architecture: request pipeline
+const TOTAL_AG_ARCH = 5;
+const AGArchDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Request enters the API Gateway pipeline',
+    'Pre-process: validate headers, authenticate token, check rate limit',
+    'Route match: URL path matched to backend service definition',
+    'Forward: send request upstream to service instance',
+    'Post-process: transform response, add CORS headers, log result',
+  ];
+  const stages = [
+    { label: 'Pre-process',  sub: 'Auth + Rate limit', idx: 1 },
+    { label: 'Route match',  sub: 'URL to service',    idx: 2 },
+    { label: 'Forward',      sub: 'Upstream call',     idx: 3 },
+    { label: 'Post-process', sub: 'Transform + Log',   idx: 4 },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />} label="Request" sublabel="Enters pipeline" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        {stages.map((s, i) => (
+          <React.Fragment key={s.label}>
+            <Arrow active={activeIdx > i} label="" />
+            <ArchNode icon={i === 0 ? <LockIcon active={activeIdx === s.idx} /> : i === 1 ? <NetworkIcon active={activeIdx === s.idx} /> : i === 2 ? <ServerIcon active={activeIdx === s.idx} /> : <CacheIcon active={activeIdx === s.idx} />}
+              label={s.label} sublabel={s.sub} active={activeIdx === s.idx} onClick={() => setActiveIdx(s.idx)} />
+          </React.Fragment>
+        ))}
+        <Arrow active={activeIdx >= 4} label="" />
+        <ArchNode icon={<UserIcon active={activeIdx >= 4} />} label="Response" sublabel="To client" active={activeIdx >= 4} />
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_AG_ARCH}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_AG_ARCH} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// AG DIAGRAM 3 - Gateway vs Reverse Proxy
+const TOTAL_AG_PROXY = 5;
+const AGProxyDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const isGW = activeIdx >= 3;
+  const descs = [
+    'Reverse proxy: SSL termination, load balancing, URL routing',
+    'Reverse proxy forwards request - no business logic, no JWT awareness',
+    'Request passes through without auth or rate limiting',
+    'API Gateway: validates JWT, checks rate limit, transforms payload',
+    'They coexist: reverse proxy at edge, API gateway for app logic',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={`arch-path${!isGW ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--read">REVERSE PROXY (NGINX)</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<NetworkIcon active={activeIdx <= 1} />} label="NGINX" sublabel="SSL + Load balance" active={activeIdx <= 1} onClick={() => setActiveIdx(0)} />
+            <VertArrow active={activeIdx >= 1} label="forwards" />
+            <ArchNode icon={<ServerIcon active={activeIdx === 2} />} label="Backend" sublabel="No auth check" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={`arch-path${isGW ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--write">API GATEWAY (KONG)</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<LockIcon active={activeIdx === 3} />} label="API Gateway" sublabel="JWT + Rate limit" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+            <VertArrow active={activeIdx >= 4} label="routes" />
+            <ArchNode icon={<ServerIcon active={activeIdx >= 4} />} label="Service" sublabel="Gets user context" active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+          </div>
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_AG_PROXY}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_AG_PROXY} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// AG DIAGRAM 4 - Request Routing
+const TOTAL_AG_ROUTE = 5;
+const AGRouteDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'GET /api/users/123 arrives at gateway',
+    'Gateway matches /api/users/* to User Service routing rule',
+    'Path rewritten: strip /api prefix, forward /users/123',
+    'Request forwarded to user-service:8080/users/123',
+    'Service responds, gateway returns response to client',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}    label="Client"       sublabel="GET /api/users/123"  active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="request" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}  label="API Gateway"  sublabel={activeIdx === 2 ? 'Rewrite path' : 'Route match'} active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 3} label="forward" />
+        <ArchNode icon={<ServerIcon active={activeIdx >= 3} />}   label="User Service" sublabel="GET /users/123"      active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-failover-banner">/api/users/* matches User Service rule</div>}
+      {activeIdx === 2 && <div className="arch-failover-banner">Strip /api prefix: /api/users/123 becomes /users/123</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Response flows back through gateway to client</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_AG_ROUTE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_AG_ROUTE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// AG DIAGRAM 5 - Authentication
+const TOTAL_AG_AUTH = 5;
+const AGAuthDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Client sends request with Bearer JWT token in Authorization header',
+    'Gateway validates JWT signature and checks expiry',
+    'Extract user claims: user_id, role from token payload',
+    'Inject trusted headers: X-User-ID, X-User-Role into forwarded request',
+    'Backend trusts gateway headers - no re-validation needed',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}    label="Client"       sublabel="Bearer: eyJhbGci..." active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="+ JWT" />
+        <ArchNode icon={<LockIcon active={activeIdx >= 1} />}     label="API Gateway"  sublabel={activeIdx <= 2 ? 'Validating JWT' : 'Injecting headers'} active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 3} label="trusted headers" />
+        <ArchNode icon={<ServerIcon active={activeIdx >= 3} />}   label="Service"      sublabel={activeIdx >= 3 ? 'X-User-ID: 123' : 'Waiting'} active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-failover-banner">Validate signature + check expiry</div>}
+      {activeIdx === 2 && <div className="arch-failover-banner">Extract: user_id=123, role=admin from claims</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Trusted subsystem: service never re-validates tokens</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_AG_AUTH}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_AG_AUTH} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// AG DIAGRAM 6 - Rate Limiting
+const TOTAL_AG_RATE = 5;
+const AGRateDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Client making rapid API requests to the gateway',
+    'Gateway checks rate limit counter in Redis: 98 of 100 used',
+    'Counter reaches 100 - limit exceeded for this window',
+    'Return 429 Too Many Requests with Retry-After: 30 header',
+    'Window resets after 30s - client can resume requests',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}    label="Client"       sublabel="Rapid requests"      active={activeIdx === 0} danger={activeIdx >= 2} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="request" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}  label="API Gateway"  sublabel={activeIdx >= 2 ? 'LIMIT HIT' : 'Checking Redis'} active={activeIdx >= 1} danger={activeIdx >= 2} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 1} label="check" />
+        <ArchNode icon={<RedisIcon active={activeIdx >= 1} />}    label="Redis"        sublabel={activeIdx >= 2 ? '100/100 - FULL' : '98/100 used'} active={activeIdx >= 1} danger={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      {activeIdx >= 2 && activeIdx < 4 && <div className="arch-danger-banner">Rate limit exceeded - 100 requests used in window</div>}
+      {activeIdx >= 3 && <div className="arch-danger-banner">429 Too Many Requests - Retry-After: 30 seconds</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">Window reset - client can send requests again</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_AG_RATE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_AG_RATE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// AG DIAGRAM 7 - Transformation
+const TOTAL_AG_TRANSFORM = 5;
+const AGTransformDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Client sends POST /v1/users with XML body',
+    'Gateway transforms: convert XML to JSON for backend',
+    'Add internal headers, remove client-specific headers',
+    'Backend returns JSON with internal fields',
+    'Gateway removes internal fields, wraps in {data: ...} envelope',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}    label="Client"       sublabel="XML body (v1)"       active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="XML" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}  label="API Gateway"  sublabel={activeIdx <= 2 ? 'Req transform' : 'Resp transform'} active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="JSON" />
+        <ArchNode icon={<ServerIcon active={activeIdx >= 2} />}   label="Backend"      sublabel="Expects JSON"        active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-failover-banner">XML to JSON conversion + inject X-User-ID header</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">Backend returns {'{'}id, name, internal_key{'}'}</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Remove internal_key, wrap: {'{'}data: {'{'}id, name{'}'}{'}'}</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_AG_TRANSFORM}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_AG_TRANSFORM} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// AG DIAGRAM 8 - Aggregation
+const TOTAL_AG_AGG = 5;
+const AGAggDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Client calls GET /api/dashboard - single request',
+    'Gateway fires 3 parallel calls to User, Orders, Notifications services',
+    'All 3 services respond independently in parallel',
+    'Gateway aggregates all 3 responses into one JSON object',
+    'Client gets complete dashboard in one round trip - 3x faster',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}    label="Client"       sublabel="GET /api/dashboard"  active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="1 call" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}  label="API Gateway"  sublabel={activeIdx >= 3 ? 'Aggregating' : 'Calling all 3'} active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 1} label="parallel" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {['User Svc','Orders Svc','Notif Svc'].map((s, i) => (
+            <ArchNode key={s} icon={<ServerIcon active={activeIdx >= 2} />} label={s} sublabel={activeIdx >= 2 ? 'Responded' : 'Called'} active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx >= 3 && <div className="arch-failover-banner">3 parallel calls combined into 1 response - 1 round trip</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_AG_AGG}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_AG_AGG} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// AG DIAGRAM 9 - Security and Monitoring
+const TOTAL_AG_SEC = 5;
+const AGSecDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Request enters gateway - security inspection begins',
+    'TLS termination, IP blocklist check, WAF rules applied',
+    'Trace ID assigned to request - propagated to all services',
+    'Latency, status code, client ID logged to metrics store',
+    'Error rate >1% triggers alert to on-call engineer',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}    label="Request"      sublabel="Enters gateway"      active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="inspect" />
+        <ArchNode icon={<LockIcon active={activeIdx >= 1} />}     label="Security"     sublabel="TLS + WAF + IP"      active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="trace ID" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 2} />}  label="Trace"        sublabel="X-Trace-ID: abc"     active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<CacheIcon active={activeIdx === 3} />}   label="Metrics"      sublabel="Prometheus/Datadog"   active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="alert" />
+        <ArchNode icon={<WarningIcon active={activeIdx === 4} />} label="Alert"        sublabel="Error rate >1%"       active={activeIdx === 4} danger={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">Security layer: block malicious requests at edge</div>}
+      {activeIdx >= 4  && <div className="arch-danger-banner">On-call paged - error rate threshold breached</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_AG_SEC}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_AG_SEC} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// AG DIAGRAM 10 - BFF Pattern
+const TOTAL_AG_BFF = 5;
+const AGBFFDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Different clients have different data needs and performance constraints',
+    'Mobile BFF: compact payloads, aggregated for bandwidth constraints',
+    'Web BFF: rich data responses optimised for desktop browsers',
+    'Partner API BFF: strict rate limits, stable versioned API',
+    'Each BFF deploys independently - changes to one do not affect others',
+  ];
+  const bffs = [
+    { label: 'Mobile BFF',  sub: 'Compact + aggregated', idx: 1 },
+    { label: 'Web BFF',     sub: 'Rich responses',       idx: 2 },
+    { label: 'Partner BFF', sub: 'Rate limited + versioned', idx: 3 },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}   label="Clients"      sublabel="Different needs"     active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="each type" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {bffs.map(b => (
+            <ArchNode key={b.label} icon={<NetworkIcon active={activeIdx === b.idx} />} label={b.label} sublabel={b.sub} active={activeIdx === b.idx} onClick={() => setActiveIdx(b.idx)} />
+          ))}
+        </div>
+        <Arrow active={activeIdx >= 1} label="to services" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {['User Svc','Order Svc','Pay Svc'].map(s => (
+            <ArchNode key={s} icon={<ServerIcon active={activeIdx >= 1} />} label={s} sublabel="backend" active={activeIdx >= 1} />
+          ))}
+        </div>
+      </div>
+      {activeIdx >= 4 && <div className="arch-failover-banner">Each BFF deploys independently - optimised for its client</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_AG_BFF}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_AG_BFF} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // MICROSERVICES DIAGRAMS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -2451,6 +2806,35 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
   const isSA    = topic === 'system-architecture';
   const isDB    = topic === 'database-design';
   const isMS    = topic === 'microservices';
+  const isAG    = topic === 'api-gateway';
+
+  // -- API Gateway diagrams --
+  const getAGDiagram = (): React.ReactNode => {
+    if (t.includes('fundamentals'))                                           return <AGFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('architecture') && !t.includes('micro'))                   return <AGArchDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('reverse proxy') || t.includes('vs reverse'))              return <AGProxyDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('routing') || t.includes('forwarding'))                    return <AGRouteDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('authentication') || t.includes('authorization'))          return <AGAuthDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('rate limit') || t.includes('throttl'))                    return <AGRateDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('transform'))                                               return <AGTransformDiagram    activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('aggregat') || t.includes('composition'))                  return <AGAggDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('security') || t.includes('monitor'))                      return <AGSecDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('bff') || t.includes('backend for frontend') || t.includes('failure') || t.includes('practice')) return <AGBFFDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <AGFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  };
+
+  const getAGTotal = (): number => {
+    if (t.includes('fundamentals'))                                           return TOTAL_AG_FUND;
+    if (t.includes('architecture') && !t.includes('micro'))                   return TOTAL_AG_ARCH;
+    if (t.includes('reverse proxy') || t.includes('vs reverse'))              return TOTAL_AG_PROXY;
+    if (t.includes('routing') || t.includes('forwarding'))                    return TOTAL_AG_ROUTE;
+    if (t.includes('authentication') || t.includes('authorization'))          return TOTAL_AG_AUTH;
+    if (t.includes('rate limit') || t.includes('throttl'))                    return TOTAL_AG_RATE;
+    if (t.includes('transform'))                                               return TOTAL_AG_TRANSFORM;
+    if (t.includes('aggregat') || t.includes('composition'))                  return TOTAL_AG_AGG;
+    if (t.includes('security') || t.includes('monitor'))                      return TOTAL_AG_SEC;
+    return TOTAL_AG_BFF;
+  };
 
   // -- Microservices diagrams --
   const getMSDiagram = (): React.ReactNode => {
@@ -2622,7 +3006,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
     return TOTAL_BASICS;
   };
 
-  const total = isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
+  const total = isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
 
   useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle, topic]);
 
@@ -2634,7 +3018,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
 
   return (
     <div className="module-animation" aria-label="Architecture diagram">
-      {isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
+      {isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
     </div>
   );
 };
