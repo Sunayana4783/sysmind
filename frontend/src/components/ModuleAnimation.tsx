@@ -1288,6 +1288,373 @@ const SCSpikeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// CDN DIAGRAMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// CDN DIAGRAM 1 - Fundamentals: user to edge vs user to origin
+const TOTAL_CDN_FUND = 5;
+const CDNFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'User in Mumbai requests content from your website',
+    'Without CDN: request travels all the way to New York - 150ms',
+    'With CDN: CDN routes to nearest edge server in Mumbai - 5ms',
+    '30x faster for the user - same content, different source',
+    'Origin server never touched - 95% cache hit ratio saves load',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon active={activeIdx === 0} />}    label="User Mumbai"   sublabel="Makes request"      active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label={activeIdx >= 2 ? '5ms via CDN' : '150ms no CDN'} />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 2} />}  label="CDN Edge"      sublabel="Mumbai PoP"         active={activeIdx >= 2} danger={activeIdx === 1} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 3} label="only on miss" />
+        <ArchNode icon={<ServerIcon active={activeIdx >= 4} />}   label="Origin"        sublabel="New York server"    active={activeIdx >= 4} danger={activeIdx === 1} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">No CDN: 150ms round trip to New York every request</div>}
+      {activeIdx === 2 && <div className="arch-failover-banner">CDN edge in Mumbai: 5ms - 30x faster for user</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Only 5% of requests (cache misses) reach origin</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_CDN_FUND}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_CDN_FUND} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// CDN DIAGRAM 2 - Architecture: DNS routing to edge
+const TOTAL_CDN_ARCH = 5;
+const CDNArchDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'User resolves your domain via CDN nameserver',
+    'CDN DNS returns IP of nearest edge PoP based on user location',
+    'User connects to closest edge server',
+    'Cache hit: edge serves content - origin not touched',
+    'Cache miss: edge fetches from origin, caches for next user',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />}  label="User"         sublabel="DNS query"          active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="DNS" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}   label="CDN DNS"      sublabel="Geo routing"        active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="nearest IP" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 2} />}   label="Edge PoP"     sublabel="Frankfurt/Mumbai"   active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 4} label="miss only" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 4} />}   label="Origin"       sublabel="Your server"        active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 3 && <div className="arch-failover-banner">Cache HIT: content served from edge in milliseconds</div>}
+      {activeIdx >= 4  && <div className="arch-danger-banner">Cache MISS: edge fetches from origin, then caches it</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_CDN_ARCH}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_CDN_ARCH} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// CDN DIAGRAM 3 - Edge PoPs and cache hierarchy
+const TOTAL_CDN_EDGE = 5;
+const CDNEdgeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'User request routed via Anycast BGP to nearest PoP',
+    'L1 edge cache checked first - closest to user',
+    'L1 miss: check regional L2 cache shared by nearby PoPs',
+    'L2 miss: only origin shield contacts origin - not all 300 PoPs',
+    'Origin shield caches result - all future L2 misses served from shield',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-col arch-col--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />}  label="User"         sublabel="Anycast routes here" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <VertArrow active={activeIdx >= 1} label="L1 check" />
+        <ArchNode icon={<CacheIcon   active={activeIdx >= 1} />}   label="L1 Edge PoP"  sublabel="Closest to user"    active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <VertArrow active={activeIdx >= 2} label="miss" />
+        <ArchNode icon={<CacheIcon   active={activeIdx >= 2} />}   label="L2 Regional"  sublabel="Asia-Pacific cache" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <VertArrow active={activeIdx >= 3} label="miss" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 3} />}   label="Origin Shield" sublabel="One shield for all" active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+        <VertArrow active={activeIdx >= 4} label="once" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 4} />}   label="Origin"       sublabel="Only hit on miss"    active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_CDN_EDGE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_CDN_EDGE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// CDN DIAGRAM 4 - Origin caching: Cache-Control headers and TTL
+const TOTAL_CDN_CACHE = 5;
+const CDNCacheDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Origin sends Cache-Control: public, max-age=86400',
+    'Edge stores response for 24 hours',
+    'Second user requests same URL - edge checks cache',
+    'Cache hit: served from edge, origin not called',
+    'After 24h TTL expires: conditional request (If-Modified-Since)',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx === 0} />}  label="Origin"       sublabel="max-age=86400"      active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="cache headers" />
+        <ArchNode icon={<CacheIcon   active={activeIdx >= 1} />}   label="CDN Edge"     sublabel={activeIdx >= 1 ? 'Caches 24h' : 'Waiting'} active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 3} label="served" />
+        <ArchNode icon={<UserIcon    active={activeIdx >= 2} />}   label="User 2"       sublabel={activeIdx >= 3 ? 'Got cache hit!' : 'Requests'} active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-failover-banner">Edge caches response for 24 hours</div>}
+      {activeIdx >= 3 && <div className="arch-failover-banner">Cache HIT: User 2 served instantly from edge</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">TTL expired: conditional request with If-Modified-Since</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_CDN_CACHE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_CDN_CACHE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// CDN DIAGRAM 5 - Push vs Pull CDN
+const TOTAL_CDN_PUSHPULL = 5;
+const CDNPushPullDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const isPush = activeIdx >= 3;
+  const descs = [
+    'Pull CDN: first user on any edge triggers cache miss (slow)',
+    'Pull CDN: second user gets cache hit (fast) - cache warms from traffic',
+    'Pull CDN: high traffic warms all edges quickly',
+    'Push CDN: you upload content to all edges before users request it',
+    'Push CDN: every user - including the first - gets a cache hit',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={`arch-path${!isPush ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--read">PULL CDN</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<UserIcon   active={activeIdx === 0} />} label="User 1"    sublabel="Cache miss (slow)" active={activeIdx === 0} danger={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+            <VertArrow active={activeIdx >= 1} label="pulls from origin" />
+            <ArchNode icon={<CacheIcon  active={activeIdx >= 1} />}  label="CDN Edge"  sublabel="Now cached" active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+            <VertArrow active={activeIdx >= 2} label="cache hit" />
+            <ArchNode icon={<UserIcon   active={activeIdx === 2} />} label="User 2+"   sublabel="Cache hit (fast)" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={`arch-path${isPush ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--write">PUSH CDN</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<ServerIcon active={activeIdx === 3} />} label="You"       sublabel="Upload to CDN" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+            <VertArrow active={activeIdx >= 4} label="pre-loaded" />
+            <ArchNode icon={<CacheIcon  active={activeIdx >= 4} />}  label="All Edges" sublabel="Content ready" active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+            {activeIdx >= 4 && <div className="arch-failover-banner" style={{ marginTop: '0.5rem' }}>Every user gets cache hit from first request</div>}
+          </div>
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_CDN_PUSHPULL}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_CDN_PUSHPULL} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// CDN DIAGRAM 6 - Static vs Dynamic
+const TOTAL_CDN_STATIC = 5;
+const CDNStaticDynDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Static asset: same image for all users - CDN caches it',
+    'Content hash in URL: app.a1b2c3.js - cache safely for 1 year',
+    'Dynamic API: user-specific data - cannot share between users',
+    'CDN accelerates dynamic on private backbone: 30% faster',
+    'Edge function: personalisation logic runs at CDN node, not origin',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={`arch-path${activeIdx <= 1 ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--read">STATIC</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<CacheIcon  active={activeIdx <= 1} />} label="CDN Edge"   sublabel="image.a1b2c3.jpg" active={activeIdx <= 1} onClick={() => setActiveIdx(0)} />
+            <VertArrow active={activeIdx >= 1} label="cache 1 year" />
+            <ArchNode icon={<UserIcon   active={activeIdx === 1} />} label="All Users" sublabel="Same cached asset" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={`arch-path${activeIdx >= 2 ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--write">DYNAMIC</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<NetworkIcon active={activeIdx >= 2} />} label="CDN Edge"  sublabel={activeIdx >= 4 ? 'Edge function!' : 'Accelerates'} active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+            <VertArrow active={activeIdx >= 3} label={activeIdx >= 4 ? 'edge logic' : 'private backbone'} />
+            <ArchNode icon={<ServerIcon  active={activeIdx >= 2 && activeIdx <= 3} />} label="Origin" sublabel="User-specific" active={activeIdx >= 2 && activeIdx <= 3} onClick={() => setActiveIdx(3)} />
+            {activeIdx >= 4 && <div className="arch-failover-banner" style={{ marginTop: '0.5rem' }}>Edge function: no origin call needed</div>}
+          </div>
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_CDN_STATIC}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_CDN_STATIC} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// CDN DIAGRAM 7 - Cache Invalidation and Purging
+const TOTAL_CDN_PURGE = 5;
+const CDNPurgeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Content updated on origin - CDN edges still serve old version',
+    'Developer triggers global cache purge via CDN API',
+    'Purge command propagates to all 300+ PoPs in under 5 seconds',
+    'All edge caches for that URL cleared',
+    'Next user: edge fetches fresh content from origin, caches it',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx === 0} />}  label="Origin"       sublabel="New content ready"  active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="purge API" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}   label="CDN Control"  sublabel="Purge command"      active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="propagate" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {['PoP 1','PoP 2','PoP 3'].map((p, i) => (
+            <ArchNode key={p} icon={<CacheIcon active={activeIdx >= 3} />}
+              label={p} sublabel={activeIdx >= 3 ? 'Cache cleared' : 'Stale cache'}
+              active={activeIdx >= 3} danger={activeIdx === 1 || activeIdx === 2}
+              onClick={() => setActiveIdx(3)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">Edges serving stale content - purge initiated</div>}
+      {activeIdx >= 3 && <div className="arch-failover-banner">All PoP caches cleared in under 5 seconds globally</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_CDN_PURGE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_CDN_PURGE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// CDN DIAGRAM 8 - Security: DDoS + WAF + TLS
+const TOTAL_CDN_SEC = 5;
+const CDNSecDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'DDoS attack: 1 Tbps flood from global botnet',
+    'Anycast spreads attack across 300+ CDN PoPs globally',
+    'WAF inspects HTTP content: blocks SQL injection, XSS',
+    'TLS terminates at edge: HTTPS offloaded from origin',
+    'Only clean legitimate traffic reaches your origin server',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<WarningIcon active={activeIdx === 0} />}  label="DDoS Attack"  sublabel="1 Tbps botnet"      active={activeIdx === 0} danger onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="absorbed" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}   label="CDN Network"  sublabel="300+ PoPs absorb"   active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<LockIcon    active={activeIdx >= 2} />}   label="WAF"          sublabel="Block SQLi + XSS"   active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 3} label="TLS" />
+        <ArchNode icon={<LockIcon    active={activeIdx >= 3} />}   label="TLS Term."    sublabel="HTTPS at edge"      active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="clean only" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 4} />}   label="Origin"       sublabel="Never sees attack"  active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 0 && <div className="arch-danger-banner">DDoS: 1 Tbps flood - CDN network absorbs it</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">Origin only receives clean, authenticated traffic</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_CDN_SEC}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_CDN_SEC} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// CDN DIAGRAM 9 - CDN Request Routing
+const TOTAL_CDN_ROUTE = 5;
+const CDNRouteDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Browser resolves yourdomain.com via CDN nameserver',
+    'CDN DNS geo-locates user and returns nearest PoP IP',
+    'Browser connects to nearest edge PoP',
+    'Edge checks cache: URL matched - cache HIT',
+    'Content served in 15ms total including DNS + connect + serve',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />}  label="Browser"      sublabel="yourdomain.com"     active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="DNS query" />
+        <ArchNode icon={<NetworkIcon active={activeIdx === 1} />}  label="CDN DNS"      sublabel="Returns nearest IP" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="connect 8ms" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 2} />}   label="Edge PoP"     sublabel="Frankfurt/Mumbai"   active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 4} label="response" />
+        <ArchNode icon={<UserIcon    active={activeIdx >= 4} />}   label="Browser"      sublabel="15ms total"         active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 3 && <div className="arch-failover-banner">Cache HIT: URL found - serving immediately</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">15ms total: DNS + TCP + cache serve</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_CDN_ROUTE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_CDN_ROUTE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// CDN DIAGRAM 10 - Practice: cache headers + multi-CDN
+const TOTAL_CDN_PRACTICE = 5;
+const CDNPracticeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Set correct Cache-Control headers for each content type',
+    'JS/CSS with content hash: max-age=31536000 immutable (1 year)',
+    'HTML index: max-age=300 or no-cache - purge on each deploy',
+    'Monitor cache hit ratio - drop to 0% means missing headers',
+    'Multi-CDN: split traffic across two providers for resilience',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-col arch-col--center">
+        {[
+          { label: 'Cache Headers',  sub: 'Set intentionally per type', idx: 0 },
+          { label: 'JS/CSS: 1 year', sub: 'Content hash = safe',        idx: 1 },
+          { label: 'HTML: 5 min',    sub: 'Purge on each deploy',       idx: 2 },
+          { label: 'Monitor HitRate', sub: '0% = missing headers',      idx: 3 },
+          { label: 'Multi-CDN',      sub: 'CDN A + CDN B failover',     idx: 4 },
+        ].map((step, i) => (
+          <React.Fragment key={step.label}>
+            <div className={`arch-layer${activeIdx === i ? ' arch-layer--active' : ''}`} onClick={() => setActiveIdx(i)}>
+              <div className="arch-layer__icon">
+                {i === 0 && <LockIcon    active={activeIdx === i} />}
+                {i === 1 && <CacheIcon   active={activeIdx === i} />}
+                {i === 2 && <ServerIcon  active={activeIdx === i} />}
+                {i === 3 && <NetworkIcon active={activeIdx === i} />}
+                {i === 4 && <DatabaseIcon active={activeIdx === i} />}
+              </div>
+              <div className="arch-layer__info">
+                <span className="arch-layer__label">{step.label}</span>
+                <span className="arch-layer__sub">{step.sub}</span>
+              </div>
+              <div className="arch-layer__latency">{i + 1}</div>
+            </div>
+            {i < 4 && <VertArrow active={activeIdx > i} />}
+          </React.Fragment>
+        ))}
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_CDN_PRACTICE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_CDN_PRACTICE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // MESSAGE QUEUES DIAGRAMS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -3157,6 +3524,35 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
   const isMS    = topic === 'microservices';
   const isAG    = topic === 'api-gateway';
   const isMQ    = topic === 'message-queues';
+  const isCDN   = topic === 'cdn';
+
+  // -- CDN diagrams --
+  const getCDNDiagram = (): React.ReactNode => {
+    if (t.includes('fundamentals'))                                          return <CDNFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('architecture') || t.includes('component'))               return <CDNArchDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('edge') || t.includes('point of presence') || t.includes('pop')) return <CDNEdgeDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('origin') || t.includes('edge caching') || t.includes('cache-control')) return <CDNCacheDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('routing') || t.includes('content delivery') || t.includes('request routing')) return <CDNRouteDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('push') || t.includes('pull'))                            return <CDNPushPullDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('static') || t.includes('dynamic'))                       return <CDNStaticDynDiagram    activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('invalidation') || t.includes('purging') || t.includes('purge')) return <CDNPurgeDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('security') || t.includes('ddos') || t.includes('waf') || t.includes('https')) return <CDNSecDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('failure') || t.includes('practice'))                     return <CDNPracticeDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <CDNFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  };
+
+  const getCDNTotal = (): number => {
+    if (t.includes('fundamentals'))                                          return TOTAL_CDN_FUND;
+    if (t.includes('architecture') || t.includes('component'))               return TOTAL_CDN_ARCH;
+    if (t.includes('edge') || t.includes('pop'))                             return TOTAL_CDN_EDGE;
+    if (t.includes('origin') || t.includes('edge caching'))                  return TOTAL_CDN_CACHE;
+    if (t.includes('routing') || t.includes('content delivery') || t.includes('request routing')) return TOTAL_CDN_ROUTE;
+    if (t.includes('push') || t.includes('pull'))                            return TOTAL_CDN_PUSHPULL;
+    if (t.includes('static') || t.includes('dynamic'))                       return TOTAL_CDN_STATIC;
+    if (t.includes('invalidation') || t.includes('purging') || t.includes('purge')) return TOTAL_CDN_PURGE;
+    if (t.includes('security') || t.includes('ddos') || t.includes('waf'))   return TOTAL_CDN_SEC;
+    return TOTAL_CDN_PRACTICE;
+  };
 
   // -- Message Queues diagrams --
   const getMQDiagram = (): React.ReactNode => {
@@ -3384,7 +3780,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
     return TOTAL_BASICS;
   };
 
-  const total = isMQ ? getMQTotal() : isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
+  const total = isCDN ? getCDNTotal() : isMQ ? getMQTotal() : isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
 
   useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle, topic]);
 
@@ -3396,7 +3792,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
 
   return (
     <div className="module-animation" aria-label="Architecture diagram">
-      {isMQ ? getMQDiagram() : isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
+      {isCDN ? getCDNDiagram() : isMQ ? getMQDiagram() : isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
     </div>
   );
 };

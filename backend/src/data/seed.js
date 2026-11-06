@@ -10,16 +10,18 @@ const DATABASE_DESIGN_MODULES  = require('./databaseDesignContent');
 const MICROSERVICES_MODULES    = require('./microservicesContent');
 const API_GATEWAY_MODULES      = require('./apiGatewayContent');
 const MESSAGE_QUEUES_MODULES   = require('./messageQueuesContent');
+const CDN_MODULES              = require('./cdnContent');
 
 const TOPICS = [
-  { slug: 'caching',             title: 'Caching',             order: 1, locked: false, description: 'Master caching fundamentals, eviction policies, Redis, and distributed caching patterns.',                                                              modules: CACHING_MODULES },
-  { slug: 'system-architecture', title: 'System Architecture', order: 2, locked: false, description: 'Understand architectural patterns, monolith vs microservices, scalability, distributed systems, and fault tolerance.',                               modules: SYSTEM_ARCHITECTURE_MODULES },
-  { slug: 'scalability',         title: 'Scalability',         order: 3, locked: false, description: 'Vertical vs horizontal scaling, auto-scaling, capacity planning, bottleneck identification, and handling traffic spikes.',                            modules: SCALABILITY_MODULES },
-  { slug: 'load-balancing',      title: 'Load Balancing',      order: 4, locked: false, description: 'Load balancing algorithms, Layer 4 vs Layer 7, consistent hashing, health checks, sticky sessions, and high availability.',                         modules: LOAD_BALANCING_MODULES },
-  { slug: 'database-design',     title: 'Database Design',     order: 5, locked: false, description: 'SQL vs NoSQL, data modeling, normalization, indexing, replication, sharding, ACID transactions, and CAP theorem.',                                    modules: DATABASE_DESIGN_MODULES },
-  { slug: 'microservices',       title: 'Microservices',       order: 6, locked: false, description: 'Service decomposition, inter-service communication, service discovery, data management, containerization, resilience, and observability.',            modules: MICROSERVICES_MODULES },
-  { slug: 'api-gateway',         title: 'API Gateway',         order: 7, locked: false, description: 'API Gateway fundamentals, routing, authentication, rate limiting, transformation, aggregation, security, and monitoring.',                            modules: API_GATEWAY_MODULES },
-  { slug: 'message-queues',      title: 'Message Queues',      order: 8, locked: false, description: 'Message queue fundamentals, producers and consumers, delivery guarantees, ordering, DLQs, RabbitMQ, Kafka, and SQS.',                                modules: MESSAGE_QUEUES_MODULES },
+  { slug: 'caching',             title: 'Caching',             order: 1, locked: false, description: 'Master caching fundamentals, eviction policies, Redis, and distributed caching patterns.',                                                                modules: CACHING_MODULES },
+  { slug: 'system-architecture', title: 'System Architecture', order: 2, locked: false, description: 'Understand architectural patterns, monolith vs microservices, scalability, distributed systems, and fault tolerance.',                                 modules: SYSTEM_ARCHITECTURE_MODULES },
+  { slug: 'scalability',         title: 'Scalability',         order: 3, locked: false, description: 'Vertical vs horizontal scaling, auto-scaling, capacity planning, bottleneck identification, and handling traffic spikes.',                              modules: SCALABILITY_MODULES },
+  { slug: 'load-balancing',      title: 'Load Balancing',      order: 4, locked: false, description: 'Load balancing algorithms, Layer 4 vs Layer 7, consistent hashing, health checks, sticky sessions, and high availability.',                           modules: LOAD_BALANCING_MODULES },
+  { slug: 'database-design',     title: 'Database Design',     order: 5, locked: false, description: 'SQL vs NoSQL, data modeling, normalization, indexing, replication, sharding, ACID transactions, and CAP theorem.',                                      modules: DATABASE_DESIGN_MODULES },
+  { slug: 'microservices',       title: 'Microservices',       order: 6, locked: false, description: 'Service decomposition, inter-service communication, service discovery, data management, containerization, resilience, and observability.',              modules: MICROSERVICES_MODULES },
+  { slug: 'api-gateway',         title: 'API Gateway',         order: 7, locked: false, description: 'API Gateway fundamentals, routing, authentication, rate limiting, transformation, aggregation, security, and monitoring.',                              modules: API_GATEWAY_MODULES },
+  { slug: 'message-queues',      title: 'Message Queues',      order: 8, locked: false, description: 'Message queue fundamentals, producers and consumers, delivery guarantees, ordering, DLQs, RabbitMQ, Kafka, and SQS.',                                  modules: MESSAGE_QUEUES_MODULES },
+  { slug: 'cdn',                 title: 'CDN',                 order: 9, locked: false, description: 'CDN fundamentals, edge servers, PoPs, origin caching, push vs pull, static vs dynamic content, cache invalidation, and CDN security.',                 modules: CDN_MODULES },
 ];
 
 const seed = async () => {
