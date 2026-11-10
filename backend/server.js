@@ -34,6 +34,26 @@ app.use('/api/learning', learningRoutes);
 app.use('/api/quiz',     quizRoutes);
 app.use('/api/activity', activityRoutes);
 
+app.post('/api/admin/seed', async (req, res) => {
+  if (req.headers['x-seed-secret'] !== 'sysmind_seed_2024_run') return res.status(403).json({ message: 'Forbidden' });
+  try {
+    const Topic  = require('./src/models/Topic');
+    const Module = require('./src/models/Module');
+    const RP     = require('./src/data/reliabilityPatternsContent');
+    await Module.deleteMany({ topicSlug: 'reliability-patterns' });
+    await Topic.findOneAndUpdate({ slug: 'reliability-patterns' },
+      { slug: 'reliability-patterns', title: 'Reliability Patterns', order: 11, locked: false,
+        description: 'Circuit breakers, retries, bulkheads, timeouts, failover, graceful degradation, health checks, and load shedding.' },
+      { upsert: true, new: true });
+    const log = [];
+    for (const mod of RP) {
+      await Module.create({ ...mod, topicSlug: 'reliability-patterns' });
+      log.push(mod.order + ': ' + mod.title);
+    }
+    res.json({ ok: true, count: log.length, log });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
