@@ -34,6 +34,26 @@ app.use('/api/learning', learningRoutes);
 app.use('/api/quiz',     quizRoutes);
 app.use('/api/activity', activityRoutes);
 
+app.post('/api/admin/seed', async (req, res) => {
+  if (req.headers['x-seed-secret'] !== 'sysmind_seed_2024_run') return res.status(403).json({ message: 'Forbidden' });
+  try {
+    const Topic  = require('./src/models/Topic');
+    const Module = require('./src/models/Module');
+    const EST    = require('./src/data/estimationContent');
+    await Module.deleteMany({ topicSlug: 'estimation-capacity' });
+    await Topic.findOneAndUpdate({ slug: 'estimation-capacity' },
+      { slug: 'estimation-capacity', title: 'Estimation and Capacity Planning', order: 12, locked: false,
+        description: 'RPS estimation, storage sizing, bandwidth, CPU/memory estimation, back-of-the-envelope calculations, and capacity optimization.' },
+      { upsert: true, new: true });
+    const log = [];
+    for (const mod of EST) {
+      await Module.create({ ...mod, topicSlug: 'estimation-capacity' });
+      log.push(mod.order + ': ' + mod.title);
+    }
+    res.json({ ok: true, count: log.length, log });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
