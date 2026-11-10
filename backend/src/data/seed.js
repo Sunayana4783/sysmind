@@ -13,6 +13,7 @@ const MESSAGE_QUEUES_MODULES   = require('./messageQueuesContent');
 const CDN_MODULES              = require('./cdnContent');
 const DISTRIBUTED_SYSTEMS_MODULES = require('./distributedSystemsContent');
 const RELIABILITY_PATTERNS_MODULES = require('./reliabilityPatternsContent');
+const ESTIMATION_MODULES            = require('./estimationContent');
 
 const TOPICS = [
   { slug: 'caching',             title: 'Caching',             order: 1, locked: false, description: 'Master caching fundamentals, eviction policies, Redis, and distributed caching patterns.',                                                                modules: CACHING_MODULES },
@@ -28,6 +29,8 @@ const TOPICS = [
   { slug: 'distributed-systems',  title: 'Distributed Systems',  order: 10, locked: false, description: 'Fundamentals, consensus (Raft/Paxos), distributed transactions, consistency models, CAP theorem, and fault tolerance.',                                     modules: DISTRIBUTED_SYSTEMS_MODULES },
 
   { slug: 'reliability-patterns', title: 'Reliability Patterns', order: 11, locked: false, description: 'Circuit breakers, retries, bulkheads, timeouts, failover, graceful degradation, health checks, and load shedding.', modules: RELIABILITY_PATTERNS_MODULES },
+
+  { slug: 'estimation-capacity', title: 'Estimation and Capacity Planning', order: 12, locked: false, description: 'RPS estimation, storage sizing, bandwidth, CPU/memory estimation, back-of-the-envelope calculations, and capacity optimization.', modules: ESTIMATION_MODULES },
 ];
 
 const seed = async () => {

@@ -1288,6 +1288,387 @@ const SCSpikeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ESTIMATION AND CAPACITY PLANNING DIAGRAMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// EST DIAGRAM 1 - Estimation Fundamentals: 4-step process
+const TOTAL_EST_FUND = 5;
+const ESTFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Step 1: Establish scale - how many DAU and actions per user?',
+    'Step 2: Calculate throughput - daily volume / 86,400 = avg RPS',
+    'Step 3: Estimate per-request cost - CPU ms, memory, storage, bytes',
+    'Step 4: Total resources = rate * per-request cost',
+    'Step 5: Add safety headroom - multiply by 2-3x for spikes',
+  ];
+  const steps = [
+    { label: 'User Scale',      sub: 'DAU + actions/user',   idx: 0 },
+    { label: 'Throughput RPS',  sub: 'volume / 86,400',      idx: 1 },
+    { label: 'Per-request',     sub: 'CPU + mem + bytes',    idx: 2 },
+    { label: 'Total resources', sub: 'rate * cost',          idx: 3 },
+    { label: 'Add headroom',    sub: 'x 2-3 safety factor',  idx: 4 },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-col arch-col--center">
+        {steps.map((step, i) => (
+          <React.Fragment key={step.label}>
+            <div className={`arch-layer${activeIdx === i ? ' arch-layer--active' : ''}`} onClick={() => setActiveIdx(i)}>
+              <div className="arch-layer__icon">
+                {i === 0 && <UserIcon    active={activeIdx === i} />}
+                {i === 1 && <NetworkIcon active={activeIdx === i} />}
+                {i === 2 && <ServerIcon  active={activeIdx === i} />}
+                {i === 3 && <DatabaseIcon active={activeIdx === i} />}
+                {i === 4 && <LockIcon    active={activeIdx === i} />}
+              </div>
+              <div className="arch-layer__info">
+                <span className="arch-layer__label">{step.label}</span>
+                <span className="arch-layer__sub">{step.sub}</span>
+              </div>
+              <div className="arch-layer__latency">{i + 1}</div>
+            </div>
+            {i < 4 && <VertArrow active={activeIdx > i} />}
+          </React.Fragment>
+        ))}
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_EST_FUND}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_EST_FUND} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// EST DIAGRAM 2 - RPS Calculation
+const TOTAL_EST_RPS = 5;
+const ESTRPSDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    '500M daily active users on the platform',
+    'Each user reads 100 items per day',
+    '500M * 100 = 50 billion reads per day',
+    '50B / 86,400 seconds = ~578,000 average reads per second',
+    'Peak = 3x average = ~1.7M reads per second to provision for',
+  ];
+  const vals = ['500M DAU', 'x 100 reads', '= 50B/day', '/ 86,400s', 'x 3 peak'];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-eviction">
+        <div className="arch-eviction__label">RPS Calculation Steps</div>
+        <div className="arch-eviction__slots">
+          {vals.map((v, i) => (
+            <div key={v}
+              className={`arch-eviction__slot${activeIdx === i ? ' arch-eviction__slot--full' : i < activeIdx ? ' arch-eviction__slot--new' : ''}`}
+              onClick={() => setActiveIdx(i)}
+              style={{ cursor: 'pointer', minWidth: 72, height: 68, fontSize: '0.6rem', padding: '0.25rem' }}>
+              <div style={{ fontWeight: 800, fontSize: '0.65rem' }}>{v}</div>
+              {activeIdx === i && <div className="arch-node__pulse" />}
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: '0.75rem', textAlign: 'center' }}>
+          {activeIdx >= 3 && <div className="arch-failover-banner">Avg: 578K RPS{activeIdx >= 4 ? ' | Peak: 1.7M RPS' : ''}</div>}
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_EST_RPS}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_EST_RPS} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// EST DIAGRAM 3 - User + Workload
+const TOTAL_EST_USER = 5;
+const ESTUserDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    '100M registered users - but only 10% are daily active',
+    '10M DAU generate all the actual traffic',
+    'Each user performs 50 reads + 2 writes per day',
+    '10% of DAU active simultaneously = 1M concurrent users at peak',
+    'Growing 20%/month: 10M DAU becomes 74M in 12 months',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />}  label="100M Registered" sublabel="Total users"      active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="10% active" />
+        <ArchNode icon={<UserIcon    active={activeIdx >= 1} />}  label="10M DAU"          sublabel="Traffic sources"  active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="actions" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 2} />}  label="52 req/user/day"  sublabel="50r + 2w"         active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<NetworkIcon active={activeIdx === 3} />} label="1M concurrent"    sublabel="Peak simultaneous" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="x20%/mo" />
+        <ArchNode icon={<CacheIcon   active={activeIdx === 4} />} label="74M in 12mo"      sublabel="At 20%/month growth" active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_EST_USER}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_EST_USER} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// EST DIAGRAM 4 - Storage Estimation
+const TOTAL_EST_STORAGE = 5;
+const ESTStorageDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Row size: user_id 8B + text 50B + timestamp 8B + meta 20B = 86B',
+    '10M posts per day * 86 bytes = 860MB raw data per day',
+    'Add indexes (30% overhead): 860MB * 1.3 = ~1.1GB per day',
+    '3x replication: 1.1GB * 3 = 3.3GB actual daily storage',
+    '5-year total: 3.3GB * 365 * 5 = ~6TB to provision',
+  ];
+  const rows = [
+    { label: 'Row: 86B',    sub: '8+50+8+20 bytes',   idx: 0 },
+    { label: '860MB/day',   sub: '10M * 86B',          idx: 1 },
+    { label: '+30% index',  sub: '= 1.1GB/day',        idx: 2 },
+    { label: '3x repl',     sub: '= 3.3GB/day',        idx: 3 },
+    { label: '5yr: ~6TB',   sub: '3.3*365*5',          idx: 4 },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-eviction">
+        <div className="arch-eviction__label">Storage Calculation</div>
+        <div className="arch-eviction__slots">
+          {rows.map((r, i) => (
+            <div key={r.label}
+              className={`arch-eviction__slot${activeIdx === i ? ' arch-eviction__slot--full' : i < activeIdx ? ' arch-eviction__slot--new' : ''}`}
+              onClick={() => setActiveIdx(i)}
+              style={{ cursor: 'pointer', minWidth: 72, height: 68, fontSize: '0.6rem', padding: '0.25rem' }}>
+              <div style={{ fontWeight: 800, fontSize: '0.65rem' }}>{r.label}</div>
+              <div style={{ fontSize: '0.52rem', opacity: 0.8 }}>{r.sub}</div>
+              {activeIdx === i && <div className="arch-node__pulse" />}
+            </div>
+          ))}
+        </div>
+        {activeIdx >= 4 && <div className="arch-failover-banner" style={{ marginTop: '0.75rem' }}>Provision 6TB for 5 years of post data</div>}
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_EST_STORAGE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_EST_STORAGE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// EST DIAGRAM 5 - Bandwidth
+const TOTAL_EST_BW = 5;
+const ESTBandwidthDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    '100K peak RPS to your servers',
+    'Average response size is 10KB per request',
+    '100K * 10KB = 1 GB/s outbound bandwidth needed',
+    'CDN handles 95% of traffic: origin needs only 50 MB/s',
+    'Internal service calls add 5x more internal bandwidth',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />}  label="100K RPS"      sublabel="Peak requests"      active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="x 10KB" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}   label="1 GB/s"        sublabel="Raw bandwidth need" active={activeIdx === 1} danger={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="CDN 95%" />
+        <ArchNode icon={<CacheIcon   active={activeIdx >= 2} />}   label="CDN Edge"      sublabel="Handles 950K RPS"   active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 3} label="miss 5%" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 3} />}   label="Origin"        sublabel="Only 50 MB/s"       active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">1 GB/s outbound - exceeds single server NIC!</div>}
+      {activeIdx >= 2 && <div className="arch-failover-banner">CDN reduces origin bandwidth 20x</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_EST_BW}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_EST_BW} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// EST DIAGRAM 6 - CPU + Memory
+const TOTAL_EST_CPU = 5;
+const ESTCPUDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    '10K peak RPS - how many servers do we need?',
+    'Each request uses 20ms of CPU time',
+    '8-core server at 70% utilisation handles: 8*1000*0.7/20 = 280 RPS',
+    'Servers needed: 10,000 / 280 = 36 servers',
+    'Memory check: 1K concurrent * 5MB = 5GB min RAM per server',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />}  label="10K peak RPS"  sublabel="To handle"           active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="x 20ms" />
+        <ArchNode icon={<CacheIcon   active={activeIdx === 1} />}  label="20ms CPU/req"  sublabel="Per request cost"    active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="8 cores" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 2} />}   label="280 RPS"       sublabel="Per 8-core server"   active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 3} label="= " />
+        <ArchNode icon={<DatabaseIcon active={activeIdx >= 3} />}  label="36 servers"    sublabel="10K / 280 = 35.7"    active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      {activeIdx >= 4 && <div className="arch-failover-banner">Memory: 1K concurrent * 5MB = 5GB min + overhead = 8GB RAM</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_EST_CPU}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_EST_CPU} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// EST DIAGRAM 7 - Peak Load Forecasting
+const TOTAL_EST_PEAK = 5;
+const ESTPeakDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Daily average traffic baseline: 1,000 RPS',
+    'Evening peak is typically 3x the daily average: 3,000 RPS',
+    'Planned event (product launch) brings 10x spike: 10,000 RPS',
+    'Provision infrastructure for the event peak: 10K RPS',
+    'At +20%/month growth: plan next scale-up in 3 months',
+  ];
+  const levels = [
+    { label: 'Avg: 1K RPS',   color: '#7C5CFC', pct: 10 },
+    { label: 'Peak: 3K RPS',  color: '#E97316', pct: 30 },
+    { label: 'Event: 10K RPS', color: '#DC2626', pct: 100 },
+    { label: 'Provision 10K', color: '#22c55e', pct: 100 },
+    { label: 'Growth runway',  color: '#7C5CFC', pct: 60 },
+  ];
+  const level = levels[Math.min(activeIdx, levels.length - 1)];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 2} />}   label="Traffic Level"  sublabel={level.label}        active={activeIdx >= 1} danger={activeIdx === 2} onClick={() => setActiveIdx(activeIdx < 4 ? activeIdx + 1 : 0)} />
+        <Arrow active label="compare to" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 3} />}   label="Provisioned"    sublabel="10K RPS capacity"   active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      <div style={{ background: '#F0EEFF', borderRadius: 8, padding: '0.75rem', margin: '0.5rem 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: 4, fontWeight: 700, color: '#24212B' }}>
+          <span>Traffic Load</span><span style={{ color: level.color }}>{level.label}</span>
+        </div>
+        <div style={{ background: '#E5E0EF', borderRadius: 4, height: 16, overflow: 'hidden' }}>
+          <div style={{ background: level.color, height: '100%', width: level.pct + '%', borderRadius: 4, transition: 'width 0.5s, background 0.3s' }} />
+        </div>
+      </div>
+      {activeIdx === 2 && <div className="arch-danger-banner">Event spike 10x over average - must provision for this</div>}
+      {activeIdx >= 3 && <div className="arch-failover-banner">Provision for peak + 3-month growth runway</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_EST_PEAK}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_EST_PEAK} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// EST DIAGRAM 8 - Back-of-the-Envelope
+const TOTAL_EST_BOTE = 5;
+const ESTBOTEDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'State assumptions clearly: 500M DAU, 10 actions per user per day',
+    'Calculate daily volume: 500M * 10 = 5 billion actions per day',
+    'Convert to RPS: 5B / 86,400 = ~58,000 average RPS',
+    'Apply peak multiplier: 58K * 3x = 175,000 peak RPS',
+    'Add 2x safety margin: 175K * 2 = 350K RPS to provision for',
+  ];
+  const vals = ['500M DAU', 'x10 actions', '= 5B/day', '/ 86,400', 'x3 peak', 'x2 safety'];
+  const show = Math.min(activeIdx + 2, vals.length);
+  return (
+    <div className="arch-diagram">
+      <div className="arch-eviction">
+        <div className="arch-eviction__label">Back-of-the-Envelope Template</div>
+        <div className="arch-eviction__slots" style={{ flexWrap: 'wrap', justifyContent: 'center', gap: '0.4rem' }}>
+          {vals.slice(0, show).map((v, i) => (
+            <div key={v}
+              className={`arch-eviction__slot${i === activeIdx ? ' arch-eviction__slot--full' : ' arch-eviction__slot--new'}`}
+              onClick={() => setActiveIdx(Math.min(i, 4))}
+              style={{ cursor: 'pointer', minWidth: 72, height: 60, fontSize: '0.65rem', padding: '0.25rem' }}>
+              <div style={{ fontWeight: 800 }}>{v}</div>
+            </div>
+          ))}
+        </div>
+        {activeIdx >= 4 && <div className="arch-failover-banner" style={{ marginTop: '0.75rem' }}>Result: provision for 350K RPS</div>}
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_EST_BOTE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_EST_BOTE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// EST DIAGRAM 9 - Resource Utilization Optimization
+const TOTAL_EST_UTIL = 5;
+const ESTUtilDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Measure: servers running at 10% CPU utilisation for 30 days',
+    'At 10%: paying for 90% of capacity that sits idle',
+    'Right-size: downsize to 20% of current servers at 50% utilisation',
+    'Add caching: 90% cache hit rate cuts DB queries by 10x',
+    'Result: same performance at 50% less infrastructure cost',
+  ];
+  const utils = [10, 10, 50, 50, 50];
+  const serverCounts = [10, 10, 2, 2, 2];
+  const util = utils[activeIdx];
+  return (
+    <div className="arch-diagram">
+      <div style={{ background: '#F0EEFF', borderRadius: 8, padding: '0.75rem', margin: '0 0 0.75rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: 4, fontWeight: 700, color: '#24212B' }}>
+          <span>CPU Utilisation ({serverCounts[activeIdx]} servers)</span>
+          <span style={{ color: util < 30 ? '#DC2626' : '#22c55e' }}>{util}%</span>
+        </div>
+        <div style={{ background: '#E5E0EF', borderRadius: 4, height: 20, overflow: 'hidden' }}>
+          <div style={{ background: util < 30 ? '#DC2626' : '#7C5CFC', height: '100%', width: util + '%', borderRadius: 4, transition: 'all 0.5s' }} />
+        </div>
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">10% utilisation: paying for 90% idle capacity</div>}
+      {activeIdx === 2 && <div className="arch-failover-banner">Right-sized: 50% utilisation on 2 servers</div>}
+      {activeIdx >= 3 && <div className="arch-failover-banner">Cache + right-size: 50% cost saving</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_EST_UTIL}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_EST_UTIL} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// EST DIAGRAM 10 - Full Walkthrough (URL Shortener)
+const TOTAL_EST_WALK = 5;
+const ESTWalkthroughDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    '100M DAU, 1% create a short URL daily = 1M new URLs/day',
+    '11.6 write RPS, 10 redirects per URL = 115 read RPS',
+    'Read:write ratio = 10:1 - cache-heavy read architecture',
+    'Storage: 1M * 500B = 500MB/day, 5yr * 3x replication = 2.7TB',
+    'Result: 1 small DB server + 1 Redis cache handles this system',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />}  label="100M DAU"      sublabel="1% write daily"     active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="1M URLs/day" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}   label="URL System"    sublabel="11.6w + 115r RPS"   active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<RedisIcon   active={activeIdx >= 2} />}   label="Redis Cache"   sublabel="Serves 95% reads"   active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 3} label="miss" />
+        <ArchNode icon={<DatabaseIcon active={activeIdx >= 3} />}  label="1 DB Server"   sublabel="2.7TB over 5 years" active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      {activeIdx >= 4 && <div className="arch-failover-banner">Surprisingly small: 1 DB + 1 Redis cache is sufficient!</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_EST_WALK}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_EST_WALK} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RELIABILITY PATTERNS DIAGRAMS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -4252,6 +4633,35 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
   const isCDN   = topic === 'cdn';
   const isDS    = topic === 'distributed-systems';
   const isRP    = topic === 'reliability-patterns';
+  const isEST   = topic === 'estimation-capacity';
+
+  // -- Estimation diagrams --
+  const getESTDiagram = (): React.ReactNode => {
+    if (t.includes('fundamentals'))                                          return <ESTFundamentalsDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('traffic') || t.includes('rps') || t.includes('requests per second')) return <ESTRPSDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('user') || t.includes('workload'))                        return <ESTUserDiagram           activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('storage') || t.includes('capacity estimation'))          return <ESTStorageDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('bandwidth'))                                             return <ESTBandwidthDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('cpu') || t.includes('memory') || t.includes('cpu and memory')) return <ESTCPUDiagram    activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('peak') || t.includes('forecast') || t.includes('forecasting')) return <ESTPeakDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('back-of') || t.includes('envelope') || t.includes('back of')) return <ESTBOTEDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('utiliz') || t.includes('optimiz') || t.includes('optimization')) return <ESTUtilDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('walkthrough') || t.includes('failure') || t.includes('full')) return <ESTWalkthroughDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <ESTFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  };
+
+  const getESTTotal = (): number => {
+    if (t.includes('fundamentals'))                                          return TOTAL_EST_FUND;
+    if (t.includes('traffic') || t.includes('rps'))                          return TOTAL_EST_RPS;
+    if (t.includes('user') || t.includes('workload'))                        return TOTAL_EST_USER;
+    if (t.includes('storage'))                                               return TOTAL_EST_STORAGE;
+    if (t.includes('bandwidth'))                                             return TOTAL_EST_BW;
+    if (t.includes('cpu') || t.includes('memory'))                           return TOTAL_EST_CPU;
+    if (t.includes('peak') || t.includes('forecast'))                        return TOTAL_EST_PEAK;
+    if (t.includes('back-of') || t.includes('envelope'))                     return TOTAL_EST_BOTE;
+    if (t.includes('utiliz') || t.includes('optimiz'))                       return TOTAL_EST_UTIL;
+    return TOTAL_EST_WALK;
+  };
 
   // -- Reliability Patterns diagrams --
   const getRPDiagram = (): React.ReactNode => {
@@ -4563,7 +4973,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
     return TOTAL_BASICS;
   };
 
-  const total = isRP ? getRPTotal() : isDS ? getDSTotal() : isCDN ? getCDNTotal() : isMQ ? getMQTotal() : isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
+  const total = isEST ? getESTTotal() : isRP ? getRPTotal() : isDS ? getDSTotal() : isCDN ? getCDNTotal() : isMQ ? getMQTotal() : isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
 
   useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle, topic]);
 
@@ -4575,7 +4985,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
 
   return (
     <div className="module-animation" aria-label="Architecture diagram">
-      {isRP ? getRPDiagram() : isDS ? getDSDiagram() : isCDN ? getCDNDiagram() : isMQ ? getMQDiagram() : isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
+      {isEST ? getESTDiagram() : isRP ? getRPDiagram() : isDS ? getDSDiagram() : isCDN ? getCDNDiagram() : isMQ ? getMQDiagram() : isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
     </div>
   );
 };

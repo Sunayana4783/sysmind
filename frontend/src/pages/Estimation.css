@@ -1,0 +1,9 @@
+/* Estimation.css */
+@import './Caching.css';
+
+.est-page .caching-breadcrumb__current {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
