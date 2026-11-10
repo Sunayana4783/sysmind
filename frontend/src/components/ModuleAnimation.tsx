@@ -1288,6 +1288,377 @@ const SCSpikeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// RELIABILITY PATTERNS DIAGRAMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// RP DIAGRAM 1 - Fundamentals: defense in depth
+const TOTAL_RP_FUND = 5;
+const RPFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Downstream service starts failing - triggering reliability patterns',
+    'Timeout fires: request does not wait forever - fails fast',
+    'Retry with backoff: transient failure resolved on second attempt',
+    'Circuit breaker opens: repeated failures stop calls to failing service',
+    'Fallback serves: degraded but working response returned to user',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-col arch-col--center">
+        {[
+          { label: 'Timeout',         sub: 'Fail fast - no waiting forever', idx: 1 },
+          { label: 'Retry + Backoff', sub: 'Handle transient failures',       idx: 2 },
+          { label: 'Circuit Breaker', sub: 'Stop calling failing service',    idx: 3 },
+          { label: 'Fallback',        sub: 'Serve degraded response',         idx: 4 },
+        ].map((step, i) => (
+          <React.Fragment key={step.label}>
+            <div className={`arch-layer${activeIdx === step.idx ? ' arch-layer--active' : ''}`} onClick={() => setActiveIdx(step.idx)}>
+              <div className="arch-layer__icon">
+                {i === 0 && <LockIcon    active={activeIdx === step.idx} />}
+                {i === 1 && <NetworkIcon active={activeIdx === step.idx} />}
+                {i === 2 && <WarningIcon active={activeIdx === step.idx} />}
+                {i === 3 && <CacheIcon   active={activeIdx === step.idx} />}
+              </div>
+              <div className="arch-layer__info">
+                <span className="arch-layer__label">{step.label}</span>
+                <span className="arch-layer__sub">{step.sub}</span>
+              </div>
+              <div className="arch-layer__latency">{i + 1}</div>
+            </div>
+            {i < 3 && <VertArrow active={activeIdx > step.idx} />}
+          </React.Fragment>
+        ))}
+      </div>
+      {activeIdx === 0 && <div className="arch-danger-banner">Failure detected - reliability patterns activate</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Defense in depth: multiple layers catch different failures</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RP_FUND}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RP_FUND} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RP DIAGRAM 2 - Fault Isolation
+const TOTAL_RP_ISOLATION = 5;
+const RPIsolationDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Service A crashes unexpectedly',
+    'Without isolation: failure spreads to B, C, D - cascade',
+    'With isolation: failure contained to Service A only',
+    'Services B, C, D remain unaffected and serving traffic',
+    'Service A restarts and rejoins - other services never noticed',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx === 0} />}  label="Service A"   sublabel={activeIdx === 0 ? 'CRASHED' : activeIdx >= 4 ? 'Recovered' : 'Down'} active={activeIdx === 0 || activeIdx >= 4} danger={activeIdx >= 1 && activeIdx <= 3} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 2} label="isolated" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {['Service B','Service C','Service D'].map(s => (
+            <ArchNode key={s} icon={<ServerIcon active={activeIdx >= 2} />} label={s} sublabel={activeIdx >= 2 ? 'Unaffected' : activeIdx === 1 ? 'Cascading!' : 'Running'} active={activeIdx >= 2} danger={activeIdx === 1} onClick={() => setActiveIdx(2)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">No isolation: A failure cascades to B, C, D</div>}
+      {activeIdx >= 2 && activeIdx <= 3 && <div className="arch-failover-banner">With isolation: blast radius contained to A only</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">A recovered - B, C, D never noticed the failure</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RP_ISOLATION}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RP_ISOLATION} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RP DIAGRAM 3 - Circuit Breaker: 3 states
+const TOTAL_RP_CB = 5;
+const RPCircuitBreakerDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'CLOSED: normal operation - calls pass through and are monitored',
+    'Failure rate spikes above 50% threshold in 10-second window',
+    'OPEN: all calls immediately return error - no waiting for timeout',
+    'After 30s cooldown: HALF-OPEN - one test request allowed through',
+    'Test succeeds: CLOSED again - normal traffic resumes',
+  ];
+  const states = ['CLOSED', 'FAILING', 'OPEN', 'HALF-OPEN', 'CLOSED'];
+  const colors = ['#7C5CFC', '#DC2626', '#DC2626', '#E97316', '#22c55e'];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active />}                      label="Caller"      sublabel="Makes requests"      active />
+        <Arrow active={activeIdx !== 2} label={activeIdx === 2 ? 'BLOCKED' : 'calls'} />
+        <ArchNode icon={<LockIcon    active={activeIdx !== 2} />}    label="Circuit Breaker" sublabel={states[activeIdx]} active={activeIdx !== 2} danger={activeIdx === 2 || activeIdx === 1} onClick={() => setActiveIdx(activeIdx + 1 < 5 ? activeIdx + 1 : 0)} />
+        <Arrow active={activeIdx !== 2} label={activeIdx === 2 ? '' : 'to'} />
+        <ArchNode icon={<ServerIcon  active={activeIdx !== 2} />}    label="Service B"   sublabel={activeIdx === 1 ? 'FAILING' : 'Downstream'} active={activeIdx !== 1 && activeIdx !== 2} danger={activeIdx === 1 || activeIdx === 2} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-step-info" style={{ borderTop: `2px solid ${colors[activeIdx]}` }}>
+        <span className="arch-step-pill" style={{ background: colors[activeIdx] }}>{activeIdx + 1} / {TOTAL_RP_CB}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      {activeIdx === 2 && <div className="arch-danger-banner">OPEN: instant error - no thread blocked waiting</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">HALF-OPEN: probe request tests recovery</div>}
+      {activeIdx === 4 && <div className="arch-failover-banner">CLOSED: test passed - full traffic resumed</div>}
+      <StepNav activeIdx={activeIdx} total={TOTAL_RP_CB} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RP DIAGRAM 4 - Retry + Backoff + Jitter
+const TOTAL_RP_RETRY = 5;
+const RPRetryDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Request fails with network timeout - transient error',
+    'Retry 1: wait 1 second then retry',
+    'Retry 2: wait 2 seconds (doubled) + jitter then retry',
+    'Retry 3: wait 4 seconds (doubled again) + jitter then retry',
+    'Success: transient issue resolved - request completes',
+  ];
+  const waits = ['timeout', '1s wait', '2s+jitter', '4s+jitter', 'success!'];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />}  label="Caller"      sublabel="Makes request"       active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active label="attempt" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}   label="Retry Logic" sublabel={waits[activeIdx]}    active={activeIdx >= 1} onClick={() => setActiveIdx(activeIdx < 4 ? activeIdx + 1 : 0)} />
+        <Arrow active={activeIdx >= 1} label="retry" />
+        <ArchNode icon={<ServerIcon  active={activeIdx === 4} />}  label="Service"     sublabel={activeIdx === 4 ? 'Success!' : 'Failing'} active={activeIdx === 4} danger={activeIdx >= 1 && activeIdx <= 3} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 0 && <div className="arch-danger-banner">Timeout - transient failure detected</div>}
+      {activeIdx >= 1 && activeIdx <= 3 && <div className="arch-failover-banner">Exponential backoff: {waits[activeIdx]} before retry {activeIdx}</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">Retry succeeded - transient failure handled transparently</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RP_RETRY}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RP_RETRY} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RP DIAGRAM 5 - Timeout
+const TOTAL_RP_TIMEOUT = 5;
+const RPTimeoutDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Service A sends request to Service B',
+    'Service B is slow - no response arriving',
+    '500ms timeout fires - A stops waiting',
+    'Thread freed: A can now serve other requests',
+    'Error or fallback returned quickly to the caller',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx === 0} />}  label="Service A"   sublabel={activeIdx === 2 ? 'Thread freed!' : 'Waiting...'} active={activeIdx === 0 || activeIdx >= 2} danger={activeIdx === 1} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 0} label={activeIdx >= 2 ? 'timeout!' : 'request'} />
+        <ArchNode icon={<LockIcon    active={activeIdx === 2} />}  label="Timeout"     sublabel="500ms limit"         active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 0} label={activeIdx === 1 ? 'slow...' : ''} />
+        <ArchNode icon={<ServerIcon  active={activeIdx === 0} />}  label="Service B"   sublabel={activeIdx === 1 ? 'Too slow' : 'Downstream'} active={activeIdx === 0} danger={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">B not responding - thread blocked waiting...</div>}
+      {activeIdx === 2 && <div className="arch-failover-banner">Timeout fires at 500ms - thread immediately freed</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">Caller gets fast error - not stuck waiting 30 seconds</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RP_TIMEOUT}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RP_TIMEOUT} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RP DIAGRAM 6 - Bulkhead
+const TOTAL_RP_BULKHEAD = 5;
+const RPBulkheadDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const withBulkhead = activeIdx >= 3;
+  const descs = [
+    'Without bulkhead: B, C, D share a single pool of 20 threads',
+    'Service B becomes slow - starts consuming threads',
+    'B fills all 20 threads - C and D have no threads, appear down',
+    'With bulkhead: B:10 threads, C:5 threads, D:5 threads',
+    'B fills its 10 - C and D still have their own threads and serve normally',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={`arch-path${!withBulkhead ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--read">NO BULKHEAD</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<CacheIcon  active={activeIdx <= 2} />} label="20 threads" sublabel="Shared pool"        active={activeIdx === 0} danger={activeIdx === 2} onClick={() => setActiveIdx(1)} />
+            <VertArrow active={activeIdx >= 1} label="B takes all" />
+            <div className="arch-row arch-row--center" style={{ gap: '0.25rem' }}>
+              {['B slow','C DOWN','D DOWN'].map((s, i) => (
+                <ArchNode key={s} icon={<ServerIcon active={i === 0 && activeIdx === 1} />} label={s} sublabel="" active={i === 0 && activeIdx >= 1} danger={i > 0 && activeIdx === 2} onClick={() => setActiveIdx(2)} />
+              ))}
+            </div>
+            {activeIdx === 2 && <div className="arch-danger-banner" style={{ marginTop: '0.5rem' }}>C and D starved of threads!</div>}
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={`arch-path${withBulkhead ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--write">WITH BULKHEAD</div>
+          <div className="arch-row arch-row--col">
+            <div className="arch-row arch-row--center" style={{ gap: '0.25rem' }}>
+              <ArchNode icon={<CacheIcon  active={activeIdx === 4} />} label="B: 10" sublabel={activeIdx === 4 ? 'Full-isolated' : 'threads'} active={activeIdx >= 3} danger={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+              <ArchNode icon={<CacheIcon  active={activeIdx >= 3} />}  label="C: 5"  sublabel="OK"       active={activeIdx >= 3} onClick={() => setActiveIdx(4)} />
+              <ArchNode icon={<CacheIcon  active={activeIdx >= 3} />}  label="D: 5"  sublabel="OK"       active={activeIdx >= 3} onClick={() => setActiveIdx(4)} />
+            </div>
+            {activeIdx >= 4 && <div className="arch-failover-banner" style={{ marginTop: '0.5rem' }}>B isolated - C and D serve normally</div>}
+          </div>
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RP_BULKHEAD}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RP_BULKHEAD} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RP DIAGRAM 7 - Failover and Redundancy
+const TOTAL_RP_FAILOVER = 5;
+const RPFailoverDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Primary handles all traffic - standby waits in reserve',
+    'Health check detects primary failure',
+    'Failover triggers: VIP reassigned to standby in under 30 seconds',
+    'Standby becomes new primary - traffic flows normally',
+    'Old primary rebuilt and becomes the new standby',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active />}                     label="Traffic"     sublabel="All requests"        active />
+        <Arrow active label="to" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <ArchNode icon={<ServerIcon  active={activeIdx <= 1} />}  label="Primary"     sublabel={activeIdx >= 2 ? 'FAILED' : 'Active'} active={activeIdx <= 1} danger={activeIdx >= 2 && activeIdx <= 3} onClick={() => setActiveIdx(1)} />
+          <ArchNode icon={<ServerIcon  active={activeIdx >= 2} />}  label="Standby"     sublabel={activeIdx >= 3 ? 'Now PRIMARY' : 'Standby'} active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+        </div>
+        <ArchNode icon={<NetworkIcon active={activeIdx === 2} />}   label="Health Check" sublabel="Detects failure"   active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      {activeIdx === 2 && <div className="arch-danger-banner">Primary failed - health check triggered failover</div>}
+      {activeIdx >= 3 && <div className="arch-failover-banner">Failover complete - standby serving all traffic</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RP_FAILOVER}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RP_FAILOVER} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RP DIAGRAM 8 - Graceful Degradation
+const TOTAL_RP_DEGRADE = 5;
+const RPDegradeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Product page depends on multiple services',
+    'Recommendation service goes down - circuit breaker opens',
+    'Fallback: return cached popular items instead of personalised ones',
+    'Core product page (title, price, cart) is unaffected',
+    'User sees degraded but functional page - not an error',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 0} />}   label="Product Page" sublabel="Always works"       active />
+        <Arrow active={activeIdx >= 2} label="fallback" />
+        <ArchNode icon={<CacheIcon   active={activeIdx >= 2} />}   label="Cached Items" sublabel="Generic popular"    active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<DatabaseIcon active={activeIdx >= 0} />}  label="Catalog Svc"  sublabel="Core - always up"   active />
+        <ArchNode icon={<ServerIcon   active={activeIdx === 0} />} label="Reco Svc"     sublabel={activeIdx >= 1 ? 'DOWN' : 'Running'} active={activeIdx === 0} danger={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <ArchNode icon={<LockIcon     active={activeIdx === 1} />} label="Circuit Open" sublabel="No calls to Reco"   active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">Recommendation service down - circuit open</div>}
+      {activeIdx >= 2 && <div className="arch-failover-banner">Fallback: cached items shown - no error page</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RP_DEGRADE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RP_DEGRADE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RP DIAGRAM 9 - Health Checks and Self-Healing
+const TOTAL_RP_HEALTH = 5;
+const RPHealthDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Load balancer pings /health every 5 seconds on each instance',
+    'Instance DB pool exhausted - health check returns 503',
+    'Instance removed from load balancer rotation automatically',
+    'Kubernetes liveness probe fails - container restarted',
+    'Readiness probe passes - instance added back to rotation',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 0} />}   label="Load Balancer" sublabel="Pings /health 5s" active />
+        <Arrow active={activeIdx >= 1} label="503!" />
+        <ArchNode icon={<ServerIcon  active={activeIdx <= 1} />}   label="Instance"      sublabel={activeIdx === 1 ? 'DB pool full' : activeIdx >= 2 && activeIdx <= 3 ? 'Restarting' : activeIdx >= 4 ? 'Healthy' : 'Running'} active={activeIdx === 0 || activeIdx >= 4} danger={activeIdx >= 1 && activeIdx <= 3} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<LockIcon    active={activeIdx === 2} />}  label="Removed"       sublabel="From LB pool"      active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 3} label="restart" />
+        <ArchNode icon={<CacheIcon   active={activeIdx === 3} />}  label="K8s Restart"   sublabel="Liveness failed"   active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="ready!" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 4} />}   label="Re-added"      sublabel="Readiness OK"      active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">Health check: DB pool exhausted - returns 503</div>}
+      {activeIdx === 2 && <div className="arch-failover-banner">Removed from rotation - no traffic sent</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">Self-healed: instance healthy and serving again</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RP_HEALTH}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RP_HEALTH} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RP DIAGRAM 10 - Rate Limiting and Load Shedding
+const TOTAL_RP_RATELIMIT = 5;
+const RPRateLimitDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Traffic spike: 1000 req/sec arriving - capacity is 500/sec',
+    'Per-client rate limiter: heavy user at 200/min - cap 100/min',
+    'Excess requests rejected with 429 Too Many Requests',
+    'System at 85% CPU: load shedding drops low-priority batch jobs',
+    'Core user-facing traffic served at full speed - system stable',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-stampede">
+        <div className="arch-stampede__users">
+          {['Client 1','Client 2','Batch','...'].map(c => (
+            <div key={c} className={`arch-stampede__user${activeIdx >= 1 ? ' arch-stampede__user--flood' : ''}`}>
+              <UserIcon active={activeIdx >= 1} />
+              <span>{c}</span>
+            </div>
+          ))}
+        </div>
+        <Arrow active={activeIdx >= 1} label={activeIdx >= 1 ? 'spike!' : 'requests'} />
+        <div className="arch-stampede__center">
+          <ArchNode icon={<LockIcon    active={activeIdx >= 1} />}  label="Rate Limiter"  sublabel={activeIdx >= 2 ? '429 excess' : 'Checking'} active={activeIdx >= 1} onClick={() => setActiveIdx(2)} />
+          {activeIdx >= 3 && <><VertArrow active label="overload" /><ArchNode icon={<NetworkIcon active />} label="Load Shed" sublabel="Drop batch jobs" active /></>}
+          {activeIdx >= 4 && <><VertArrow active label="stable" /><ArchNode icon={<ServerIcon active />} label="Core APIs" sublabel="Full speed" active /></>}
+        </div>
+      </div>
+      {activeIdx === 0 && <div className="arch-danger-banner">Traffic spike: 2x capacity arriving</div>}
+      {activeIdx >= 2 && activeIdx <= 3 && <div className="arch-danger-banner">429 sent to excess clients - load shed batch work</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">System stable - user-facing APIs unaffected</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RP_RATELIMIT}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RP_RATELIMIT} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // DISTRIBUTED SYSTEMS DIAGRAMS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -3880,6 +4251,35 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
   const isMQ    = topic === 'message-queues';
   const isCDN   = topic === 'cdn';
   const isDS    = topic === 'distributed-systems';
+  const isRP    = topic === 'reliability-patterns';
+
+  // -- Reliability Patterns diagrams --
+  const getRPDiagram = (): React.ReactNode => {
+    if (t.includes('fundamentals'))                                          return <RPFundamentalsDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('fault tolerance') || t.includes('fault isolation') || t.includes('isolation')) return <RPIsolationDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('circuit breaker') || t.includes('circuit'))              return <RPCircuitBreakerDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('retry') || t.includes('exponential') || t.includes('backoff')) return <RPRetryDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('timeout'))                                               return <RPTimeoutDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('bulkhead'))                                              return <RPBulkheadDiagram       activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('failover') || t.includes('redundancy'))                  return <RPFailoverDiagram       activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('graceful') || t.includes('fallback') || t.includes('degradation')) return <RPDegradeDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('health') || t.includes('self-heal') || t.includes('self heal')) return <RPHealthDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('rate limit') || t.includes('load shed') || t.includes('throttl') || t.includes('failure')) return <RPRateLimitDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <RPFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  };
+
+  const getRPTotal = (): number => {
+    if (t.includes('fundamentals'))                                          return TOTAL_RP_FUND;
+    if (t.includes('fault tolerance') || t.includes('fault isolation') || t.includes('isolation')) return TOTAL_RP_ISOLATION;
+    if (t.includes('circuit breaker') || t.includes('circuit'))              return TOTAL_RP_CB;
+    if (t.includes('retry') || t.includes('exponential') || t.includes('backoff')) return TOTAL_RP_RETRY;
+    if (t.includes('timeout'))                                               return TOTAL_RP_TIMEOUT;
+    if (t.includes('bulkhead'))                                              return TOTAL_RP_BULKHEAD;
+    if (t.includes('failover') || t.includes('redundancy'))                  return TOTAL_RP_FAILOVER;
+    if (t.includes('graceful') || t.includes('fallback') || t.includes('degradation')) return TOTAL_RP_DEGRADE;
+    if (t.includes('health') || t.includes('self-heal'))                     return TOTAL_RP_HEALTH;
+    return TOTAL_RP_RATELIMIT;
+  };
 
   // -- Distributed Systems diagrams --
   const getDSDiagram = (): React.ReactNode => {
@@ -4163,7 +4563,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
     return TOTAL_BASICS;
   };
 
-  const total = isDS ? getDSTotal() : isCDN ? getCDNTotal() : isMQ ? getMQTotal() : isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
+  const total = isRP ? getRPTotal() : isDS ? getDSTotal() : isCDN ? getCDNTotal() : isMQ ? getMQTotal() : isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
 
   useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle, topic]);
 
@@ -4175,7 +4575,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
 
   return (
     <div className="module-animation" aria-label="Architecture diagram">
-      {isDS ? getDSDiagram() : isCDN ? getCDNDiagram() : isMQ ? getMQDiagram() : isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
+      {isRP ? getRPDiagram() : isDS ? getDSDiagram() : isCDN ? getCDNDiagram() : isMQ ? getMQDiagram() : isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
     </div>
   );
 };

@@ -1,0 +1,9 @@
+/* ReliabilityPatterns.css */
+@import './Caching.css';
+
+.rp-page .caching-breadcrumb__current {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

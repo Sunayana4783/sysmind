@@ -24,7 +24,7 @@ const HLD_TOPICS: HLDTopic[] = [
   { id: 'cdn', title: 'CDN', locked: false, route: '/learning/hld/cdn', description: 'Content delivery networks, edge caching, geo-distribution.' },
   { id: 'distributed-systems', title: 'Distributed Systems', locked: false, route: '/learning/hld/distributed-systems', description: 'Consensus, fault tolerance, distributed transactions.' },
   { id: 'estimation-capacity',  title: 'Estimation and Capacity Planning', locked: true, description: 'Back-of-envelope calculations, traffic estimation, storage sizing.' },
-  { id: 'reliability-patterns', title: 'Reliability Patterns',             locked: true, description: 'Circuit breakers, retries, bulkheads, timeouts, graceful degradation.' },
+  { id: 'reliability-patterns', title: 'Reliability Patterns', locked: false, route: '/learning/hld/reliability-patterns', description: 'Circuit breakers, retries, bulkheads, timeouts, failover, graceful degradation, health checks, and load shedding.' },
   { id: 'realtime-streaming',   title: 'Real-time and Streaming',          locked: true, description: 'WebSockets, SSE, Kafka Streams, event-driven pipelines, stream processing.' },
   { id: 'observability-slos',   title: 'Observability and SLOs',           locked: true, description: 'Logs, metrics, traces, SLIs, SLOs, SLAs, alerting, incident response.' },
 ];

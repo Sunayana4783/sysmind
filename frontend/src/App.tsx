@@ -20,6 +20,7 @@ import ApiGateway           from './pages/ApiGateway';
 import MessageQueues        from './pages/MessageQueues';
 import CDN                  from './pages/CDN';
 import DistributedSystems   from './pages/DistributedSystems';
+import ReliabilityPatterns  from './pages/ReliabilityPatterns';
 import Profile   from './pages/Profile';
 import AuthNav   from './components/AuthNav';
 
@@ -80,6 +81,7 @@ const AppRoutes = () => {
         <Route path="/learning/hld/message-queues"       element={<ProtectedRoute><MessageQueues /></ProtectedRoute>} />
         <Route path="/learning/hld/cdn"                  element={<ProtectedRoute><CDN /></ProtectedRoute>} />
         <Route path="/learning/hld/distributed-systems"  element={<ProtectedRoute><DistributedSystems /></ProtectedRoute>} />
+        <Route path="/learning/hld/reliability-patterns" element={<ProtectedRoute><ReliabilityPatterns /></ProtectedRoute>} />
         <Route path="/profile"            element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
         <Route path="*" element={<Navigate to="/signup" replace />} />
