@@ -23,6 +23,10 @@ const HLD_TOPICS: HLDTopic[] = [
   { id: 'message-queues', title: 'Message Queues', locked: false, route: '/learning/hld/message-queues', description: 'Kafka, RabbitMQ, async processing, event-driven design.' },
   { id: 'cdn', title: 'CDN', locked: false, route: '/learning/hld/cdn', description: 'Content delivery networks, edge caching, geo-distribution.' },
   { id: 'distributed-systems', title: 'Distributed Systems', locked: false, route: '/learning/hld/distributed-systems', description: 'Consensus, fault tolerance, distributed transactions.' },
+  { id: 'estimation-capacity',  title: 'Estimation and Capacity Planning', locked: true, description: 'Back-of-envelope calculations, traffic estimation, storage sizing.' },
+  { id: 'reliability-patterns', title: 'Reliability Patterns',             locked: true, description: 'Circuit breakers, retries, bulkheads, timeouts, graceful degradation.' },
+  { id: 'realtime-streaming',   title: 'Real-time and Streaming',          locked: true, description: 'WebSockets, SSE, Kafka Streams, event-driven pipelines, stream processing.' },
+  { id: 'observability-slos',   title: 'Observability and SLOs',           locked: true, description: 'Logs, metrics, traces, SLIs, SLOs, SLAs, alerting, incident response.' },
 ];
 
 const HLD = () => {
@@ -46,7 +50,7 @@ const HLD = () => {
           <div className="hld-page__badge">High Level Design</div>
           <h1 className="hld-page__title">HLD Topics</h1>
           <p className="hld-page__subtitle">
-            Start with <strong>Caching</strong> - the only unlocked topic. More topics unlock as you progress.
+            Start with <strong>Caching</strong> - the first topic. Work through all 14 topics to master HLD.
           </p>
         </header>
 
