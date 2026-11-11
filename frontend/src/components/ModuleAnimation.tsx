@@ -5266,6 +5266,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
 
   // -- Real-Time and Streaming diagrams --
   const getRTDiagram = (): React.ReactNode => {
+    if (t.includes('stream processing fundamentals') || (t.includes('stream process') && t.includes('fundamentals'))) return <RTStreamFundDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     if (t.includes('fundamentals') || t.includes('real-time systems'))       return <RTFundamentalsDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     if (t.includes('protocol') || t.includes('websocket') || t.includes('sse') || t.includes('long polling')) return <RTProtocolsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     if (t.includes('real-time data processing') || t.includes('data processing')) return <RTStreamPipelineDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
@@ -5280,6 +5281,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
   };
 
   const getRTTotal = (): number => {
+    if (t.includes('stream processing fundamentals') || (t.includes('stream process') && t.includes('fundamentals'))) return TOTAL_RT_STREAM;
     if (t.includes('fundamentals') || t.includes('real-time systems'))       return TOTAL_RT_FUND;
     if (t.includes('protocol') || t.includes('websocket') || t.includes('sse')) return TOTAL_RT_PROTO;
     if (t.includes('real-time data processing'))                              return TOTAL_RT_PIPELINE;
