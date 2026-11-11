@@ -5011,6 +5011,239 @@ const LBPracticeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; set
   );
 };
 
+
+// SA DIAGRAM 4b - Client-Server Architecture
+const TOTAL_SA_CLIENT_SERVER = 5;
+const SAClientServerDiagram = ({ activeIdx, setActiveIdx }) => {
+  const descs = [
+    'Client sends HTTP request to the server',
+    '2-tier: client talks directly to database - simple apps',
+    '3-tier: client talks to app server which talks to database',
+    'Stateless server: JWT in every request - any server handles any user',
+    'Multiple clients (mobile, web) share one stateless backend',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={'arch-path' + (activeIdx <= 1 ? ' arch-path--active' : '')}>
+          <div className="arch-path__label arch-path__label--read">2-TIER</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<UserIcon active={activeIdx === 0} />} label="Client" sublabel="Browser / App" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+            <VertArrow active={activeIdx >= 1} label="direct SQL" />
+            <ArchNode icon={<DatabaseIcon active={activeIdx === 1} />} label="Database" sublabel="Direct access" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={'arch-path' + (activeIdx >= 2 ? ' arch-path--active' : '')}>
+          <div className="arch-path__label arch-path__label--write">3-TIER</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<UserIcon active={activeIdx >= 2} />} label="Client" sublabel="Sends JWT" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+            <VertArrow active={activeIdx >= 3} label="HTTP" />
+            <ArchNode icon={<ServerIcon active={activeIdx === 3} />} label="App Server" sublabel="Stateless" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+            <VertArrow active={activeIdx >= 4} label="query" />
+            <ArchNode icon={<DatabaseIcon active={activeIdx >= 4} />} label="Database" sublabel="Isolated" active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+          </div>
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_CLIENT_SERVER}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SA_CLIENT_SERVER} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SA DIAGRAM 6b - Service Communication (REST vs gRPC vs WebSocket)
+const TOTAL_SA_SVC_COMM = 5;
+const SAServiceCommDiagram = ({ activeIdx, setActiveIdx }) => {
+  const descs = [
+    'REST: HTTP + JSON - universal, simple, slight overhead',
+    'gRPC: Protobuf over HTTP/2 - 10x faster for internal calls',
+    'WebSocket: persistent bidirectional - real-time push features',
+    'Sync: caller waits (REST/gRPC) - for immediate response needed',
+    'Async: fire and forget (queue) - for background work',
+  ];
+  const protocols = [
+    { label: 'REST',      sub: 'HTTP+JSON universal',    idx: 0 },
+    { label: 'gRPC',      sub: 'Protobuf 10x faster',    idx: 1 },
+    { label: 'WebSocket', sub: 'Bidirectional real-time', idx: 2 },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon active={activeIdx <= 2} />} label="Service A" sublabel="Caller" active />
+        <Arrow active label="protocol" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {protocols.map(p => (
+            <ArchNode key={p.label} icon={<NetworkIcon active={activeIdx === p.idx} />} label={p.label} sublabel={p.sub} active={activeIdx === p.idx} onClick={() => setActiveIdx(p.idx)} />
+          ))}
+        </div>
+        <Arrow active label="to" />
+        <ArchNode icon={<ServerIcon active={activeIdx <= 2} />} label="Service B" sublabel="Receiver" active />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<LockIcon   active={activeIdx === 3} />} label="Sync"  sublabel="Wait for response" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <ArchNode icon={<CacheIcon  active={activeIdx === 4} />} label="Async" sublabel="Queue + continue"  active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-failover-banner">gRPC: same as REST but 5-10x faster internally</div>}
+      {activeIdx === 2 && <div className="arch-failover-banner">WebSocket: server pushes without client asking</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">Sync: use when you need the result to continue</div>}
+      {activeIdx === 4 && <div className="arch-failover-banner">Async: use when result not needed immediately</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_SVC_COMM}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SA_SVC_COMM} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SA DIAGRAM 7b - Architecture Design Principles (SoC, DRY, SOLID)
+const TOTAL_SA_PRINCIPLES = 5;
+const SADesignPrinciplesDiagram = ({ activeIdx, setActiveIdx }) => {
+  const descs = [
+    'Separation of Concerns: each module has ONE clearly defined job',
+    'Modularity: independent pieces with well-defined interfaces',
+    'Single Responsibility (SOLID-S): one class, one reason to change',
+    'Dependency Inversion: depend on abstractions, not concrete classes',
+    'DRY + KISS + YAGNI: no duplicates, keep simple, no premature features',
+  ];
+  const principles = [
+    { label: 'Separation of Concerns', sub: 'One job per module',           idx: 0 },
+    { label: 'Modularity',             sub: 'Independent, interfaces',      idx: 1 },
+    { label: 'Single Responsibility',  sub: 'One reason to change',         idx: 2 },
+    { label: 'Dependency Inversion',   sub: 'Depend on abstractions',       idx: 3 },
+    { label: 'DRY + KISS + YAGNI',    sub: 'No waste, stay simple',         idx: 4 },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-col arch-col--center">
+        {principles.map((p, i) => (
+          <React.Fragment key={p.label}>
+            <div className={'arch-layer' + (activeIdx === i ? ' arch-layer--active' : '')} onClick={() => setActiveIdx(i)}>
+              <div className="arch-layer__icon">
+                {i === 0 && <LockIcon    active={activeIdx === i} />}
+                {i === 1 && <NetworkIcon active={activeIdx === i} />}
+                {i === 2 && <ServerIcon  active={activeIdx === i} />}
+                {i === 3 && <CacheIcon   active={activeIdx === i} />}
+                {i === 4 && <DatabaseIcon active={activeIdx === i} />}
+              </div>
+              <div className="arch-layer__info">
+                <span className="arch-layer__label">{p.label}</span>
+                <span className="arch-layer__sub">{p.sub}</span>
+              </div>
+              <div className="arch-layer__latency">{i + 1}</div>
+            </div>
+            {i < 4 && <VertArrow active={activeIdx > i} />}
+          </React.Fragment>
+        ))}
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_PRINCIPLES}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SA_PRINCIPLES} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SA DIAGRAM 8b - Architecture Decision-Making (Trade-offs)
+const TOTAL_SA_DECISION = 5;
+const SADecisionDiagram = ({ activeIdx, setActiveIdx }) => {
+  const descs = [
+    'Requirement arrives: store 1 billion events per day',
+    'Option A: PostgreSQL - strong consistency, complex to shard',
+    'Option B: Cassandra - scales writes, eventual consistency',
+    'Trade-off: choose based on read/write pattern and team skill',
+    'ADR written: document decision + rationale for future team',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={'arch-path' + (activeIdx === 1 ? ' arch-path--active' : '')}>
+          <div className="arch-path__label arch-path__label--read">OPTION A: PostgreSQL</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<DatabaseIcon active={activeIdx === 1} />} label="PostgreSQL" sublabel="ACID + Consistency" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+            {activeIdx === 1 && <div className="arch-danger-banner" style={{ marginTop: '0.5rem' }}>Hard to shard at 1B events/day</div>}
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={'arch-path' + (activeIdx === 2 ? ' arch-path--active' : '')}>
+          <div className="arch-path__label arch-path__label--write">OPTION B: Cassandra</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<CacheIcon active={activeIdx === 2} />} label="Cassandra" sublabel="Scale writes + AP" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+            {activeIdx === 2 && <div className="arch-failover-banner" style={{ marginTop: '0.5rem' }}>Eventual consistency - acceptable for logs</div>}
+          </div>
+        </div>
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<NetworkIcon active={activeIdx === 3} />} label="Trade-off" sublabel="Consistency vs Scale" active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="document" />
+        <ArchNode icon={<LockIcon    active={activeIdx >= 4} />} label="ADR" sublabel="Decision recorded" active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 0 && <div className="arch-failover-banner">Every architecture decision involves a trade-off</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">ADR: future team knows WHY this decision was made</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_DECISION}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SA_DECISION} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// SA DIAGRAM 10b - HLD Design Process
+const TOTAL_SA_HLD_PROCESS = 5;
+const SAHLDProcessDiagram = ({ activeIdx, setActiveIdx }) => {
+  const descs = [
+    'Step 1: Clarify requirements - scale, patterns, constraints',
+    'Step 2: Back-of-envelope - QPS, storage, bandwidth estimates',
+    'Step 3: Draw HLD - major components and connections',
+    'Step 4: Deep dive - zoom into the critical component',
+    'Step 5: Trade-offs - explain decisions and alternatives',
+  ];
+  const steps = [
+    { label: 'Requirements',   sub: 'Scale, patterns, constraints', idx: 0 },
+    { label: 'Estimation',     sub: 'QPS, storage, bandwidth',      idx: 1 },
+    { label: 'HLD Diagram',    sub: 'Draw components + links',      idx: 2 },
+    { label: 'Deep Dive',      sub: 'Critical component detail',    idx: 3 },
+    { label: 'Trade-offs',     sub: 'Explain decisions made',       idx: 4 },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-col arch-col--center">
+        {steps.map((step, i) => (
+          <React.Fragment key={step.label}>
+            <div className={'arch-layer' + (activeIdx === i ? ' arch-layer--active' : '')} onClick={() => setActiveIdx(i)}>
+              <div className="arch-layer__icon">
+                {i === 0 && <UserIcon    active={activeIdx === i} />}
+                {i === 1 && <CacheIcon   active={activeIdx === i} />}
+                {i === 2 && <NetworkIcon active={activeIdx === i} />}
+                {i === 3 && <ServerIcon  active={activeIdx === i} />}
+                {i === 4 && <LockIcon    active={activeIdx === i} />}
+              </div>
+              <div className="arch-layer__info">
+                <span className="arch-layer__label">{step.label}</span>
+                <span className="arch-layer__sub">{step.sub}</span>
+              </div>
+              <div className="arch-layer__latency">{i + 1}</div>
+            </div>
+            {i < 4 && <VertArrow active={activeIdx > i} />}
+          </React.Fragment>
+        ))}
+      </div>
+      {activeIdx === 0 && <div className="arch-failover-banner">Ask: how many users? Read vs write ratio? Global?</div>}
+      {activeIdx === 2 && <div className="arch-failover-banner">Bird-eye view first - details come in step 4</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_SA_HLD_PROCESS}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_SA_HLD_PROCESS} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // DISPATCHER
 // ─────────────────────────────────────────────────────────────────────────────
@@ -5339,32 +5572,37 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
 
   // ── System Architecture diagrams ──────────────────────────────────────────
   const getSADiagram = (): React.ReactNode => {
-    if (t.includes('fundamentals'))                                         return <SAFundamentalsDiagram  activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('fundamentals') && !t.includes('reliability'))            return <SAFundamentalsDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     if (t.includes('architectural pattern') || t.includes('architectural patterns')) return <SAPatternsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('monolithic') || t.includes('client-server') || t.includes('client server')) return <SAMonolithDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('component') || t.includes('interaction'))               return <SACommDiagram          activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('service communication') || t.includes('grpc') || t.includes('websocket')) return <SACommDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('scalability') || t.includes('load'))                    return <SAScaleDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('database'))                                              return <SADatabaseDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('distributed'))                                           return <SADistributedDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('monolithic architecture'))                                return <SAMonolithDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('client-server') || t.includes('client server'))          return <SAClientServerDiagram     activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('system components') || t.includes('interaction'))        return <SACommDiagram             activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('service communication') || t.includes('grpc') || t.includes('websocket') || t.includes('rest,')) return <SAServiceCommDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('design principle') || t.includes('solid') || t.includes('modularity') || t.includes('separation')) return <SADesignPrinciplesDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('decision-making') || t.includes('decision making') || t.includes('trade-off') || t.includes('trade off')) return <SADecisionDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     if (t.includes('fault') || t.includes('reliability') || t.includes('availability')) return <SAFaultDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('design principle') || t.includes('solid') || t.includes('modularity')) return <SAPatternsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('decision') || t.includes('trade-off') || t.includes('trade off')) return <SADatabaseDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
-    if (t.includes('hld') || t.includes('design process') || t.includes('diagram')) return <SAFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('hld design') || t.includes('design process') || t.includes('architecture diagram')) return <SAHLDProcessDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('scalability') || t.includes('load'))                     return <SAScaleDiagram            activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('database'))                                               return <SADatabaseDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('distributed'))                                            return <SADistributedDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     if (t.includes('failure') || t.includes('stampede') || t.includes('penetration') || t.includes('avalanche')) return <SAFaultDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
     return <SAFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
   };
 
   const getSATotals = (): number => {
-    if (t.includes('fundamentals'))                                         return TOTAL_SA_FUND;
+    if (t.includes('fundamentals') && !t.includes('reliability'))            return TOTAL_SA_FUND;
     if (t.includes('architectural pattern') || t.includes('architectural patterns')) return TOTAL_SA_PATTERNS;
-    if (t.includes('monolithic') || t.includes('client-server') || t.includes('client server')) return TOTAL_SA_MONO;
-    if (t.includes('component') || t.includes('interaction') || t.includes('service communication') || t.includes('grpc')) return TOTAL_SA_COMM;
-    if (t.includes('scalability') || t.includes('load'))                    return TOTAL_SA_SCALE;
-    if (t.includes('database'))                                              return TOTAL_SA_DB;
-    if (t.includes('distributed'))                                           return TOTAL_SA_DIST;
+    if (t.includes('monolithic architecture'))                                return TOTAL_SA_MONO;
+    if (t.includes('client-server') || t.includes('client server'))          return TOTAL_SA_CLIENT_SERVER;
+    if (t.includes('system components') || t.includes('interaction'))        return TOTAL_SA_COMM;
+    if (t.includes('service communication') || t.includes('grpc') || t.includes('websocket')) return TOTAL_SA_SVC_COMM;
+    if (t.includes('design principle') || t.includes('solid') || t.includes('modularity') || t.includes('separation')) return TOTAL_SA_PRINCIPLES;
+    if (t.includes('decision-making') || t.includes('decision making') || t.includes('trade-off') || t.includes('trade off')) return TOTAL_SA_DECISION;
     if (t.includes('fault') || t.includes('reliability') || t.includes('availability') || t.includes('failure')) return TOTAL_SA_FAULT;
-    if (t.includes('design principle') || t.includes('decision') || t.includes('hld') || t.includes('diagram')) return TOTAL_SA_PATTERNS;
+    if (t.includes('hld design') || t.includes('design process') || t.includes('architecture diagram')) return TOTAL_SA_HLD_PROCESS;
+    if (t.includes('scalability') || t.includes('load'))                     return TOTAL_SA_SCALE;
+    if (t.includes('database'))                                               return TOTAL_SA_DB;
+    if (t.includes('distributed'))                                            return TOTAL_SA_DIST;
     return TOTAL_SA_FUND;
   };
 
