@@ -34,6 +34,26 @@ app.use('/api/learning', learningRoutes);
 app.use('/api/quiz',     quizRoutes);
 app.use('/api/activity', activityRoutes);
 
+app.post('/api/admin/seed', async (req, res) => {
+  if (req.headers['x-seed-secret'] !== 'sysmind_seed_2024_run') return res.status(403).json({ message: 'Forbidden' });
+  try {
+    const Topic = require('./src/models/Topic');
+    const Module = require('./src/models/Module');
+    const OBS = require('./src/data/observabilityContent');
+    await Module.deleteMany({ topicSlug: 'observability-slos' });
+    await Topic.findOneAndUpdate({ slug: 'observability-slos' },
+      { slug: 'observability-slos', title: 'Observability and SLOs', order: 14, locked: false,
+        description: 'Logs, metrics, traces, golden signals, SLIs, SLOs, SLAs, error budgets, alerting, and incident management.' },
+      { upsert: true, new: true });
+    const log = [];
+    for (const mod of OBS) {
+      await Module.create({ ...mod, topicSlug: 'observability-slos' });
+      log.push(mod.order + ': ' + mod.title);
+    }
+    res.json({ ok: true, count: log.length, log });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use((req, res) => res.status(404).json({ message: 'Route not found' }));
