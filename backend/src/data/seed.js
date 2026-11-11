@@ -14,6 +14,7 @@ const CDN_MODULES              = require('./cdnContent');
 const DISTRIBUTED_SYSTEMS_MODULES = require('./distributedSystemsContent');
 const RELIABILITY_PATTERNS_MODULES = require('./reliabilityPatternsContent');
 const ESTIMATION_MODULES            = require('./estimationContent');
+const REALTIME_STREAMING_MODULES     = require('./realtimeStreamingContent');
 
 const TOPICS = [
   { slug: 'caching',             title: 'Caching',             order: 1, locked: false, description: 'Master caching fundamentals, eviction policies, Redis, and distributed caching patterns.',                                                                modules: CACHING_MODULES },
@@ -31,6 +32,8 @@ const TOPICS = [
   { slug: 'reliability-patterns', title: 'Reliability Patterns', order: 11, locked: false, description: 'Circuit breakers, retries, bulkheads, timeouts, failover, graceful degradation, health checks, and load shedding.', modules: RELIABILITY_PATTERNS_MODULES },
 
   { slug: 'estimation-capacity', title: 'Estimation and Capacity Planning', order: 12, locked: false, description: 'RPS estimation, storage sizing, bandwidth, CPU/memory estimation, back-of-the-envelope calculations, and capacity optimization.', modules: ESTIMATION_MODULES },
+
+  { slug: 'realtime-streaming', title: 'Real-Time and Streaming', order: 13, locked: false, description: 'WebSockets, SSE, Kafka Streams, Flink, event streaming, windows, event-time vs processing-time.', modules: REALTIME_STREAMING_MODULES },
 ];
 
 const seed = async () => {

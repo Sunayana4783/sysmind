@@ -1288,6 +1288,401 @@ const SCSpikeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// REAL-TIME AND STREAMING DIAGRAMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// RT DIAGRAM 1 - Fundamentals: push vs pull
+const TOTAL_RT_FUND = 5;
+const RTFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Pull model: client polls server every 5 seconds for new data',
+    'User waits up to 5 seconds to see a new message - bad UX',
+    'Push model: server pushes data to client immediately on event',
+    'Message delivered to recipient in under 100ms',
+    'Push is 50x faster than 5-second polling for real-time data',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={`arch-path${activeIdx <= 1 ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--read">PULL (POLLING)</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<UserIcon    active={activeIdx === 0} />} label="Client" sublabel="Polls every 5s"  active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+            <VertArrow active={activeIdx >= 1} label="5s wait" />
+            <ArchNode icon={<ServerIcon  active={activeIdx === 1} />} label="Server" sublabel="Waits to reply"  active={activeIdx === 1} danger={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+            {activeIdx === 1 && <div className="arch-danger-banner" style={{ marginTop: '0.5rem' }}>Up to 5 second delay!</div>}
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={`arch-path${activeIdx >= 2 ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--write">PUSH (REAL-TIME)</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<ServerIcon  active={activeIdx >= 2} />} label="Server" sublabel="Event occurs"    active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+            <VertArrow active={activeIdx >= 3} label="instant push" />
+            <ArchNode icon={<UserIcon    active={activeIdx >= 3} />} label="Client" sublabel="<100ms delivery" active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+            {activeIdx >= 4 && <div className="arch-failover-banner" style={{ marginTop: '0.5rem' }}>50x faster than polling!</div>}
+          </div>
+        </div>
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RT_FUND}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RT_FUND} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RT DIAGRAM 2 - Protocols: WebSocket vs SSE vs Long Polling
+const TOTAL_RT_PROTO = 5;
+const RTProtocolsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'WebSocket: HTTP upgrade to persistent full-duplex TCP connection',
+    'WebSocket: both client and server send data any time - 2 byte overhead',
+    'SSE: standard HTTP, server pushes events, client uses separate requests',
+    'Long Polling: client requests, server holds open until data available',
+    'Choose: WebSocket=bidirectional, SSE=server-push, LongPoll=fallback',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-col arch-col--center">
+        {[
+          { label: 'WebSocket',     sub: 'Full duplex: 2-byte/msg',     idx: 1, active: activeIdx <= 1 },
+          { label: 'SSE',           sub: 'Server push: standard HTTP',  idx: 2, active: activeIdx === 2 },
+          { label: 'Long Polling',  sub: 'HTTP hold: fallback only',    idx: 3, active: activeIdx >= 3 },
+        ].map((proto, i) => (
+          <React.Fragment key={proto.label}>
+            <div className={`arch-layer${activeIdx === proto.idx || (proto.idx === 1 && activeIdx === 0) ? ' arch-layer--active' : ''}`} onClick={() => setActiveIdx(proto.idx)}>
+              <div className="arch-layer__icon">
+                {i === 0 && <NetworkIcon active={activeIdx <= 1} />}
+                {i === 1 && <CacheIcon   active={activeIdx === 2} />}
+                {i === 2 && <LockIcon    active={activeIdx >= 3} />}
+              </div>
+              <div className="arch-layer__info">
+                <span className="arch-layer__label">{proto.label}</span>
+                <span className="arch-layer__sub">{proto.sub}</span>
+              </div>
+              <div className="arch-layer__latency">{i === 0 ? 'Best' : i === 1 ? 'Good' : 'Last resort'}</div>
+            </div>
+            {i < 2 && <VertArrow active={activeIdx > proto.idx} label="fallback if needed" />}
+          </React.Fragment>
+        ))}
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RT_PROTO}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RT_PROTO} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RT DIAGRAM 3 - Stream Processing pipeline
+const TOTAL_RT_PIPELINE = 5;
+const RTStreamPipelineDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Events generated continuously from user actions or sensors',
+    'Filter: remove bots, invalid events, test traffic',
+    'Enrich: join with user profile data for context',
+    'Aggregate: count events per user per 1-minute window',
+    'Serve: results written to Redis and pushed to dashboard',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />}  label="Events"      sublabel="Continuous stream"   active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="filter" />
+        <ArchNode icon={<LockIcon    active={activeIdx === 1} />}  label="Filter"      sublabel="Remove bots"         active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="enrich" />
+        <ArchNode icon={<DatabaseIcon active={activeIdx === 2} />} label="Enrich"      sublabel="Add user context"    active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 3} label="aggregate" />
+        <ArchNode icon={<CacheIcon   active={activeIdx === 3} />}  label="Aggregate"   sublabel="Count per window"    active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="serve" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 4} />}   label="Dashboard"   sublabel="Real-time results"   active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RT_PIPELINE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RT_PIPELINE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RT DIAGRAM 4 - Stream Fundamentals: operators
+const TOTAL_RT_STREAM = 5;
+const RTStreamFundDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Record arrives: key=user123, value=click_event, timestamp=now',
+    'Filter operator: is this a valid click? Keep or discard',
+    'Map operator: transform to {user, product, timestamp}',
+    'Aggregate: increment counter for user+product in this window',
+    'When window closes: emit final count as output record',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-col arch-col--center">
+        {[
+          { label: 'Record',     sub: 'key+value+timestamp',   idx: 0 },
+          { label: 'Filter',     sub: 'Valid click? Yes/No',    idx: 1 },
+          { label: 'Map',        sub: 'Extract fields',         idx: 2 },
+          { label: 'Aggregate',  sub: 'Count in window',        idx: 3 },
+          { label: 'Emit',       sub: 'Output record',          idx: 4 },
+        ].map((op, i) => (
+          <React.Fragment key={op.label}>
+            <div className={`arch-layer${activeIdx === i ? ' arch-layer--active' : ''}`} onClick={() => setActiveIdx(i)}>
+              <div className="arch-layer__icon">
+                {i === 0 && <UserIcon    active={activeIdx === i} />}
+                {i === 1 && <LockIcon    active={activeIdx === i} />}
+                {i === 2 && <NetworkIcon active={activeIdx === i} />}
+                {i === 3 && <CacheIcon   active={activeIdx === i} />}
+                {i === 4 && <ServerIcon  active={activeIdx === i} />}
+              </div>
+              <div className="arch-layer__info">
+                <span className="arch-layer__label">{op.label}</span>
+                <span className="arch-layer__sub">{op.sub}</span>
+              </div>
+              <div className="arch-layer__latency">{i + 1}</div>
+            </div>
+            {i < 4 && <VertArrow active={activeIdx > i} />}
+          </React.Fragment>
+        ))}
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RT_STREAM}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RT_STREAM} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RT DIAGRAM 5 - Event Streaming Architecture (Kafka)
+const TOTAL_RT_KAFKA = 5;
+const RTKafkaDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Producer publishes "order.placed" event to Kafka topic',
+    'Kafka stores event permanently in the append-only log',
+    'Email Service: subscribes and sends confirmation email',
+    'Inventory Service: subscribes and reserves stock independently',
+    'New service added: replays full history from Kafka log',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx === 0} />}  label="Order Svc"   sublabel="order.placed event"  active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="publish" />
+        <ArchNode icon={<CacheIcon   active={activeIdx >= 1} />}   label="Kafka Topic" sublabel="Persistent log"       active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="fan-out" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {[['Email Svc','Send email',2],['Inventory Svc','Reserve stock',3],['New Svc','Replay history',4]].map(([s,sub,i]) => (
+            <ArchNode key={String(s)} icon={<ServerIcon active={activeIdx >= Number(i)} />} label={String(s)} sublabel={String(sub)} active={activeIdx >= Number(i)} onClick={() => setActiveIdx(Number(i))} />
+          ))}
+        </div>
+      </div>
+      {activeIdx >= 4 && <div className="arch-failover-banner">New service replays full history - no producer changes needed</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RT_KAFKA}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RT_KAFKA} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RT DIAGRAM 6 - Frameworks comparison
+const TOTAL_RT_FRAMEWORKS = 5;
+const RTFrameworksDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Stream events arriving in Kafka - which framework to process?',
+    'Kafka Streams: library in your app, no cluster, Kafka-to-Kafka',
+    'Apache Flink: separate cluster, true event-time, sub-10ms latency',
+    'Spark Streaming: micro-batches 1-30s, good if already using Spark',
+    'Default choice: Kafka Streams. Use Flink for complex event-time needs',
+  ];
+  const frameworks = [
+    { label: 'Kafka Streams', sub: 'Library: no cluster', idx: 1 },
+    { label: 'Apache Flink',  sub: 'Cluster: event-time', idx: 2 },
+    { label: 'Spark Streaming', sub: 'Micro-batch: 1-30s', idx: 3 },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<CacheIcon   active={activeIdx === 0} />}  label="Kafka"       sublabel="Event source"        active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="choose" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {frameworks.map(f => (
+            <ArchNode key={f.label} icon={<NetworkIcon active={activeIdx === f.idx} />} label={f.label} sublabel={f.sub} active={activeIdx === f.idx} onClick={() => setActiveIdx(f.idx)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx === 1 && <div className="arch-failover-banner">Kafka Streams: simplest - no extra infrastructure</div>}
+      {activeIdx === 2 && <div className="arch-failover-banner">Flink: most powerful - true event-time, exactly-once</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">Spark: familiar if Spark already used - higher latency</div>}
+      {activeIdx >= 4  && <div className="arch-failover-banner">Start with Kafka Streams, upgrade to Flink if needed</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RT_FRAMEWORKS}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RT_FRAMEWORKS} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RT DIAGRAM 7 - Data Pipeline: CDC + Kafka + processing
+const TOTAL_RT_DATAPIPE = 5;
+const RTDataPipelineDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Source: database change captured by Debezium CDC',
+    'CDC event published to Kafka topic automatically',
+    'Flink processes: transforms, enriches, aggregates',
+    'Multi-sink: writes to Elasticsearch + Redis + data warehouse',
+    'Search index and cache updated within seconds of DB change',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<DatabaseIcon active={activeIdx === 0} />} label="Source DB"   sublabel="Debezium CDC"        active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="CDC" />
+        <ArchNode icon={<CacheIcon    active={activeIdx >= 1} />}  label="Kafka"       sublabel="Event log"           active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="process" />
+        <ArchNode icon={<NetworkIcon  active={activeIdx >= 2} />}  label="Flink"       sublabel="Transform + enrich"  active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 3} label="multi-sink" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <ArchNode icon={<LockIcon   active={activeIdx >= 3} />}  label="Elastic"     sublabel="Search index"        active={activeIdx >= 3} />
+          <ArchNode icon={<RedisIcon  active={activeIdx >= 3} />}  label="Redis"       sublabel="Cache"               active={activeIdx >= 3} />
+        </div>
+      </div>
+      {activeIdx >= 4 && <div className="arch-failover-banner">End-to-end: DB change to search/cache in under 2 seconds</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RT_DATAPIPE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RT_DATAPIPE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RT DIAGRAM 8 - Event Time vs Processing Time
+const TOTAL_RT_EVTTIME = 5;
+const RTEventTimeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Event occurs: user clicks at exactly 14:00:00',
+    'Network delay: event travels 5 minutes due to mobile batching',
+    'Arrives at processor at 14:05:00',
+    'Processing time: attributed to 14:05 window - WRONG',
+    'Event time: use 14:00 timestamp - CORRECT - watermark handles delay',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />}  label="Event 14:00"  sublabel="Actual event time"  active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="5min delay" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 1} />}   label="Transit"      sublabel="Mobile buffering"   active={activeIdx === 1} danger={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="arrives" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 2} />}   label="Processor"    sublabel="Sees at 14:05"      active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<LockIcon    active={activeIdx === 3} />}  label="Proc. Time"   sublabel="14:05 bucket - WRONG" active={activeIdx === 3} danger onClick={() => setActiveIdx(3)} />
+        <ArchNode icon={<CacheIcon   active={activeIdx === 4} />}  label="Event Time"   sublabel="14:00 bucket - RIGHT" active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 3 && <div className="arch-danger-banner">Processing time puts event in wrong time bucket!</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">Event time + watermark: correct window attribution</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RT_EVTTIME}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RT_EVTTIME} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RT DIAGRAM 9 - Windows
+const TOTAL_RT_WINDOWS = 5;
+const RTWindowsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Tumbling: fixed 1-min non-overlapping buckets, each event in one window',
+    'Sliding: 10-min window moves 1-min at a time, events in multiple windows',
+    'Session: gaps >30min close window - variable size per activity burst',
+    'Window closes when watermark passes end time',
+    'Early trigger: emit partial results every 30s while window still open',
+  ];
+  const windows = [
+    { label: 'Tumbling',  sub: '1-min fixed, no overlap', idx: 0 },
+    { label: 'Sliding',   sub: '10-min, 1-min step',      idx: 1 },
+    { label: 'Session',   sub: 'Gap >30min = new window', idx: 2 },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-col arch-col--center">
+        {windows.map((w, i) => (
+          <React.Fragment key={w.label}>
+            <div className={`arch-layer${activeIdx === i ? ' arch-layer--active' : ''}`} onClick={() => setActiveIdx(i)}>
+              <div className="arch-layer__icon">
+                {i === 0 && <LockIcon    active={activeIdx === i} />}
+                {i === 1 && <NetworkIcon active={activeIdx === i} />}
+                {i === 2 && <UserIcon    active={activeIdx === i} />}
+              </div>
+              <div className="arch-layer__info">
+                <span className="arch-layer__label">{w.label}</span>
+                <span className="arch-layer__sub">{w.sub}</span>
+              </div>
+              <div className="arch-layer__latency">{i + 1}</div>
+            </div>
+            {i < 2 && <VertArrow active={activeIdx > i} />}
+          </React.Fragment>
+        ))}
+        {activeIdx >= 3 && (
+          <>
+            <VertArrow active label="watermark" />
+            <ArchNode icon={<CacheIcon active />} label="Window Close" sublabel={activeIdx >= 4 ? 'Early trigger every 30s' : 'Emit final result'} active />
+          </>
+        )}
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RT_WINDOWS}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RT_WINDOWS} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// RT DIAGRAM 10 - Failure/Practice: consumer lag + WS reconnect
+const TOTAL_RT_PRACTICE = 5;
+const RTPracticeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Normal: 100 events/sec arriving, 100/sec processed - lag = 0',
+    'Processing slows: slow DB query makes it 5 events/sec only',
+    'Consumer lag grows: 95 events/sec backlog builds',
+    'Alert fires at lag > 1,000 events - scale consumers',
+    'Recovered: 10 consumers, lag drains, real-time restored',
+  ];
+  const lags = [0, 0, 950, 10000, 0];
+  const lag = lags[Math.min(activeIdx, lags.length - 1)];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<CacheIcon   active />}                    label="Kafka"       sublabel="100 events/sec"      active />
+        <Arrow active={activeIdx >= 1} label="consume" />
+        <ArchNode icon={<ServerIcon  active={activeIdx <= 1} />}   label="Consumer"    sublabel={activeIdx === 1 ? 'Slow: 5/sec' : activeIdx >= 4 ? 'x10 fast' : '100/sec'} active={activeIdx <= 1 || activeIdx >= 4} danger={activeIdx >= 1 && activeIdx <= 3} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="alert" />
+        <ArchNode icon={<WarningIcon active={activeIdx >= 2 && activeIdx <= 3} />} label="Alert" sublabel={lag > 0 ? `Lag: ${lag.toLocaleString()}` : 'Lag: 0'} active={activeIdx >= 2 && activeIdx <= 3} danger={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-danger-banner">Slow query: processing 5/sec vs 100/sec arriving</div>}
+      {activeIdx === 2 && <div className="arch-danger-banner">Lag at 950 events - alert threshold approaching</div>}
+      {activeIdx === 3 && <div className="arch-danger-banner">Lag at 10,000 - critical alert! Scale immediately!</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">Scaled to 10 consumers - lag draining, real-time restored</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_RT_PRACTICE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_RT_PRACTICE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // ESTIMATION AND CAPACITY PLANNING DIAGRAMS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -4634,6 +5029,35 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
   const isDS    = topic === 'distributed-systems';
   const isRP    = topic === 'reliability-patterns';
   const isEST   = topic === 'estimation-capacity';
+  const isRT    = topic === 'realtime-streaming';
+
+  // -- Real-Time and Streaming diagrams --
+  const getRTDiagram = (): React.ReactNode => {
+    if (t.includes('fundamentals') || t.includes('real-time systems'))       return <RTFundamentalsDiagram   activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('protocol') || t.includes('websocket') || t.includes('sse') || t.includes('long polling')) return <RTProtocolsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('real-time data processing') || t.includes('data processing')) return <RTStreamPipelineDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('stream processing fundamentals') || t.includes('stream process')) return <RTStreamFundDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('event streaming') || t.includes('kafka') && !t.includes('flink') && !t.includes('streams,')) return <RTKafkaDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('framework') || t.includes('flink') || t.includes('kafka streams') || t.includes('spark')) return <RTFrameworksDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('pipeline') || t.includes('cdc') || t.includes('data pipeline')) return <RTDataPipelineDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('event time') || t.includes('processing time'))           return <RTEventTimeDiagram      activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('window') || t.includes('tumbling') || t.includes('sliding') || t.includes('session')) return <RTWindowsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('failure') || t.includes('practice') || t.includes('architectures')) return <RTPracticeDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <RTFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  };
+
+  const getRTTotal = (): number => {
+    if (t.includes('fundamentals') || t.includes('real-time systems'))       return TOTAL_RT_FUND;
+    if (t.includes('protocol') || t.includes('websocket') || t.includes('sse')) return TOTAL_RT_PROTO;
+    if (t.includes('real-time data processing'))                              return TOTAL_RT_PIPELINE;
+    if (t.includes('stream processing fundamentals'))                         return TOTAL_RT_STREAM;
+    if (t.includes('event streaming'))                                        return TOTAL_RT_KAFKA;
+    if (t.includes('framework') || t.includes('flink') || t.includes('kafka streams') || t.includes('spark')) return TOTAL_RT_FRAMEWORKS;
+    if (t.includes('pipeline') || t.includes('cdc'))                         return TOTAL_RT_DATAPIPE;
+    if (t.includes('event time') || t.includes('processing time'))           return TOTAL_RT_EVTTIME;
+    if (t.includes('window') || t.includes('tumbling') || t.includes('sliding')) return TOTAL_RT_WINDOWS;
+    return TOTAL_RT_PRACTICE;
+  };
 
   // -- Estimation diagrams --
   const getESTDiagram = (): React.ReactNode => {
@@ -4973,7 +5397,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
     return TOTAL_BASICS;
   };
 
-  const total = isEST ? getESTTotal() : isRP ? getRPTotal() : isDS ? getDSTotal() : isCDN ? getCDNTotal() : isMQ ? getMQTotal() : isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
+  const total = isRT ? getRTTotal() : isEST ? getESTTotal() : isRP ? getRPTotal() : isDS ? getDSTotal() : isCDN ? getCDNTotal() : isMQ ? getMQTotal() : isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
 
   useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle, topic]);
 
@@ -4985,7 +5409,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
 
   return (
     <div className="module-animation" aria-label="Architecture diagram">
-      {isEST ? getESTDiagram() : isRP ? getRPDiagram() : isDS ? getDSDiagram() : isCDN ? getCDNDiagram() : isMQ ? getMQDiagram() : isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
+      {isRT ? getRTDiagram() : isEST ? getESTDiagram() : isRP ? getRPDiagram() : isDS ? getDSDiagram() : isCDN ? getCDNDiagram() : isMQ ? getMQDiagram() : isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
     </div>
   );
 };
