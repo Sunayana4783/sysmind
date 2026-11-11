@@ -15,6 +15,7 @@ const DISTRIBUTED_SYSTEMS_MODULES = require('./distributedSystemsContent');
 const RELIABILITY_PATTERNS_MODULES = require('./reliabilityPatternsContent');
 const ESTIMATION_MODULES            = require('./estimationContent');
 const REALTIME_STREAMING_MODULES     = require('./realtimeStreamingContent');
+const OBSERVABILITY_MODULES           = require('./observabilityContent');
 
 const TOPICS = [
   { slug: 'caching',             title: 'Caching',             order: 1, locked: false, description: 'Master caching fundamentals, eviction policies, Redis, and distributed caching patterns.',                                                                modules: CACHING_MODULES },
@@ -34,6 +35,8 @@ const TOPICS = [
   { slug: 'estimation-capacity', title: 'Estimation and Capacity Planning', order: 12, locked: false, description: 'RPS estimation, storage sizing, bandwidth, CPU/memory estimation, back-of-the-envelope calculations, and capacity optimization.', modules: ESTIMATION_MODULES },
 
   { slug: 'realtime-streaming', title: 'Real-Time and Streaming', order: 13, locked: false, description: 'WebSockets, SSE, Kafka Streams, Flink, event streaming, windows, event-time vs processing-time.', modules: REALTIME_STREAMING_MODULES },
+
+  { slug: 'observability-slos', title: 'Observability and SLOs', order: 14, locked: false, description: 'Logs, metrics, traces, golden signals, SLIs, SLOs, SLAs, error budgets, alerting, and incident management.', modules: OBSERVABILITY_MODULES },
 ];
 
 const seed = async () => {

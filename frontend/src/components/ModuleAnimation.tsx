@@ -1288,6 +1288,380 @@ const SCSpikeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setAct
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// OBSERVABILITY AND SLOs DIAGRAMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+// OBS DIAGRAM 1 - Fundamentals: 3 pillars
+const TOTAL_OBS_FUND = 5;
+const OBSFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Problem occurs in production - what tools do we use?',
+    'Metrics: Prometheus alert fires - error rate > 1%',
+    'Logs: Elasticsearch shows NullPointerException in Service C',
+    'Traces: Jaeger shows payment service took 4s - root cause found',
+    'Three pillars together: detect, explain, locate - MTTR in minutes',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<WarningIcon active={activeIdx === 0} />}  label="Problem"      sublabel="Something broke"     active={activeIdx === 0} danger onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="investigate" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <ArchNode icon={<CacheIcon   active={activeIdx === 1} />} label="Metrics"     sublabel="Prometheus alert"    active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+          <ArchNode icon={<DatabaseIcon active={activeIdx === 2} />} label="Logs"       sublabel="Elasticsearch"       active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+          <ArchNode icon={<NetworkIcon active={activeIdx === 3} />} label="Traces"      sublabel="Jaeger waterfall"    active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        </div>
+        <Arrow active={activeIdx >= 4} label="MTTR" />
+        <ArchNode icon={<LockIcon    active={activeIdx >= 4} />}   label="Fix Found"    sublabel="Minutes not hours"   active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 1 && <div className="arch-failover-banner">Metrics: WHAT is broken (error rate > 1%)</div>}
+      {activeIdx === 2 && <div className="arch-failover-banner">Logs: WHY it broke (NullPointerException)</div>}
+      {activeIdx === 3 && <div className="arch-failover-banner">Traces: WHERE it broke (payment service, 4s)</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_OBS_FUND}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_OBS_FUND} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// OBS DIAGRAM 2 - Logging: structured log pipeline
+const TOTAL_OBS_LOG = 5;
+const OBSLoggingDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Service emits structured JSON log event with all context',
+    'Log shipper (Fluentd) forwards to centralised Elasticsearch',
+    'All 50 services logs searchable from one Kibana UI',
+    'Filter by trace_id=abc123: see full request path across services',
+    'Tiered storage: hot 7 days, warm 30 days, cold archive 1 year',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {['Service A','Service B','Service C'].map(s => (
+            <ArchNode key={s} icon={<ServerIcon active={activeIdx === 0} />} label={s} sublabel="JSON logs" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+          ))}
+        </div>
+        <Arrow active={activeIdx >= 1} label="Fluentd" />
+        <ArchNode icon={<DatabaseIcon active={activeIdx >= 1} />}  label="Elasticsearch" sublabel="Centralised store" active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="search" />
+        <ArchNode icon={<NetworkIcon  active={activeIdx >= 2} />}  label="Kibana"       sublabel="Query + dashboards" active={activeIdx >= 2} onClick={() => setActiveIdx(2)} />
+      </div>
+      {activeIdx === 3 && <div className="arch-failover-banner">trace_id=abc123: found across 5 services in 2 seconds</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">Tiered storage: cost-effective log retention</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_OBS_LOG}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_OBS_LOG} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// OBS DIAGRAM 3 - Metrics: Prometheus + Grafana
+const TOTAL_OBS_METRICS = 5;
+const OBSMetricsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Service exposes /metrics endpoint with RED metrics',
+    'Prometheus scrapes /metrics every 15 seconds',
+    'RED metrics: Rate 1234/s, Errors 0.3%, Duration P99=487ms',
+    'Grafana dashboards show real-time graphs per service',
+    'Alert fires: error rate > 1% for 5 min - pages on-call',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon  active={activeIdx === 0} />}  label="Service"      sublabel="/metrics endpoint"  active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="scrape 15s" />
+        <ArchNode icon={<CacheIcon   active={activeIdx >= 1} />}   label="Prometheus"   sublabel="Time-series store"  active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 3} label="query" />
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 3} />}   label="Grafana"      sublabel="Dashboards"         active={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        {['Rate: 1234/s','Errors: 0.3%','P99: 487ms'].map((m, i) => (
+          <ArchNode key={m} icon={<DatabaseIcon active={activeIdx === 2} />} label={m} sublabel="RED metric" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        ))}
+        {activeIdx >= 4 && <ArchNode icon={<WarningIcon active />} label="Alert!" sublabel="Error > 1%" active danger onClick={() => setActiveIdx(4)} />}
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_OBS_METRICS}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_OBS_METRICS} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// OBS DIAGRAM 4 - Distributed Tracing
+const TOTAL_OBS_TRACE = 5;
+const OBSTracingDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Request enters API Gateway - trace_id=abc123 assigned',
+    'trace_id propagated to every downstream service call',
+    'Each service emits span: name, duration, status',
+    'Payment service span: 4s, ERROR - root cause identified',
+    'Jaeger waterfall: full request path visible in seconds',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<NetworkIcon active={activeIdx === 0} />}  label="Gateway"      sublabel="trace_id: abc123"   active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="propagate" />
+        <ArchNode icon={<ServerIcon  active={activeIdx === 1} />}  label="Order Svc"    sublabel="10ms - OK"           active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="call" />
+        <ArchNode icon={<LockIcon    active={activeIdx >= 2} />}   label="Payment Svc"  sublabel={activeIdx >= 3 ? '4s - ERROR!' : '...'} active={activeIdx >= 2} danger={activeIdx >= 3} onClick={() => setActiveIdx(3)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<CacheIcon   active={activeIdx === 4} />}  label="Jaeger"       sublabel="Trace waterfall"     active={activeIdx === 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      {activeIdx === 3 && <div className="arch-danger-banner">Payment: 4s DB query - root cause found!</div>}
+      {activeIdx >= 4 && <div className="arch-failover-banner">Jaeger: full trace visible in seconds, not hours</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_OBS_TRACE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_OBS_TRACE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// OBS DIAGRAM 5 - Health Checks and Alerting
+const TOTAL_OBS_HEALTH = 5;
+const OBSHealthDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Load balancer pings /health every 5 seconds on each service',
+    'Deep health check verifies DB, cache, and dependencies',
+    'Prometheus alert fires: error rate > 1% for 5 minutes',
+    'PagerDuty notifies on-call with context and runbook link',
+    'MTTR measured: time from detection to resolution',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<NetworkIcon active={activeIdx >= 0} />}   label="Load Balancer" sublabel="/health every 5s"  active />
+        <Arrow active={activeIdx >= 1} label="deep check" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 1} />}   label="Service"       sublabel={activeIdx === 1 ? 'Checks DB+Redis' : '503 if unhealthy'} active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<CacheIcon   active={activeIdx === 2} />}  label="Prometheus"    sublabel="Alert: error > 1%"  active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 3} label="notify" />
+        <ArchNode icon={<LockIcon    active={activeIdx === 3} />}  label="PagerDuty"     sublabel="On-call paged"      active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="MTTR" />
+        <ArchNode icon={<UserIcon    active={activeIdx >= 4} />}   label="Engineer"      sublabel="Investigates"       active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_OBS_HEALTH}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_OBS_HEALTH} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// OBS DIAGRAM 6 - Golden Signals
+const TOTAL_OBS_GOLDEN = 5;
+const OBSGoldenDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Four Golden Signals: complete picture of service health',
+    'Latency: P99=487ms - are requests fast enough?',
+    'Traffic: 12,340 req/sec - is demand within capacity?',
+    'Errors: 0.3% error rate - are requests succeeding?',
+    'Saturation: CPU 73%, DB pool 68% - will it fail soon?',
+  ];
+  const signals = [
+    { label: 'Latency', sub: 'P99 = 487ms', idx: 1, ok: true },
+    { label: 'Traffic', sub: '12,340 req/s', idx: 2, ok: true },
+    { label: 'Errors',  sub: '0.3% error', idx: 3, ok: true },
+    { label: 'Saturation', sub: 'CPU 73%', idx: 4, ok: false },
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<ServerIcon active />}                     label="Your Service"  sublabel="Is it healthy?"     active />
+        <Arrow active={activeIdx >= 1} label="4 signals" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          {signals.map(s => (
+            <ArchNode key={s.label} icon={<CacheIcon active={activeIdx === s.idx} />}
+              label={s.label} sublabel={s.sub}
+              active={activeIdx === s.idx}
+              danger={activeIdx === s.idx && !s.ok}
+              onClick={() => setActiveIdx(s.idx)} />
+          ))}
+        </div>
+      </div>
+      {activeIdx >= 1 && activeIdx <= 3 && <div className="arch-failover-banner">GREEN: {signals[activeIdx-1]?.label} is healthy</div>}
+      {activeIdx === 4 && <div className="arch-danger-banner">Watch Saturation: at 73% CPU, next spike may cause issues</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_OBS_GOLDEN}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_OBS_GOLDEN} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// OBS DIAGRAM 7 - SLIs
+const TOTAL_OBS_SLI = 5;
+const OBSSLIDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'User makes a checkout request to the service',
+    'Measure: did it return success AND complete in under 500ms?',
+    'Good event: success + fast. Bad event: error OR slow',
+    'SLI = good_requests / total_requests over time window',
+    'SLI = 99.72% - measure of actual user experience',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-row arch-row--center">
+        <ArchNode icon={<UserIcon    active={activeIdx === 0} />}  label="User Request"  sublabel="Checkout page"       active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+        <Arrow active={activeIdx >= 1} label="measure" />
+        <ArchNode icon={<LockIcon    active={activeIdx >= 1} />}   label="SLI Measure"   sublabel="Success + <500ms?"   active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+        <Arrow active={activeIdx >= 2} label="classify" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <ArchNode icon={<ServerIcon active={activeIdx === 2} />} label="Good event"    sublabel="Fast + success"      active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+          <ArchNode icon={<WarningIcon active={activeIdx === 2} />} label="Bad event"   sublabel="Error or slow"        active={activeIdx === 2} danger onClick={() => setActiveIdx(2)} />
+        </div>
+      </div>
+      {activeIdx >= 3 && <div className="arch-failover-banner">SLI = good / total = 997,200 / 1,000,000 = 99.72%</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_OBS_SLI}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_OBS_SLI} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// OBS DIAGRAM 8 - SLOs and Error Budget
+const TOTAL_OBS_SLO = 5;
+const OBSSLODiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'SLI measured: 99.72% requests successful last 30 days',
+    'SLO target: 99.9% availability over any 30-day window',
+    'Error budget: 0.1% = 43.2 minutes of downtime per month',
+    'SLI is 99.72% - error budget is OVERRUN - SLO breached',
+    'Response: freeze deployments, investigate root cause',
+  ];
+  const budgetPct = [100, 100, 100, 0, 0];
+  const bp = budgetPct[Math.min(activeIdx, 4)];
+  return (
+    <div className="arch-diagram">
+      <div style={{ background: '#F0EEFF', borderRadius: 8, padding: '0.75rem', margin: '0 0 0.75rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', marginBottom: 4, fontWeight: 700, color: '#24212B' }}>
+          <span>Error Budget Remaining</span>
+          <span style={{ color: bp === 0 ? '#DC2626' : '#7C5CFC' }}>{bp === 0 ? 'EXHAUSTED' : bp + '% remaining'}</span>
+        </div>
+        <div style={{ background: '#E5E0EF', borderRadius: 4, height: 20, overflow: 'hidden' }}>
+          <div style={{ background: bp === 0 ? '#DC2626' : '#7C5CFC', height: '100%', width: Math.max(bp, 2) + '%', borderRadius: 4, transition: 'all 0.5s' }} />
+        </div>
+      </div>
+      {activeIdx === 3 && <div className="arch-danger-banner">SLO BREACHED: 0.28% failure > 0.1% budget</div>}
+      {activeIdx >= 4 && <div className="arch-danger-banner">Action: freeze deploys, focus on reliability</div>}
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_OBS_SLO}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_OBS_SLO} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// OBS DIAGRAM 9 - SLAs and Burn Rate
+const TOTAL_OBS_SLA = 5;
+const OBSSLADiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'SLO: 99.95% internal target (stricter than SLA)',
+    'SLA: 99.9% external customer contract with penalties',
+    'Burn rate: how fast is error budget being consumed?',
+    '15x burn rate: budget exhausted in 2 days - alert fires!',
+    'Policy: freeze deploys at 15x burn rate before SLA breach',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-two-path">
+        <div className={`arch-path${activeIdx <= 1 ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--write">INTERNAL (SLO)</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<LockIcon    active={activeIdx === 0} />} label="SLO: 99.95%" sublabel="Stricter target" active={activeIdx === 0} onClick={() => setActiveIdx(0)} />
+            {activeIdx === 0 && <div className="arch-failover-banner" style={{ marginTop: '0.5rem' }}>SLO margin before SLA breach</div>}
+          </div>
+        </div>
+        <div className="arch-path-divider" />
+        <div className={`arch-path${activeIdx >= 1 ? ' arch-path--active' : ''}`}>
+          <div className="arch-path__label arch-path__label--read">EXTERNAL (SLA)</div>
+          <div className="arch-row arch-row--col">
+            <ArchNode icon={<UserIcon    active={activeIdx === 1} />} label="SLA: 99.9%" sublabel="Customer contract" active={activeIdx === 1} onClick={() => setActiveIdx(1)} />
+            {activeIdx === 1 && <div className="arch-danger-banner" style={{ marginTop: '0.5rem' }}>Breach = financial penalty</div>}
+          </div>
+        </div>
+      </div>
+      <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
+        <ArchNode icon={<CacheIcon   active={activeIdx === 2} />}  label="Burn Rate"    sublabel="1x sustainable"     active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <Arrow active={activeIdx >= 3} label="spikes!" />
+        <ArchNode icon={<WarningIcon active={activeIdx >= 3} />}   label="15x Burn!"   sublabel="Budget in 2 days"   active={activeIdx >= 3} danger onClick={() => setActiveIdx(3)} />
+        <Arrow active={activeIdx >= 4} label="freeze" />
+        <ArchNode icon={<ServerIcon  active={activeIdx >= 4} />}   label="Policy"      sublabel="Stop deploys"       active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_OBS_SLA}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_OBS_SLA} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// OBS DIAGRAM 10 - Observability in Practice
+const TOTAL_OBS_PRACTICE = 5;
+const OBSPracticeDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActiveIdx: (i: number) => void }) => {
+  const descs = [
+    'Start: add RED metrics to all user-facing services',
+    'Alert fires: P99 latency > 500ms for 5 minutes',
+    'Trace shows DB slow; logs show missing index on user_id',
+    'Fix deployed: index added - P99 drops from 2s to 50ms',
+    'Post-mortem: timeline, root cause, action items documented',
+  ];
+  return (
+    <div className="arch-diagram">
+      <div className="arch-col arch-col--center">
+        {[
+          { label: 'Instrument',  sub: 'RED metrics on all services', idx: 0 },
+          { label: 'Alert fires', sub: 'P99 > 500ms for 5 min',       idx: 1 },
+          { label: 'Investigate', sub: 'Trace + logs: DB index missing', idx: 2 },
+          { label: 'Fix',         sub: 'Index added: 2s -> 50ms',      idx: 3 },
+          { label: 'Post-mortem', sub: 'Timeline, cause, prevention',  idx: 4 },
+        ].map((step, i) => (
+          <React.Fragment key={step.label}>
+            <div className={`arch-layer${activeIdx === i ? ' arch-layer--active' : ''}`} onClick={() => setActiveIdx(i)}>
+              <div className="arch-layer__icon">
+                {i === 0 && <ServerIcon  active={activeIdx === i} />}
+                {i === 1 && <WarningIcon active={activeIdx === i} />}
+                {i === 2 && <NetworkIcon active={activeIdx === i} />}
+                {i === 3 && <LockIcon    active={activeIdx === i} />}
+                {i === 4 && <DatabaseIcon active={activeIdx === i} />}
+              </div>
+              <div className="arch-layer__info">
+                <span className="arch-layer__label">{step.label}</span>
+                <span className="arch-layer__sub">{step.sub}</span>
+              </div>
+              <div className="arch-layer__latency">{i + 1}</div>
+            </div>
+            {i < 4 && <VertArrow active={activeIdx > i} />}
+          </React.Fragment>
+        ))}
+      </div>
+      <div className="arch-step-info">
+        <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_OBS_PRACTICE}</span>
+        <span className="arch-step-desc">{descs[activeIdx]}</span>
+      </div>
+      <StepNav activeIdx={activeIdx} total={TOTAL_OBS_PRACTICE} setActiveIdx={setActiveIdx} />
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // REAL-TIME AND STREAMING DIAGRAMS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -5263,6 +5637,35 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
   const isRP    = topic === 'reliability-patterns';
   const isEST   = topic === 'estimation-capacity';
   const isRT    = topic === 'realtime-streaming';
+  const isOBS   = topic === 'observability-slos';
+
+  // -- Observability and SLOs diagrams --
+  const getOBSDiagram = (): React.ReactNode => {
+    if (t.includes('fundamentals') || t.includes('observability fundamentals'))  return <OBSFundamentalsDiagram  activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('logging') || t.includes('log management'))                   return <OBSLoggingDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('metrics') || t.includes('monitoring'))                       return <OBSMetricsDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('tracing') || t.includes('distributed tracing'))              return <OBSTracingDiagram        activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('health check') || t.includes('alerting'))                    return <OBSHealthDiagram         activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('golden signal') || t.includes('latency, traffic') || t.includes('saturation')) return <OBSGoldenDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('service level indicator') || t.includes('sli') && !t.includes('slo') && !t.includes('sla')) return <OBSSLIDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('service level objective') || (t.includes('slo') && !t.includes('sla'))) return <OBSSLODiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('service level agreement') || t.includes('sla') || t.includes('error budget')) return <OBSSLADiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    if (t.includes('failure') || t.includes('practice') || t.includes('observability in')) return <OBSPracticeDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+    return <OBSFundamentalsDiagram activeIdx={activeIdx} setActiveIdx={setActiveIdx} />;
+  };
+
+  const getOBSTotal = (): number => {
+    if (t.includes('fundamentals') || t.includes('observability fundamentals'))  return TOTAL_OBS_FUND;
+    if (t.includes('logging') || t.includes('log management'))                   return TOTAL_OBS_LOG;
+    if (t.includes('metrics') || t.includes('monitoring'))                       return TOTAL_OBS_METRICS;
+    if (t.includes('tracing') || t.includes('distributed tracing'))              return TOTAL_OBS_TRACE;
+    if (t.includes('health check') || t.includes('alerting'))                    return TOTAL_OBS_HEALTH;
+    if (t.includes('golden signal') || t.includes('saturation'))                 return TOTAL_OBS_GOLDEN;
+    if (t.includes('service level indicator') || (t.includes('sli') && !t.includes('slo') && !t.includes('sla'))) return TOTAL_OBS_SLI;
+    if (t.includes('service level objective') || (t.includes('slo') && !t.includes('sla'))) return TOTAL_OBS_SLO;
+    if (t.includes('service level agreement') || t.includes('sla') || t.includes('error budget')) return TOTAL_OBS_SLA;
+    return TOTAL_OBS_PRACTICE;
+  };
 
   // -- Real-Time and Streaming diagrams --
   const getRTDiagram = (): React.ReactNode => {
@@ -5637,7 +6040,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
     return TOTAL_BASICS;
   };
 
-  const total = isRT ? getRTTotal() : isEST ? getESTTotal() : isRP ? getRPTotal() : isDS ? getDSTotal() : isCDN ? getCDNTotal() : isMQ ? getMQTotal() : isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
+  const total = isOBS ? getOBSTotal() : isRT ? getRTTotal() : isEST ? getESTTotal() : isRP ? getRPTotal() : isDS ? getDSTotal() : isCDN ? getCDNTotal() : isMQ ? getMQTotal() : isAG ? getAGTotal() : isMS ? getMSTotal() : isDB ? getDBTotal() : isLB ? getLBTotal() : isSC ? getSCTotal() : isSA ? getSATotals() : getCacheTotals();
 
   useEffect(() => { setActiveIdx(0); }, [steps, title, topicTitle, topic]);
 
@@ -5649,7 +6052,7 @@ const ModuleAnimation = ({ steps, animType, title, topicTitle, topic }: Props) =
 
   return (
     <div className="module-animation" aria-label="Architecture diagram">
-      {isRT ? getRTDiagram() : isEST ? getESTDiagram() : isRP ? getRPDiagram() : isDS ? getDSDiagram() : isCDN ? getCDNDiagram() : isMQ ? getMQDiagram() : isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
+      {isOBS ? getOBSDiagram() : isRT ? getRTDiagram() : isEST ? getESTDiagram() : isRP ? getRPDiagram() : isDS ? getDSDiagram() : isCDN ? getCDNDiagram() : isMQ ? getMQDiagram() : isAG ? getAGDiagram() : isMS ? getMSDiagram() : isDB ? getDBDiagram() : isLB ? getLBDiagram() : isSC ? getSCDiagram() : isSA ? getSADiagram() : getCacheDiagram()}
     </div>
   );
 };

@@ -23,6 +23,7 @@ import DistributedSystems   from './pages/DistributedSystems';
 import ReliabilityPatterns  from './pages/ReliabilityPatterns';
 import Estimation           from './pages/Estimation';
 import RealtimeStreaming     from './pages/RealtimeStreaming';
+import Observability         from './pages/Observability';
 import Profile   from './pages/Profile';
 import AuthNav   from './components/AuthNav';
 
@@ -86,6 +87,7 @@ const AppRoutes = () => {
         <Route path="/learning/hld/reliability-patterns" element={<ProtectedRoute><ReliabilityPatterns /></ProtectedRoute>} />
         <Route path="/learning/hld/estimation-capacity"  element={<ProtectedRoute><Estimation /></ProtectedRoute>} />
         <Route path="/learning/hld/realtime-streaming"   element={<ProtectedRoute><RealtimeStreaming /></ProtectedRoute>} />
+        <Route path="/learning/hld/observability-slos"   element={<ProtectedRoute><Observability /></ProtectedRoute>} />
         <Route path="/profile"            element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
         <Route path="*" element={<Navigate to="/signup" replace />} />

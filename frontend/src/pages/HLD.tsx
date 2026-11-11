@@ -26,7 +26,7 @@ const HLD_TOPICS: HLDTopic[] = [
   { id: 'estimation-capacity',  title: 'Estimation and Capacity Planning', locked: false, route: '/learning/hld/estimation-capacity', description: 'Back-of-envelope calculations, traffic estimation, storage sizing.' },
   { id: 'reliability-patterns', title: 'Reliability Patterns', locked: false, route: '/learning/hld/reliability-patterns', description: 'Circuit breakers, retries, bulkheads, timeouts, failover, graceful degradation, health checks, and load shedding.' },
   { id: 'realtime-streaming',   title: 'Real-time and Streaming',          locked: false, route: '/learning/hld/realtime-streaming', description: 'WebSockets, SSE, Kafka Streams, event-driven pipelines, stream processing.' },
-  { id: 'observability-slos',   title: 'Observability and SLOs',           locked: true, description: 'Logs, metrics, traces, SLIs, SLOs, SLAs, alerting, incident response.' },
+  { id: 'observability-slos',   title: 'Observability and SLOs',           locked: false, route: '/learning/hld/observability-slos', description: 'Logs, metrics, traces, golden signals, SLIs, SLOs, SLAs, error budgets, alerting, and incident management.' },
 ];
 
 const HLD = () => {
