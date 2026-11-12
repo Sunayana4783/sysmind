@@ -261,29 +261,53 @@
    MOBILE  ≤ 640 px
    ══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 640px) {
-  .module-animation { padding: 1rem 0.75rem 0.875rem; }
+  .module-animation { padding: 0.875rem 0.625rem 0.75rem; }
 
-  /* ── Nodes: slightly smaller but still readable ─────────────────────── */
-  .arch-node {
-    min-width: 64px;
-    max-width: 80px;
-    padding: 0.625rem 0.4rem 0.5rem;
-    border-radius: 10px;
+  /* ── arch-diagram: allow horizontal scroll instead of wrap ──────────── */
+  .arch-diagram {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  .arch-node__label   { font-size: 0.62rem; }
-  .arch-node__sublabel{ font-size: 0.55rem; }
 
-  /* ── Arrows: show on mobile as small compact version ────────────────── */
-  .arch-arrow { gap: 2px; }
-  .arch-arrow svg { width: 36px; height: 22px; }
-  .arch-arrow__label { font-size: 0.52rem; padding: 1px 4px; }
+  /* ── Rows: scroll horizontally, never wrap ──────────────────────────── */
+  .arch-row {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    gap: 0.25rem !important;
+  }
+  .arch-row--center {
+    flex-wrap: nowrap !important;
+    justify-content: flex-start;
+    overflow-x: auto;
+    gap: 0.2rem;
+  }
 
-  .arch-varrow svg { width: 22px; height: 28px; }
+  /* ── Nodes: compact but readable ───────────────────────────────────── */
+  .arch-node {
+    min-width: 60px;
+    max-width: 72px;
+    padding: 0.5rem 0.3rem 0.4rem;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+  .arch-node__label   { font-size: 0.58rem; }
+  .arch-node__sublabel{ font-size: 0.5rem; }
+
+  /* ── Arrows: compact ────────────────────────────────────────────────── */
+  .arch-arrow { gap: 2px; flex-shrink: 0; }
+  .arch-arrow svg { width: 28px; height: 18px; }
+  .arch-arrow__label { font-size: 0.48rem; padding: 1px 3px; }
+  .arch-varrow svg { width: 20px; height: 24px; }
 
   /* ── Two-path: stack vertically ─────────────────────────────────────── */
   .arch-two-path {
     grid-template-columns: 1fr;
-    gap: 0.625rem;
+    gap: 0.5rem;
   }
   .arch-path-divider {
     width: 100%;
@@ -291,29 +315,39 @@
     margin: 0;
   }
 
-  /* ── Layer rows ─────────────────────────────────────────────────────── */
-  .arch-layer { padding: 0.5rem 0.625rem; gap: 0.625rem; }
-  .arch-layer__label { font-size: 0.8rem; }
-  .arch-layer__latency { font-size: 0.62rem; padding: 0.2rem 0.5rem; }
+  /* ── Layers (vertical list items) ──────────────────────────────────── */
+  .arch-layer { padding: 0.45rem 0.5rem; gap: 0.5rem; }
+  .arch-layer__label { font-size: 0.75rem; }
+  .arch-layer__latency { font-size: 0.58rem; padding: 0.15rem 0.4rem; white-space: nowrap; }
 
-  /* ── Redis / Cluster stack vertically ───────────────────────────────── */
+  /* ── Redis / Cluster ─────────────────────────────────────────────────── */
   .arch-redis-layout { flex-direction: column; align-items: center; }
-  .arch-redis__apps  { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+  .arch-redis__apps  { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 0.3rem; }
   .arch-redis__arrows { flex-direction: row; }
   .arch-cluster { flex-direction: column; }
+  .arch-cluster__nodes { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 0.3rem; }
 
   /* ── Eviction slots ─────────────────────────────────────────────────── */
-  .arch-eviction__slots { gap: 0.3rem; }
-  .arch-eviction__slot  { width: 44px; height: 44px; font-size: 0.8rem; border-radius: 9px; }
+  .arch-eviction__slots { gap: 0.25rem; flex-wrap: wrap; justify-content: center; }
+  .arch-eviction__slot  { width: 42px; height: 42px; font-size: 0.72rem; border-radius: 8px; }
 
   /* ── Step info bar ──────────────────────────────────────────────────── */
-  .arch-step-info { padding: 0.6rem 0.75rem; gap: 0.5rem; }
-  .arch-step-desc { font-size: 0.75rem; }
+  .arch-step-info { padding: 0.5rem 0.625rem; gap: 0.4rem; }
+  .arch-step-desc { font-size: 0.72rem; }
+  .arch-step-pill { font-size: 0.58rem; }
 
-  /* ── Row centering ──────────────────────────────────────────────────── */
-  .arch-row--center { gap: 0.2rem; }
+  /* ── Col layout: keep vertical, just tighter ───────────────────────── */
+  .arch-col--center { gap: 0.1rem; }
 
-  /* ── Return row wraps ───────────────────────────────────────────────── */
-  .arch-return-row  { flex-wrap: wrap; }
-  .arch-return-label{ font-size: 0.65rem; }
+  /* ── Return row ─────────────────────────────────────────────────────── */
+  .arch-return-row  { flex-wrap: wrap; justify-content: center; }
+  .arch-return-label{ font-size: 0.6rem; }
+
+  /* ── Stampede ───────────────────────────────────────────────────────── */
+  .arch-stampede { gap: 0.4rem; }
+  .arch-stampede__users { gap: 0.2rem; }
+
+  /* ── Banners ─────────────────────────────────────────────────────────── */
+  .arch-danger-banner,
+  .arch-failover-banner { font-size: 0.72rem; padding: 0.5rem 0.625rem; }
 }
