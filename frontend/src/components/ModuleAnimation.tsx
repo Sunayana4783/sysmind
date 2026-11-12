@@ -1314,7 +1314,7 @@ const OBSFundamentalsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number
         <Arrow active={activeIdx >= 4} label="MTTR" />
         <ArchNode icon={<LockIcon    active={activeIdx >= 4} />}   label="Fix Found"    sublabel="Minutes not hours"   active={activeIdx >= 4} onClick={() => setActiveIdx(4)} />
       </div>
-      {activeIdx === 1 && <div className="arch-failover-banner">Metrics: WHAT is broken (error rate > 1%)</div>}
+      {activeIdx === 1 && <div className="arch-failover-banner">Metrics: WHAT is broken (error rate &gt; 1%)</div>}
       {activeIdx === 2 && <div className="arch-failover-banner">Logs: WHY it broke (NullPointerException)</div>}
       {activeIdx === 3 && <div className="arch-failover-banner">Traces: WHERE it broke (payment service, 4s)</div>}
       <div className="arch-step-info">
@@ -1383,7 +1383,7 @@ const OBSMetricsDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; set
         {['Rate: 1234/s','Errors: 0.3%','P99: 487ms'].map((m, i) => (
           <ArchNode key={m} icon={<DatabaseIcon active={activeIdx === 2} />} label={m} sublabel="RED metric" active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
         ))}
-        {activeIdx >= 4 && <ArchNode icon={<WarningIcon active />} label="Alert!" sublabel="Error > 1%" active danger onClick={() => setActiveIdx(4)} />}
+        {activeIdx >= 4 && <ArchNode icon={<WarningIcon active />} label="Alert!" sublabel="Error &gt; 1%" active danger onClick={() => setActiveIdx(4)} />}
       </div>
       <div className="arch-step-info">
         <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_OBS_METRICS}</span>
@@ -1445,7 +1445,7 @@ const OBSHealthDiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setA
         <ArchNode icon={<ServerIcon  active={activeIdx >= 1} />}   label="Service"       sublabel={activeIdx === 1 ? 'Checks DB+Redis' : '503 if unhealthy'} active={activeIdx >= 1} onClick={() => setActiveIdx(1)} />
       </div>
       <div className="arch-row arch-row--center" style={{ marginTop: '0.75rem' }}>
-        <ArchNode icon={<CacheIcon   active={activeIdx === 2} />}  label="Prometheus"    sublabel="Alert: error > 1%"  active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
+        <ArchNode icon={<CacheIcon   active={activeIdx === 2} />}  label="Prometheus"    sublabel="Alert: error &gt; 1%"  active={activeIdx === 2} onClick={() => setActiveIdx(2)} />
         <Arrow active={activeIdx >= 3} label="notify" />
         <ArchNode icon={<LockIcon    active={activeIdx === 3} />}  label="PagerDuty"     sublabel="On-call paged"      active={activeIdx === 3} onClick={() => setActiveIdx(3)} />
         <Arrow active={activeIdx >= 4} label="MTTR" />
@@ -1557,7 +1557,7 @@ const OBSSLODiagram = ({ activeIdx, setActiveIdx }: { activeIdx: number; setActi
           <div style={{ background: bp === 0 ? '#DC2626' : '#7C5CFC', height: '100%', width: Math.max(bp, 2) + '%', borderRadius: 4, transition: 'all 0.5s' }} />
         </div>
       </div>
-      {activeIdx === 3 && <div className="arch-danger-banner">SLO BREACHED: 0.28% failure > 0.1% budget</div>}
+      {activeIdx === 3 && <div className="arch-danger-banner">SLO BREACHED: 0.28% failure &gt; 0.1% budget</div>}
       {activeIdx >= 4 && <div className="arch-danger-banner">Action: freeze deploys, focus on reliability</div>}
       <div className="arch-step-info">
         <span className="arch-step-pill">{activeIdx + 1} / {TOTAL_OBS_SLO}</span>
