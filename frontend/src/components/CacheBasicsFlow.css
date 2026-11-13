@@ -22,7 +22,7 @@
 
 /* ── React Flow graph area ───────────────────────────────────────────────── */
 .cbf-graph {
-  height: 340px;
+  height: 400px;
   width: 100%;
   position: relative;
 }
@@ -146,7 +146,7 @@
 
 /* ── Mobile ──────────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .cbf-graph   { height: 320px; }
+  .cbf-graph   { height: 380px; }
   .flow-node   { min-width: 72px; padding: 0.5rem 0.35rem 0.4rem; border-radius: 10px; }
   .flow-node__label    { font-size: 0.62rem; }
   .flow-node__sublabel { font-size: 0.52rem; }
