@@ -100,10 +100,14 @@ const FlowNode = ({ data }: { data: FlowNodeData }) => {
 
   return (
     <>
-      <Handle type="target" position={Position.Left}   style={{ opacity: 0 }} />
-      <Handle type="target" position={Position.Top}    style={{ opacity: 0 }} />
-      <Handle type="source" position={Position.Right}  style={{ opacity: 0 }} />
-      <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
+      <Handle type="target" position={Position.Left}   id="left"   style={{ opacity: 0 }} />
+      <Handle type="target" position={Position.Top}    id="top"    style={{ opacity: 0 }} />
+      <Handle type="source" position={Position.Right}  id="right"  style={{ opacity: 0 }} />
+      <Handle type="source" position={Position.Bottom} id="bottom" style={{ opacity: 0 }} />
+      <Handle type="source" position={Position.Left}   id="left-s" style={{ opacity: 0 }} />
+      <Handle type="target" position={Position.Right}  id="right-t" style={{ opacity: 0 }} />
+      <Handle type="source" position={Position.Top}    id="top-s"  style={{ opacity: 0 }} />
+      <Handle type="target" position={Position.Bottom} id="bottom-t" style={{ opacity: 0 }} />
       <div
         className={`flow-node${data.active ? ' flow-node--active' : ''}`}
         style={{ background: bg, border: `2px solid ${borderColor}`, boxShadow: shadow, cursor: 'pointer' }}
@@ -167,16 +171,16 @@ const getPositions = () => {
   if (mobile) {
     return {
       user:   { x: 10,  y: 110 },
-      server: { x: 160, y: 110 },
-      cache:  { x: 310, y: 110 },
-      db:     { x: 160, y: 290 },
+      server: { x: 150, y: 110 },
+      cache:  { x: 300, y: 10  },
+      db:     { x: 300, y: 230 },
     };
   }
   return {
-    user:   { x: 20,  y: 130 },
-    server: { x: 220, y: 130 },
-    cache:  { x: 420, y: 130 },
-    db:     { x: 220, y: 320 },
+    user:   { x: 20,  y: 150 },
+    server: { x: 210, y: 150 },
+    cache:  { x: 430, y: 20  },
+    db:     { x: 430, y: 290 },
   };
 };
 
@@ -210,18 +214,20 @@ function buildNodes(step: typeof STEPS[0]): Node[] {
 // ── Build edges ───────────────────────────────────────────────────────────────
 function buildEdges(step: typeof STEPS[0]): Edge[] {
   const defs = [
-    { id: 'user-server',  source: 'user',   target: 'server', label: 'request',  type: 'smoothstep' },
-    { id: 'server-user',  source: 'server', target: 'user',   label: 'response', type: 'smoothstep' },
-    { id: 'server-cache', source: 'server', target: 'cache',  label: 'lookup',   type: 'straight'   },
-    { id: 'cache-server', source: 'cache',  target: 'server', label: 'hit',      type: 'straight'   },
-    { id: 'server-db',    source: 'server', target: 'db',     label: 'query',    type: 'straight'   },
-    { id: 'db-server',    source: 'db',     target: 'server', label: 'data',     type: 'straight'   },
+    { id: 'user-server',  source: 'user',   target: 'server', label: 'request',  sourceHandle: 'right',  targetHandle: 'left',   type: 'smoothstep' },
+    { id: 'server-user',  source: 'server', target: 'user',   label: 'response', sourceHandle: 'left',   targetHandle: 'right',  type: 'smoothstep' },
+    { id: 'server-cache', source: 'server', target: 'cache',  label: 'lookup',   sourceHandle: 'right',  targetHandle: 'left',   type: 'smoothstep' },
+    { id: 'cache-server', source: 'cache',  target: 'server', label: 'hit',      sourceHandle: 'left',   targetHandle: 'right',  type: 'smoothstep' },
+    { id: 'server-db',    source: 'server', target: 'db',     label: 'query',    sourceHandle: 'bottom', targetHandle: 'top',    type: 'smoothstep' },
+    { id: 'db-server',    source: 'db',     target: 'server', label: 'data',     sourceHandle: 'top',    targetHandle: 'bottom', type: 'smoothstep' },
   ];
   return defs.map(def => {
     const on    = step.animatedEdges.includes(def.id);
     const color = step.edgeColor?.[def.id] ?? C.border;
     return {
       id: def.id, source: def.source, target: def.target,
+      sourceHandle: def.sourceHandle,
+      targetHandle: def.targetHandle,
       label: on ? def.label : '',
       animated: on,
       style: { stroke: on ? color : C.border, strokeWidth: on ? 2.5 : 1.5, opacity: on ? 1 : 0.3 },
