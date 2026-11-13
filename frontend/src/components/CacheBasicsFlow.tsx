@@ -213,13 +213,20 @@ function buildNodes(step: typeof STEPS[0]): Node[] {
 
 // ── Build edges ───────────────────────────────────────────────────────────────
 function buildEdges(step: typeof STEPS[0]): Edge[] {
+  // server→cache goes top-right diagonal; cache→server comes back left→right
+  // server→db and db→server use right/left handles so they go around the outside,
+  // never crossing the server↔cache path.
   const defs = [
-    { id: 'user-server',  source: 'user',   target: 'server', label: 'request',  sourceHandle: 'right',  targetHandle: 'left',   type: 'smoothstep' },
-    { id: 'server-user',  source: 'server', target: 'user',   label: 'response', sourceHandle: 'left',   targetHandle: 'right',  type: 'smoothstep' },
-    { id: 'server-cache', source: 'server', target: 'cache',  label: 'lookup',   sourceHandle: 'right',  targetHandle: 'left',   type: 'smoothstep' },
-    { id: 'cache-server', source: 'cache',  target: 'server', label: 'hit',      sourceHandle: 'left',   targetHandle: 'right',  type: 'smoothstep' },
-    { id: 'server-db',    source: 'server', target: 'db',     label: 'query',    sourceHandle: 'bottom', targetHandle: 'top',    type: 'smoothstep' },
-    { id: 'db-server',    source: 'db',     target: 'server', label: 'data',     sourceHandle: 'top',    targetHandle: 'bottom', type: 'smoothstep' },
+    { id: 'user-server',  source: 'user',   target: 'server', label: 'request',  sourceHandle: 'right',    targetHandle: 'left',    type: 'smoothstep' },
+    { id: 'server-user',  source: 'server', target: 'user',   label: 'response', sourceHandle: 'left',     targetHandle: 'right',   type: 'smoothstep' },
+    // server→cache: exit top of server, enter left of cache (goes up-right, no overlap with db path)
+    { id: 'server-cache', source: 'server', target: 'cache',  label: 'lookup',   sourceHandle: 'top-s',    targetHandle: 'left',    type: 'smoothstep' },
+    // cache→server: exit left of cache, enter right of server
+    { id: 'cache-server', source: 'cache',  target: 'server', label: 'hit',      sourceHandle: 'left',     targetHandle: 'right',   type: 'smoothstep' },
+    // server→db: exit bottom of server, enter left of db (goes down-right)
+    { id: 'server-db',    source: 'server', target: 'db',     label: 'query',    sourceHandle: 'bottom',   targetHandle: 'left',    type: 'smoothstep' },
+    // db→server: exit left of db, enter right of server
+    { id: 'db-server',    source: 'db',     target: 'server', label: 'data',     sourceHandle: 'left',     targetHandle: 'right',   type: 'smoothstep' },
   ];
   return defs.map(def => {
     const on    = step.animatedEdges.includes(def.id);
