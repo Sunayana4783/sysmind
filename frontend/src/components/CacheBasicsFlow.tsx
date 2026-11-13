@@ -166,17 +166,17 @@ const getPositions = () => {
   const mobile = typeof window !== 'undefined' && window.innerWidth < 600;
   if (mobile) {
     return {
-      user:   { x: 10,  y: 130 },
-      server: { x: 150, y: 130 },
-      cache:  { x: 300, y: 20  },
-      db:     { x: 150, y: 290 },
+      user:   { x: 10,  y: 110 },
+      server: { x: 160, y: 110 },
+      cache:  { x: 310, y: 110 },
+      db:     { x: 160, y: 290 },
     };
   }
   return {
-    user:   { x: 20,  y: 150 },
-    server: { x: 210, y: 150 },
-    cache:  { x: 420, y: 30  },
-    db:     { x: 210, y: 320 },
+    user:   { x: 20,  y: 130 },
+    server: { x: 220, y: 130 },
+    cache:  { x: 420, y: 130 },
+    db:     { x: 220, y: 320 },
   };
 };
 
@@ -210,12 +210,12 @@ function buildNodes(step: typeof STEPS[0]): Node[] {
 // ── Build edges ───────────────────────────────────────────────────────────────
 function buildEdges(step: typeof STEPS[0]): Edge[] {
   const defs = [
-    { id: 'user-server',  source: 'user',   target: 'server', label: 'request'  },
-    { id: 'server-user',  source: 'server', target: 'user',   label: 'response' },
-    { id: 'server-cache', source: 'server', target: 'cache',  label: 'lookup'   },
-    { id: 'cache-server', source: 'cache',  target: 'server', label: 'hit'      },
-    { id: 'server-db',    source: 'server', target: 'db',     label: 'query'    },
-    { id: 'db-server',    source: 'db',     target: 'server', label: 'data'     },
+    { id: 'user-server',  source: 'user',   target: 'server', label: 'request',  type: 'smoothstep' },
+    { id: 'server-user',  source: 'server', target: 'user',   label: 'response', type: 'smoothstep' },
+    { id: 'server-cache', source: 'server', target: 'cache',  label: 'lookup',   type: 'straight'   },
+    { id: 'cache-server', source: 'cache',  target: 'server', label: 'hit',      type: 'straight'   },
+    { id: 'server-db',    source: 'server', target: 'db',     label: 'query',    type: 'straight'   },
+    { id: 'db-server',    source: 'db',     target: 'server', label: 'data',     type: 'straight'   },
   ];
   return defs.map(def => {
     const on    = step.animatedEdges.includes(def.id);
@@ -232,7 +232,7 @@ function buildEdges(step: typeof STEPS[0]): Edge[] {
         color: on ? color : C.border,
         width: on ? 16 : 12, height: on ? 16 : 12,
       },
-      type: 'smoothstep',
+      type: def.type || 'smoothstep',
     };
   });
 }
