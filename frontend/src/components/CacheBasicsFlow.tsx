@@ -166,17 +166,17 @@ const getPositions = () => {
   const mobile = typeof window !== 'undefined' && window.innerWidth < 600;
   if (mobile) {
     return {
-      user:   { x: 10,  y: 80  },
-      server: { x: 145, y: 80  },
-      cache:  { x: 280, y: 10  },
-      db:     { x: 280, y: 155 },
+      user:   { x: 10,  y: 110 },
+      server: { x: 150, y: 110 },
+      cache:  { x: 290, y: 10  },
+      db:     { x: 290, y: 210 },
     };
   }
   return {
-    user:   { x: 30,  y: 110 },
-    server: { x: 210, y: 110 },
-    cache:  { x: 410, y: 30  },
-    db:     { x: 410, y: 190 },
+    user:   { x: 30,  y: 130 },
+    server: { x: 220, y: 130 },
+    cache:  { x: 430, y: 20  },
+    db:     { x: 430, y: 240 },
   };
 };
 
