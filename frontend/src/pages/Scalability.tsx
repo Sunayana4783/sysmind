@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LearningNav from '../components/LearningNav';
-import ModuleAnimation from '../components/ModuleAnimation';
+import HLDFlow from '../components/HLDFlow';
+import { scalabilityFlowMap } from '../components/flows/scalabilityFlows';
 import { learningAPI, quizAPI, activityAPI, type LearningModule, type QuizData, type QuizResult } from '../services/api';
 import '../styles/learning-theme.css';
 import './Scalability.css';
@@ -33,7 +34,7 @@ const ContentModule = ({ mod, completed, onComplete, completing, onNext, isLast 
       {c.animationSteps?.length > 0 && (
         <div className="mod-block">
           <h3 className="mod-section-title">How it works</h3>
-          <ModuleAnimation steps={c.animationSteps} topicTitle={mod.title} topic="scalability" />
+          {scalabilityFlowMap[mod.title] ? <HLDFlow def={scalabilityFlowMap[mod.title]} /> : null}
         </div>
       )}
 
@@ -109,7 +110,7 @@ const FailureCasesModule = ({ mod, completed, onComplete, completing, onNext, is
             {fc.animationSteps?.length > 0 && (
               <div className="mod-block" style={{ marginTop: '1.25rem' }}>
                 <h4 className="mod-section-title">Failure flow</h4>
-                <ModuleAnimation steps={fc.animationSteps} animType="cascade" topicTitle={fc.title} topic="scalability" />
+                {scalabilityFlowMap[fc.title] ? <HLDFlow def={scalabilityFlowMap[fc.title]} /> : null}
               </div>
             )}
 
@@ -753,3 +754,4 @@ const Scalability = () => {
 };
 
 export default Scalability;
+

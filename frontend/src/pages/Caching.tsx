@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LearningNav from '../components/LearningNav';
-import ModuleAnimation from '../components/ModuleAnimation';
+import HLDFlow from '../components/HLDFlow';
 import CacheBasicsFlow from '../components/CacheBasicsFlow';
+import { cachingFlowMap } from '../components/flows/cachingFlows';
 import { learningAPI, quizAPI, activityAPI, type LearningModule, type QuizData, type QuizResult } from '../services/api';
 import '../styles/learning-theme.css';
 import './Caching.css';
@@ -41,9 +42,9 @@ const ContentModule = ({ mod, completed, onComplete, completing, onNext, isLast 
           </div>
           {mod.title === 'Cache Basics' ? (
             <CacheBasicsFlow />
-          ) : (
-            <ModuleAnimation steps={c.animationSteps} topicTitle={mod.title} topic="caching" />
-          )}
+          ) : cachingFlowMap[mod.title] ? (
+            <HLDFlow def={cachingFlowMap[mod.title]} />
+          ) : null}
         </div>
       )}
 
@@ -119,7 +120,9 @@ const FailureCasesModule = ({ mod, completed, onComplete, completing, onNext, is
             {fc.animationSteps?.length > 0 && (
               <div className="mod-block" style={{ marginTop: '1.25rem' }}>
                 <h4 className="mod-section-title">Failure flow</h4>
-                <ModuleAnimation steps={fc.animationSteps} animType="cascade" topicTitle={fc.title} topic="caching" />
+                {cachingFlowMap[fc.title] ? (
+                  <HLDFlow def={cachingFlowMap[fc.title]} />
+                ) : null}
               </div>
             )}
 
