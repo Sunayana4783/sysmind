@@ -4,7 +4,7 @@ Run locally:  uvicorn main:app --reload --port 8000
 """
 import os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -15,17 +15,12 @@ load_dotenv()
 from app.routes.assessment import router as assessment_router
 from app.database import get_client
 
-# ── APScheduler (Saturday 00:05 IST = Friday 18:35 UTC) ──────────────────────
 scheduler = AsyncIOScheduler(timezone="Asia/Kolkata")
 
 
 async def scheduled_weekly_generation():
-    """
-    Runs Saturday 12:05 AM IST.
-    Triggers assessment generation for ALL active users who completed topics this week.
-    """
     from app.supervisor import run_assessment
-    from app.database import col_users, col_completions
+    from app.database import col_completions
     from datetime import datetime, timedelta
     from zoneinfo import ZoneInfo
 
@@ -37,7 +32,6 @@ async def scheduled_weekly_generation():
     monday_utc = monday_start.astimezone(ZoneInfo("UTC")).replace(tzinfo=None)
     friday_utc = friday_end.astimezone(ZoneInfo("UTC")).replace(tzinfo=None)
 
-    # Find users who completed topics this week
     pipeline = [
         {"$match": {"completedAt": {"$gte": monday_utc, "$lte": friday_utc}}},
         {"$group": {"_id": "$userId"}},
@@ -55,7 +49,6 @@ async def scheduled_weekly_generation():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Start scheduler on app startup
     scheduler.add_job(
         scheduled_weekly_generation,
         CronTrigger(day_of_week="sat", hour=0, minute=5, timezone="Asia/Kolkata"),
@@ -68,12 +61,7 @@ async def lifespan(app: FastAPI):
     scheduler.shutdown()
 
 
-# ── App ───────────────────────────────────────────────────────────────────────
-app = FastAPI(
-    title="SysMind AI Assessment API",
-    version="1.0.0",
-    lifespan=lifespan,
-)
+app = FastAPI(title="SysMind AI Assessment API", version="1.0.0", lifespan=lifespan)
 
 ALLOWED_ORIGINS = [
     "http://localhost:5173",
@@ -93,29 +81,8 @@ app.include_router(assessment_router)
 
 
 @app.get("/")
-async def health():
+async def root():
     return {"status": "ok", "service": "SysMind AI Assessment API"}
-
-
-@app.get("/debug/me")
-async def debug_me(user_id: str = Depends(get_current_user)):
-    """Returns the user_id extracted from JWT — use this to verify token parsing."""
-    from app.database import get_db
-    db = get_db()
-    from bson import ObjectId
-    try:
-        uid = ObjectId(user_id)
-    except Exception:
-        uid = user_id
-    count = await db["progresses"].count_documents({"userId": uid})
-    count_str = await db["progresses"].count_documents({"userId": str(user_id)})
-    sample = await db["progresses"].find({"userId": uid}).limit(2).to_list(2)
-    return {
-        "user_id_from_jwt": user_id,
-        "progresses_found_as_objectid": count,
-        "progresses_found_as_string": count_str,
-        "sample": [str(s) for s in sample],
-    }
 
 
 @app.get("/health")
@@ -131,7 +98,6 @@ async def health_check():
 
 @app.get("/debug/topics/{user_id_param}")
 async def debug_topics(user_id_param: str):
-    """Check what topics exist for a user — no auth required for debugging."""
     from app.agents import agent1_history
     result = await agent1_history.run(user_id_param)
     return {
