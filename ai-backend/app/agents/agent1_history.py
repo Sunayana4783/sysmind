@@ -45,13 +45,18 @@ async def run(user_id: str) -> dict:
         "completedAt": {"$gte": week_start_utc, "$lte": week_end_utc},
     }).to_list(length=500)
 
-    # ── Fallback: if no completions this week, use last 30 days ─────────────
-    # This helps during development/testing when completions may be older
+    # ── Fallback: use last 90 days for testing ───────────────────────────────
     if not completions:
-        fallback_start = datetime.utcnow() - timedelta(days=30)
+        fallback_start = datetime.utcnow() - timedelta(days=90)
         completions = await progresses_col.find({
             "userId": uid,
             "completedAt": {"$gte": fallback_start},
+        }).to_list(length=500)
+
+    # ── Fallback 2: try string version of user_id ─────────────────────────────
+    if not completions:
+        completions = await progresses_col.find({
+            "userId": str(user_id),
         }).to_list(length=500)
 
     if not completions:

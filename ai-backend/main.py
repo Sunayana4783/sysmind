@@ -97,6 +97,27 @@ async def health():
     return {"status": "ok", "service": "SysMind AI Assessment API"}
 
 
+@app.get("/debug/me")
+async def debug_me(user_id: str = Depends(get_current_user)):
+    """Returns the user_id extracted from JWT — use this to verify token parsing."""
+    from app.database import get_db
+    db = get_db()
+    from bson import ObjectId
+    try:
+        uid = ObjectId(user_id)
+    except Exception:
+        uid = user_id
+    count = await db["progresses"].count_documents({"userId": uid})
+    count_str = await db["progresses"].count_documents({"userId": str(user_id)})
+    sample = await db["progresses"].find({"userId": uid}).limit(2).to_list(2)
+    return {
+        "user_id_from_jwt": user_id,
+        "progresses_found_as_objectid": count,
+        "progresses_found_as_string": count_str,
+        "sample": [str(s) for s in sample],
+    }
+
+
 @app.get("/health")
 async def health_check():
     try:

@@ -22,7 +22,7 @@ def get_current_user(
     token = credentials.credentials
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=ALGORITHMS)
-        user_id: str = payload.get("id") or payload.get("userId") or payload.get("sub")
+        user_id: str = payload.get("id") or payload.get("userId") or payload.get("sub") or payload.get("_id")
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid token payload")
         return user_id
