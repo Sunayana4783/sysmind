@@ -4,6 +4,8 @@ services:
     env: python
     region: singapore
     plan: free
+    runtime: python
+    pythonVersion: "3.11.9"
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
@@ -17,3 +19,5 @@ services:
         value: https://sysmind.vercel.app
       - key: PORT
         value: 8000
+      - key: PYTHON_VERSION
+        value: "3.11.9"
