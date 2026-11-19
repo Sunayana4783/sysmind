@@ -129,7 +129,14 @@ async def health_check():
     return {"status": "ok", "database": db_status}
 
 
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
+@app.get("/debug/topics/{user_id_param}")
+async def debug_topics(user_id_param: str):
+    """Check what topics exist for a user — no auth required for debugging."""
+    from app.agents import agent1_history
+    result = await agent1_history.run(user_id_param)
+    return {
+        "user_id": user_id_param,
+        "topics_found": len(result["topics"]),
+        "topics": [t["topic_title"] for t in result["topics"]],
+        "error": result["error"],
+    }
