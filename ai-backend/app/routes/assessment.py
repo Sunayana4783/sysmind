@@ -10,7 +10,7 @@ POST /api/assessment/admin/trigger   — admin manual trigger (no auth check in 
 from __future__ import annotations
 import asyncio
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException
 from bson import ObjectId
 
 from app.auth import get_current_user
@@ -42,37 +42,43 @@ async def _get_active_assessment(user_id: str) -> dict | None:
 # ── POST /generate ─────────────────────────────────────────────────────────────
 @router.post("/generate")
 async def generate_quiz(
-    background_tasks: BackgroundTasks,
     user_id: str = Depends(get_current_user),
 ):
-    # Check if quiz already exists for this week
-    existing = await _get_active_assessment(user_id)
-    if existing:
+    import traceback
+    try:
+        # Check if quiz already exists for this week
+        existing = await _get_active_assessment(user_id)
+        if existing:
+            return {
+                "message": "Quiz already generated for this week.",
+                "assessment_id": str(existing["_id"]),
+            }
+
+        final_state = await run_assessment(user_id)
+
+        if final_state["status"] == "no_topics":
+            raise HTTPException(
+                status_code=404,
+                detail=final_state.get("error", "No completed topics this week."),
+            )
+        if final_state["status"] == "failed":
+            raise HTTPException(
+                status_code=500,
+                detail=final_state.get("error", "Quiz generation failed."),
+            )
+
         return {
-            "message": "Quiz already generated for this week.",
-            "assessment_id": str(existing["_id"]),
+            "message": "Quiz generated successfully.",
+            "assessment_id": final_state["assessment_id"],
+            "topics_covered": list({q["topic_title"] for q in final_state["valid_questions"]}),
+            "question_count": len(final_state["valid_questions"][:20]),
         }
-
-    # Run pipeline synchronously (can be moved to background for large scale)
-    final_state = await run_assessment(user_id)
-
-    if final_state["status"] == "no_topics":
-        raise HTTPException(
-            status_code=404,
-            detail=final_state.get("error", "No completed topics this week."),
-        )
-    if final_state["status"] == "failed":
-        raise HTTPException(
-            status_code=500,
-            detail=final_state.get("error", "Quiz generation failed."),
-        )
-
-    return {
-        "message": "Quiz generated successfully.",
-        "assessment_id": final_state["assessment_id"],
-        "topics_covered": list({q["topic_title"] for q in final_state["valid_questions"]}),
-        "question_count": len(final_state["valid_questions"][:20]),
-    }
+    except HTTPException:
+        raise
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(f"[GENERATE ERROR] {e}\n{tb}")
+        raise HTTPException(status_code=500, detail=f"Generation error: {str(e)}")
 
 
 # ── GET /current ───────────────────────────────────────────────────────────────
