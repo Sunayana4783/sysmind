@@ -239,3 +239,56 @@
   .db-concepts-grid  { grid-template-columns: 1fr; }
   .db-header         { flex-direction: column; }
 }
+
+/* ── Weekly Assessment Banner ───────────────────────────────────────────── */
+.db-weekly-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: linear-gradient(135deg, #EEE9FF 0%, #F5F3FF 100%);
+  border: 1.5px solid #C4B5FD;
+  border-radius: 16px;
+  padding: 1.1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.db-weekly-left {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+.db-weekly-icon {
+  width: 48px; height: 48px;
+  background: white;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(124,92,252,0.15);
+}
+.db-weekly-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--l-text);
+  margin: 0 0 0.2rem;
+}
+.db-weekly-sub {
+  font-size: 0.8rem;
+  color: var(--l-text-sec);
+  margin: 0;
+}
+.db-weekly-btn {
+  background: var(--l-primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.65rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.db-weekly-btn:hover  { background: var(--l-primary-h); }
+.db-weekly-btn:active { transform: scale(0.97); }

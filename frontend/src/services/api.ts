@@ -125,4 +125,52 @@ export const activityAPI = {
                     }>('/activity/streak'),
 };
 
+// ── AI Assessment API (Python FastAPI backend) ────────────────────────────────
+const AI_BASE = import.meta.env.VITE_AI_API_URL || 'http://localhost:8000';
+
+const aiAxios = axios.create({
+  baseURL: AI_BASE,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+aiAxios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+aiAxios.interceptors.response.use(
+  (res) => res.data,
+  (err) => {
+    const detail = err.response?.data?.detail;
+    const message = typeof detail === 'string'
+      ? detail
+      : err.response?.data?.message || err.message || 'AI service error';
+    const e: any = new Error(message);
+    e.status = err.response?.status;
+    e.detail = detail;
+    return Promise.reject(e);
+  }
+);
+
+export const aiApi = {
+  generateQuiz:   () =>
+    aiAxios.post('/api/assessment/generate'),
+
+  adminTrigger:   () =>
+    aiAxios.post('/api/assessment/admin/trigger'),
+
+  getCurrentQuiz: () =>
+    aiAxios.get('/api/assessment/current'),
+
+  submitQuiz: (assessmentId: string, answers: { question_number: number; selected_answer: string }[]) =>
+    aiAxios.post(`/api/assessment/submit/${assessmentId}`, { answers }),
+
+  getResults: (resultId: string) =>
+    aiAxios.get(`/api/assessment/results/${resultId}`),
+
+  getHistory: () =>
+    aiAxios.get('/api/assessment/history'),
+};
+
 export default api;

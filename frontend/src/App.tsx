@@ -24,8 +24,10 @@ import ReliabilityPatterns  from './pages/ReliabilityPatterns';
 import Estimation           from './pages/Estimation';
 import RealtimeStreaming     from './pages/RealtimeStreaming';
 import Observability         from './pages/Observability';
-import Profile   from './pages/Profile';
-import AuthNav   from './components/AuthNav';
+import Profile      from './pages/Profile';
+import WeeklyQuiz   from './pages/WeeklyQuiz';
+import QuizResults  from './pages/QuizResults';
+import AuthNav      from './components/AuthNav';
 
 const App = () => (
   <BrowserRouter>
@@ -41,6 +43,8 @@ const AppRoutes = () => {
     pathname.startsWith('/learning') ||
     pathname === '/profile' ||
     pathname === '/dashboard' ||
+    pathname === '/weekly-quiz' ||
+    pathname.startsWith('/quiz-results') ||
     pathname === '/login' ||
     pathname === '/signup';
 
@@ -48,6 +52,8 @@ const AppRoutes = () => {
     pathname.startsWith('/learning') ||
     pathname === '/profile' ||
     pathname === '/dashboard' ||
+    pathname === '/weekly-quiz' ||
+    pathname.startsWith('/quiz-results') ||
     pathname === '/login' ||
     pathname === '/signup';
 
@@ -89,6 +95,8 @@ const AppRoutes = () => {
         <Route path="/learning/hld/realtime-streaming"   element={<ProtectedRoute><RealtimeStreaming /></ProtectedRoute>} />
         <Route path="/learning/hld/observability-slos"   element={<ProtectedRoute><Observability /></ProtectedRoute>} />
         <Route path="/profile"            element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/weekly-quiz"        element={<ProtectedRoute><WeeklyQuiz /></ProtectedRoute>} />
+        <Route path="/quiz-results/:resultId" element={<ProtectedRoute><QuizResults /></ProtectedRoute>} />
 
         <Route path="*" element={<Navigate to="/signup" replace />} />
       </Routes>
