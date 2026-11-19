@@ -19,7 +19,7 @@ def get_db():
 def col_users():           return get_db()["users"]
 def col_topics():          return get_db()["topics"]
 def col_modules():         return get_db()["modules"]
-def col_completions():     return get_db()["topic_completions"]
+def col_completions():     return get_db()["progresses"]   # Mongoose Progress model → 'progresses'
 def col_assessments():     return get_db()["weekly_assessments"]
 def col_questions():       return get_db()["assessment_questions"]
 def col_attempts():        return get_db()["assessment_attempts"]
