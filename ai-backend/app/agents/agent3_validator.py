@@ -70,24 +70,35 @@ def _dedup(questions: list[dict]) -> tuple[list[dict], list[dict]]:
     return valid, dupes
 
 
-async def run(questions: list[dict]) -> dict:
+async def run(questions: list[dict], allowed_topics: list[str] | None = None) -> dict:
     """
     Returns:
       {
-        "valid_questions": [...],       # question dicts that passed
-        "invalid_numbers": [...],       # question_numbers that failed
-        "invalid_reasons": [...],       # [{question_number, reason}]
+        "valid_questions": [...],
+        "invalid_numbers": [...],
+        "invalid_reasons": [...],
         "error": None | str
       }
     """
     if not questions:
         return {"valid_questions": [], "invalid_numbers": [], "invalid_reasons": [], "error": "No questions to validate."}
 
-    # Step 1: dedup check
-    after_dedup, dup_invalids = _dedup(questions)
-    dup_numbers = {d["question_number"] for d in dup_invalids}
+    # Step 0: reject questions from disallowed topics
+    topic_invalids = []
+    if allowed_topics:
+        allowed_set = set(t.lower() for t in allowed_topics)
+        for q in questions:
+            if q.get("topic_title", "").lower() not in allowed_set:
+                topic_invalids.append({
+                    "question_number": q["question_number"],
+                    "reason": f"Topic '{q.get('topic_title')}' not in completed topics"
+                })
+    topic_invalid_nums = {d["question_number"] for d in topic_invalids}
+    questions_to_validate = [q for q in questions if q["question_number"] not in topic_invalid_nums]
 
-    # Step 2: LLM semantic validation on non-duplicate questions
+    # Step 1: dedup check
+    after_dedup, dup_invalids = _dedup(questions_to_validate)
+    dup_numbers = {d["question_number"] for d in dup_invalids}
     llm = ChatGroq(
         api_key=GROQ_API_KEY,
         model=MODEL,
@@ -114,9 +125,9 @@ async def run(questions: list[dict]) -> dict:
         llm_valid_nums = {q["question_number"] for q in after_dedup}
         llm_invalid = []
 
-    # Combine invalid sets
-    all_invalid_reasons = dup_invalids + llm_invalid
-    all_invalid_numbers = dup_numbers | {r["question_number"] for r in llm_invalid}
+    # Combine ALL invalid sets (topic filter + dedup + llm)
+    all_invalid_reasons = topic_invalids + dup_invalids + llm_invalid
+    all_invalid_numbers = topic_invalid_nums | dup_numbers | {r["question_number"] for r in llm_invalid}
 
     valid_questions = [
         q for q in questions

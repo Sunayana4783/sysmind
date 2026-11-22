@@ -72,7 +72,8 @@ async def node_generate(state: QuizState) -> QuizState:
 
 
 async def node_validate(state: QuizState) -> QuizState:
-    result = await agent3_validator.run(state["all_questions"])
+    allowed = [t["topic_title"] for t in state.get("topics", [])]
+    result = await agent3_validator.run(state["all_questions"], allowed_topics=allowed)
     return {**state,
             "valid_questions": result["valid_questions"],
             "invalid_reasons": result.get("invalid_reasons", []),

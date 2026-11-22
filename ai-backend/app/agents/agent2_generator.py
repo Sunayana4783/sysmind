@@ -52,21 +52,29 @@ def _build_user_prompt(topics: list[dict], total: int) -> str:
     per_topic = max(1, total // len(topics)) if topics else total
     remainder = total - per_topic * len(topics)
 
+    allowed_titles = [t["topic_title"] for t in topics]
+
     lines = [
-        f"Generate EXACTLY {total} MCQ questions for the following System Design topics.",
-        f"Distribute questions: approximately {per_topic} per topic.",
-        "",
+        f"Generate EXACTLY {total} MCQ questions.",
+        f"",
+        f"CRITICAL RULE: You may ONLY ask about these {len(topics)} topics: {', '.join(allowed_titles)}",
+        f"Do NOT ask about any topic not listed above.",
+        f"Every question MUST be directly answerable from the content snippets provided below.",
+        f"Do NOT use outside knowledge. If the content does not cover it, do not ask about it.",
+        f"",
     ]
     for i, t in enumerate(topics):
         count = per_topic + (1 if i < remainder else 0)
         lines.append(f"=== TOPIC: {t['topic_title']} (generate {count} questions) ===")
+        lines.append(f"Set topic_title to exactly: \"{t['topic_title']}\"")
         if t.get("module_titles"):
-            lines.append(f"Modules covered: {', '.join(t['module_titles'][:10])}")
+            lines.append(f"Modules: {', '.join(t['module_titles'][:10])}")
         for snip in t.get("content_snippets", [])[:5]:
             lines.append(f"\n[{snip['module_title']}]: {snip['content'][:600]}")
         lines.append("")
 
     lines.append(f"\nReturn a JSON array of exactly {total} question objects.")
+    lines.append(f"Each question's topic_title must be one of: {allowed_titles}")
     return "\n".join(lines)
 
 
