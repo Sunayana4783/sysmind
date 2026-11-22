@@ -80,11 +80,10 @@ export default function WeeklyQuiz() {
 
   const handleSubmit = async () => {
     if (!quiz) return;
-    const unanswered = quiz.questions.filter(q => !answers[q.question_number]);
-    if (unanswered.length > 0) {
-      alert(`Please answer all questions. ${unanswered.length} question(s) unanswered.`);
-      return;
-    }
+                    if (unanswered.length > 0) {
+                      alert(`Please answer all questions. ${unanswered.length} question(s) unanswered.`);
+                      return;
+                    }
     setPhase('submitting');
     try {
       const payload = quiz.questions.map(q => ({
@@ -102,7 +101,12 @@ export default function WeeklyQuiz() {
 
   const answeredCount = Object.keys(answers).length;
   const totalQ = quiz?.questions.length ?? 0;
-  const progress = totalQ > 0 ? Math.round((answeredCount / totalQ) * 100) : 0;
+  // Count only question numbers that actually exist in the quiz
+  const answeredExisting = quiz
+    ? quiz.questions.filter(q => !!answers[q.question_number]).length
+    : 0;
+  const allAnswered = answeredExisting === totalQ && totalQ > 0;
+  const progress = totalQ > 0 ? Math.round((answeredExisting / totalQ) * 100) : 0;
   const q = quiz?.questions[current];
 
   return (
@@ -214,7 +218,7 @@ export default function WeeklyQuiz() {
                 <div className="wq-progress-track">
                   <div className="wq-progress-fill" style={{ width: `${progress}%` }} />
                 </div>
-                <span className="wq-progress-label">{answeredCount}/{totalQ} answered</span>
+                <span className="wq-progress-label">{answeredExisting}/{totalQ} answered</span>
               </div>
 
               {/* Question card */}
@@ -263,9 +267,9 @@ export default function WeeklyQuiz() {
                     <button
                       className="wq-btn-submit"
                       onClick={handleSubmit}
-                      disabled={answeredCount < totalQ}
+                      disabled={!allAnswered}
                     >
-                      Submit Quiz ({answeredCount}/{totalQ})
+                      Submit Quiz ({answeredExisting}/{totalQ})
                     </button>
                   )}
                 </div>
@@ -293,8 +297,8 @@ export default function WeeklyQuiz() {
                   })}
                 </div>
                 <div className="wq-sidebar-stats">
-                  <span>{answeredCount} answered</span>
-                  <span>{totalQ - answeredCount} remaining</span>
+                  <span>{answeredExisting} answered</span>
+                  <span>{totalQ - answeredExisting} remaining</span>
                 </div>
               </div>
 

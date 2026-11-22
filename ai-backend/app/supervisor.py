@@ -80,7 +80,10 @@ async def node_validate(state: QuizState) -> QuizState:
 
 
 async def node_save(state: QuizState) -> QuizState:
+    # Renumber questions sequentially to remove any gaps from validation
     questions = state["valid_questions"][:TARGET_QUESTIONS]
+    for i, q in enumerate(questions):
+        q["question_number"] = i + 1
 
     # Create assessment document
     assessment_doc = {
