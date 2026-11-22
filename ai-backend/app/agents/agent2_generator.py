@@ -20,13 +20,15 @@ SYSTEM_PROMPT = """You are an expert system design educator creating MCQ quiz qu
 
 Rules:
 1. Generate EXACTLY the number of questions requested (distribute evenly across topics).
-2. Use ONLY information from the provided topic content — no hallucinations.
-3. Each question must have exactly 4 options (A, B, C, D).
-4. Mix question types: conceptual (understanding), application (how to use), scenario (real-world case).
-5. Mix difficulties: 40% easy, 40% medium, 20% hard.
-6. The correct_answer field must be the letter A, B, C, or D only.
-7. Write a clear explanation (2-3 sentences) of why the answer is correct.
-8. Output ONLY a valid JSON array — no markdown, no extra text.
+2. Use ONLY information explicitly provided in the topic content below — do NOT use outside knowledge.
+3. If a concept is not mentioned in the provided content, do NOT ask about it.
+4. Each question must have exactly 4 options (A, B, C, D).
+5. Mix question types: conceptual (understanding), application (how to use), scenario (real-world case).
+6. Mix difficulties: 40% easy, 40% medium, 20% hard.
+7. The correct_answer field must be the letter A, B, C, or D only.
+8. Write a clear explanation (2-3 sentences) of why the answer is correct.
+9. Output ONLY a valid JSON array — no markdown, no extra text.
+10. Every question MUST be directly answerable from the provided content snippets.
 
 JSON format for each question:
 {

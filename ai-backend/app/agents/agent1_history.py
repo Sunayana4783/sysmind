@@ -67,44 +67,49 @@ async def run(user_id: str) -> dict:
             "error": "No topics completed this week (Mon-Fri).",
         }
 
-    # ── Get unique topic slugs from completions ──────────────────────────────
-    topic_slugs = list({c.get("topicSlug", "") for c in completions if c.get("topicSlug")})
+    # ── Get unique completed moduleIds ──────────────────────────────────────
+    module_ids_raw = list({str(c.get("moduleId", "")) for c in completions if c.get("moduleId")})
+    module_oids = []
+    for mid in module_ids_raw:
+        try:
+            module_oids.append(ObjectId(mid))
+        except Exception:
+            module_oids.append(mid)
 
-    if not topic_slugs:
+    # ── Fetch only the completed modules ────────────────────────────────────
+    modules_col = db["modules"]
+    completed_modules = await modules_col.find(
+        {"_id": {"$in": module_oids}, "type": "content"}
+    ).to_list(length=200)
+
+    if not completed_modules:
         return {
             "week_start": week_start_ist,
             "week_end": week_end_ist,
             "topics": [],
-            "error": "Completions found but no topicSlug field.",
+            "error": "No content modules found for your completions.",
         }
 
-    # ── Fetch topic documents by slug ────────────────────────────────────────
+    # ── Group completed modules by topicSlug ────────────────────────────────
+    from collections import defaultdict
+    by_slug: dict = defaultdict(list)
+    for mod in completed_modules:
+        slug = mod.get("topicSlug", "")
+        if slug:
+            by_slug[slug].append(mod)
+
+    # ── Fetch topic docs for display names ──────────────────────────────────
     topics_col = db["topics"]
     topics_docs = await topics_col.find(
-        {"slug": {"$in": topic_slugs}}
+        {"slug": {"$in": list(by_slug.keys())}}
     ).to_list(length=100)
+    slug_to_title = {t.get("slug", ""): t.get("title", "") for t in topics_docs}
 
-    # If no topics found by slug, try 'topicSlug' field on topic doc itself
-    if not topics_docs:
-        topics_docs = await topics_col.find(
-            {"topicSlug": {"$in": topic_slugs}}
-        ).to_list(length=100)
-
-    # ── For each topic, fetch its modules ────────────────────────────────────
-    modules_col = db["modules"]
+    # ── Build result — only content from completed modules ───────────────────
     result_topics = []
-
-    for topic_doc in topics_docs:
-        topic_id  = str(topic_doc["_id"])
-        topic_title = topic_doc.get("title", "Unknown Topic")
-        slug = topic_doc.get("slug") or topic_doc.get("topicSlug", "")
-
-        # Modules can be linked by topicSlug or topicId
-        mods = await modules_col.find(
-            {"topicSlug": slug, "type": "content"}
-        ).to_list(length=50)
-
-        module_titles   = []
+    for slug, mods in by_slug.items():
+        topic_title = slug_to_title.get(slug, slug.replace("-", " ").title())
+        module_titles = []
         content_snippets = []
 
         for mod in mods:
@@ -122,6 +127,9 @@ async def run(user_id: str) -> dict:
                         body = sec.get("body") or sec.get("text") or ""
                         if body:
                             parts.append(str(body)[:300])
+                for kp in content.get("keyPoints", [])[:5]:
+                    if kp:
+                        parts.append(str(kp)[:200])
 
             if parts:
                 content_snippets.append({
@@ -129,24 +137,17 @@ async def run(user_id: str) -> dict:
                     "content": " ".join(parts)[:800],
                 })
 
+        # Find topic_id
+        topic_doc = next((t for t in topics_docs if t.get("slug") == slug), None)
+        topic_id = str(topic_doc["_id"]) if topic_doc else slug
+
         result_topics.append({
-            "topic_id":        topic_id,
-            "topic_title":     topic_title,
-            "topic_slug":      slug,
-            "module_titles":   module_titles,
+            "topic_id":         topic_id,
+            "topic_title":      topic_title,
+            "topic_slug":       slug,
+            "module_titles":    module_titles,
             "content_snippets": content_snippets,
         })
-
-    # If no topics matched by slug, create minimal entries from slug names
-    if not result_topics:
-        for slug in topic_slugs[:5]:
-            result_topics.append({
-                "topic_id":        slug,
-                "topic_title":     slug.replace("-", " ").title(),
-                "topic_slug":      slug,
-                "module_titles":   [],
-                "content_snippets": [],
-            })
 
     return {
         "week_start": week_start_ist,
