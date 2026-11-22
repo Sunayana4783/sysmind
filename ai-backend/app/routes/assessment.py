@@ -49,10 +49,10 @@ async def generate_quiz(
         # Check if quiz already exists for this week
         existing = await _get_active_assessment(user_id)
         if existing:
-            return {
-                "message": "Quiz already generated for this week.",
-                "assessment_id": str(existing["_id"]),
-            }
+            # Delete old questions so they don't stack up
+            await col_questions().delete_many({"assessmentId": str(existing["_id"])})
+            await col_assessments().delete_many({"userId": user_id, "status": "active"})
+            existing = None
 
         final_state = await run_assessment(user_id)
 
@@ -230,9 +230,15 @@ async def get_history(user_id: str = Depends(get_current_user)):
 # ── POST /admin/trigger ────────────────────────────────────────────────────────
 @router.post("/admin/trigger")
 async def admin_trigger(user_id: str = Depends(get_current_user)):
-    """Manual trigger — deletes existing active quiz and regenerates."""
-    # Remove any existing active assessment for this user
-    await col_assessments().delete_many({"userId": user_id, "status": "active"})
+    """Manual trigger — deletes existing quiz and regenerates."""
+    # Delete ALL existing data for this user
+    existing = await col_assessments().find({"userId": user_id}).to_list(100)
+    for a in existing:
+        aid = str(a["_id"])
+        await col_questions().delete_many({"assessmentId": aid})
+        await col_attempts().delete_many({"assessmentId": aid})
+        await col_results().delete_many({"assessmentId": aid})
+    await col_assessments().delete_many({"userId": user_id})
 
     final_state = await run_assessment(user_id)
 
