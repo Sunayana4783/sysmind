@@ -80,10 +80,11 @@ export default function WeeklyQuiz() {
 
   const handleSubmit = async () => {
     if (!quiz) return;
-                    if (unanswered.length > 0) {
-                      alert(`Please answer all questions. ${unanswered.length} question(s) unanswered.`);
-                      return;
-                    }
+    const unanswered = quiz.questions.filter(q => !answers[q.question_number]);
+    if (unanswered.length > 0) {
+      alert(`Please answer all questions. ${unanswered.length} question(s) unanswered.`);
+      return;
+    }
     setPhase('submitting');
     try {
       const payload = quiz.questions.map(q => ({

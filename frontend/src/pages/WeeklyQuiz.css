@@ -149,9 +149,16 @@
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s;
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
 }
 .wq-btn-submit:hover:not(:disabled) { background: #16a34a; }
-.wq-btn-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+.wq-btn-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 
 .wq-btn-row {
   display: flex;
@@ -202,6 +209,7 @@
   border-radius: 20px;
   padding: 2rem;
   box-shadow: var(--l-shadow);
+  position: relative;
 }
 .wq-question-meta {
   display: flex;
@@ -301,6 +309,8 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
+  position: relative;
+  z-index: 10;
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────────────────── */
